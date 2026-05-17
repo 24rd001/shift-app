@@ -1,0 +1,444 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Shift Management App - Lambda + API Gateway + DynamoDB + Cognito
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 30
+    MemorySize: 256
+    # 全Lambda共通の環境変数。テーブル名はデプロイ後に動的に解決される
+    Environment:
+      Variables:
+        USERS_TABLE: !Ref UsersTable
+        SHIFTS_TABLE: !Ref ShiftsTable
+        SHIFT_REQUESTS_TABLE: !Ref ShiftRequestsTable
+        SWAP_REQUESTS_TABLE: !Ref SwapRequestsTable
+        USER_POOL_ID: !Ref CognitoUserPool
+        USER_POOL_CLIENT_ID: !Ref CognitoUserPoolClient
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+      AllowHeaders: "'Content-Type,Authorization,X-Requested-With'"
+      AllowOrigin: "'*'"
+
+Resources:
+
+  # ========================================
+  # Cognito
+  # ========================================
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "${AWS::StackName}-UserPool"
+      # メールアドレスでログインできるようにする
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+      Schema:
+        - Name: email
+          Required: true
+          Mutable: false
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub "${AWS::StackName}-Client"
+      UserPoolId: !Ref CognitoUserPool
+      # USER_PASSWORD_AUTH: メール+パスワードでのログインを許可
+      # ALLOW_REFRESH_TOKEN_AUTH: トークン更新を許可
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      GenerateSecret: false
+      AccessTokenValidity: 1
+      IdTokenValidity: 1
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: hours
+        IdToken: hours
+        RefreshToken: days
+
+  AdminGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: admin
+      UserPoolId: !Ref CognitoUserPool
+      Description: 管理者グループ - シフト確定・承認が可能
+
+  StaffGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: staff
+      UserPoolId: !Ref CognitoUserPool
+      Description: スタッフグループ - シフト希望提出・交換申請が可能
+
+  # ========================================
+  # DynamoDB Tables
+  # ========================================
+
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-Users"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+
+  ShiftsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-Shifts"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: shiftId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: date
+          AttributeType: S
+      KeySchema:
+        - AttributeName: shiftId
+          KeyType: HASH
+      # GSI: ユーザーIDと日付での検索を高速化（GET /shifts/me で使用）
+      GlobalSecondaryIndexes:
+        - IndexName: userId-date-index
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+            - AttributeName: date
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  ShiftRequestsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-ShiftRequests"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: requestId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: month
+          AttributeType: S
+      KeySchema:
+        - AttributeName: requestId
+          KeyType: HASH
+      # GSI: ユーザーIDと月での検索（スタッフの提出状況確認）
+      GlobalSecondaryIndexes:
+        - IndexName: userId-month-index
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+            - AttributeName: month
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  SwapRequestsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-SwapRequests"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: swapId
+          AttributeType: S
+        - AttributeName: requesterId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: swapId
+          KeyType: HASH
+      # GSI: 申請者IDでの検索（自分の申請一覧取得）
+      GlobalSecondaryIndexes:
+        - IndexName: requesterId-index
+          KeySchema:
+            - AttributeName: requesterId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  # ========================================
+  # API Gateway
+  # ========================================
+
+  ShiftAppApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: v1
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        # OPTIONSリクエスト（CORS preflight）には認証不要
+        AddDefaultAuthorizerToCorsPreflight: false
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt CognitoUserPool.Arn
+
+  # ========================================
+  # Lambda Functions
+  # ========================================
+
+  # --- Auth ---
+  LoginFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        Sourcemap: false
+        EntryPoints:
+          - src/handlers/auth/login.ts
+        External:
+          - "@aws-sdk/client-cognito-identity-provider"
+    Properties:
+      CodeUri: ./
+      Handler: login.handler
+      Policies:
+        # InitiateAuth はCognito側でクライアント認証するため追加IAM不要
+        - AWSLambdaBasicExecutionRole
+      Events:
+        LoginApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /auth/login
+            Method: POST
+            # このエンドポイントだけ認証不要
+            Auth:
+              Authorizer: NONE
+
+  # --- Shifts ---
+  GetShiftsFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/shifts/getShifts.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: getShifts.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ShiftsTable
+      Events:
+        GetShiftsApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /shifts
+            Method: GET
+
+  GetMyShiftsFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/shifts/getMyShifts.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: getMyShifts.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ShiftsTable
+      Events:
+        GetMyShiftsApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /shifts/me
+            Method: GET
+
+  # --- Shift Requests ---
+  CreateShiftRequestFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/shiftRequests/createShiftRequest.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: createShiftRequest.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ShiftRequestsTable
+      Events:
+        CreateShiftRequestApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /shift-requests
+            Method: POST
+
+  GetShiftRequestsFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/shiftRequests/getShiftRequests.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: getShiftRequests.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ShiftRequestsTable
+      Events:
+        GetShiftRequestsApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /shift-requests
+            Method: GET
+
+  # --- Swap Requests ---
+  CreateSwapRequestFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/swapRequests/createSwapRequest.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: createSwapRequest.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SwapRequestsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref ShiftsTable
+      Events:
+        CreateSwapRequestApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /swap-requests
+            Method: POST
+
+  RespondToSwapFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/swapRequests/respondToSwap.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: respondToSwap.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SwapRequestsTable
+      Events:
+        RespondToSwapApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /swap-requests/{id}/respond
+            Method: PUT
+
+  ApproveSwapFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/swapRequests/approveSwap.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: approveSwap.handler
+      Policies:
+        # TransactWriteItems には両テーブルへのCRUD権限が必要
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SwapRequestsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ShiftsTable
+      Events:
+        ApproveSwapApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /swap-requests/{id}/approve
+            Method: PUT
+
+# ========================================
+# Outputs
+# ========================================
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway エンドポイントURL
+    Value: !Sub "https://${ShiftAppApi}.execute-api.${AWS::Region}.amazonaws.com/v1"
+    Export:
+      Name: !Sub "${AWS::StackName}-ApiEndpoint"
+
+  UserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref CognitoUserPool
+    Export:
+      Name: !Sub "${AWS::StackName}-UserPoolId"
+
+  UserPoolClientId:
+    Description: Cognito User Pool Client ID
+    Value: !Ref CognitoUserPoolClient
+    Export:
+      Name: !Sub "${AWS::StackName}-UserPoolClientId"
+
+  UsersTableName:
+    Value: !Ref UsersTable
+  ShiftsTableName:
+    Value: !Ref ShiftsTable
+  ShiftRequestsTableName:
+    Value: !Ref ShiftRequestsTable
+  SwapRequestsTableName:
+    Value: !Ref SwapRequestsTable

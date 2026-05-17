@@ -1,0 +1,21 @@
+{
+  "httpMethod": "POST",
+  "path": "/shift-requests",
+  "headers": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer dummy-token-for-local-test"
+  },
+  "body": "{\"month\": \"2025-06\", \"preferredDates\": [\"2025-06-01\", \"2025-06-03\", \"2025-06-10\"]}",
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "sub": "staff-user-uuid-0001",
+        "email": "staff@example.com",
+        "cognito:groups": "staff"
+      }
+    }
+  },
+  "queryStringParameters": null,
+  "pathParameters": null,
+  "isBase64Encoded": false
+}

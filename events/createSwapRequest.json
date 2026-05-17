@@ -1,0 +1,21 @@
+{
+  "httpMethod": "POST",
+  "path": "/swap-requests",
+  "headers": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer dummy-token-for-local-test"
+  },
+  "body": "{\"shiftId\": \"REPLACE_WITH_EXISTING_SHIFT_ID\"}",
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "sub": "staff-user-uuid-0001",
+        "email": "staff@example.com",
+        "cognito:groups": "staff"
+      }
+    }
+  },
+  "queryStringParameters": null,
+  "pathParameters": null,
+  "isBase64Encoded": false
+}

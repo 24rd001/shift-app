@@ -1,0 +1,14 @@
+{
+  "httpMethod": "POST",
+  "path": "/auth/login",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "{\"email\": \"staff@example.com\", \"password\": \"Password123\"}",
+  "requestContext": {
+    "authorizer": null
+  },
+  "queryStringParameters": null,
+  "pathParameters": null,
+  "isBase64Encoded": false
+}

@@ -1,0 +1,23 @@
+{
+  "httpMethod": "PUT",
+  "path": "/swap-requests/REPLACE_SWAP_ID/respond",
+  "headers": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer dummy-token-for-local-test"
+  },
+  "body": "{\"accept\": true}",
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "sub": "staff-user-uuid-0002",
+        "email": "staff2@example.com",
+        "cognito:groups": "staff"
+      }
+    }
+  },
+  "queryStringParameters": null,
+  "pathParameters": {
+    "id": "REPLACE_WITH_SWAP_ID"
+  },
+  "isBase64Encoded": false
+}

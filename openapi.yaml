@@ -1,0 +1,484 @@
+openapi: '3.0.3'
+info:
+  title: Shift Management API
+  version: '1.0.0'
+  description: |
+    シフト管理アプリ バックエンドAPI仕様書
+
+    ## 認証方法
+    1. `POST /auth/login` でログインし、レスポンスの `idToken` を取得
+    2. 以降のすべてのリクエストの `Authorization` ヘッダーに `Bearer {idToken}` を付与
+
+    ## 権限
+    - **admin**: 全エンドポイントにアクセス可能
+    - **staff**: `GET /shift-requests` と `PUT /swap-requests/{id}/approve` 以外にアクセス可能
+
+servers:
+  - url: 'https://{apiId}.execute-api.ap-northeast-1.amazonaws.com/v1'
+    description: 本番環境
+    variables:
+      apiId:
+        default: 'your-api-id'
+        description: API Gateway ID（デプロイ後に確認）
+  - url: 'http://127.0.0.1:3000'
+    description: sam local start-api（ローカル開発環境）
+
+security:
+  - CognitoAuth: []
+
+components:
+  securitySchemes:
+    CognitoAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Cognito ID Token（ログイン後に取得）
+
+  schemas:
+    Shift:
+      type: object
+      properties:
+        shiftId:
+          type: string
+          format: uuid
+          example: '550e8400-e29b-41d4-a716-446655440000'
+        date:
+          type: string
+          format: date
+          example: '2025-06-15'
+        startTime:
+          type: string
+          example: '09:00'
+        endTime:
+          type: string
+          example: '17:00'
+        userId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [scheduled, cancelled, swapped]
+          default: scheduled
+
+    ShiftRequest:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        month:
+          type: string
+          pattern: '^\d{4}-\d{2}$'
+          example: '2025-06'
+        preferredDates:
+          type: array
+          items:
+            type: string
+            format: date
+          example: ['2025-06-01', '2025-06-03', '2025-06-10']
+        submittedAt:
+          type: string
+          format: date-time
+
+    SwapRequest:
+      type: object
+      properties:
+        swapId:
+          type: string
+          format: uuid
+        requesterId:
+          type: string
+          format: uuid
+        shiftId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+          default: pending
+        responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/SwapResponse'
+        createdAt:
+          type: string
+          format: date-time
+
+    SwapResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        accept:
+          type: boolean
+        respondedAt:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: 'Invalid email or password'
+
+  responses:
+    BadRequest:
+      description: リクエストが不正
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'email and password are required'
+    Unauthorized:
+      description: 認証エラー（トークンなし・無効）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'Unauthorized'
+    Forbidden:
+      description: 権限エラー（adminグループ以外がadmin専用エンドポイントを呼んだ場合）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'Admin access required'
+    NotFound:
+      description: リソースが見つからない
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'Shift not found'
+
+paths:
+  /auth/login:
+    post:
+      summary: ログイン
+      description: メールアドレスとパスワードで認証し、JWTトークンを取得する
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: 'staff@example.com'
+                password:
+                  type: string
+                  minLength: 8
+                  example: 'Password123'
+      responses:
+        '200':
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idToken:
+                    type: string
+                    description: APIリクエストに使用するトークン（Authorization: Bearer {idToken}）
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+                    description: トークン更新用（有効期限30日）
+                  expiresIn:
+                    type: integer
+                    example: 3600
+                    description: idToken の有効期限（秒）
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /shifts:
+    get:
+      summary: シフト一覧取得
+      description: |
+        全スタッフのシフトを取得する。
+        `date` や `userId` でフィルタリング可能。
+        認証済みユーザー全員がアクセス可能。
+      tags: [Shifts]
+      parameters:
+        - name: date
+          in: query
+          description: 特定日付で絞り込み（YYYY-MM-DD）
+          required: false
+          schema:
+            type: string
+            format: date
+            example: '2025-06-15'
+        - name: userId
+          in: query
+          description: 特定ユーザーIDで絞り込み
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: シフト一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shifts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Shift'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /shifts/me:
+    get:
+      summary: 自分のシフト取得
+      description: ログイン中のユーザー自身のシフト一覧を取得する（日付昇順）
+      tags: [Shifts]
+      responses:
+        '200':
+          description: 自分のシフト一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shifts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Shift'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /shift-requests:
+    post:
+      summary: シフト希望提出
+      description: スタッフが翌月のシフト希望日を提出する
+      tags: [ShiftRequests]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [month, preferredDates]
+              properties:
+                month:
+                  type: string
+                  pattern: '^\d{4}-\d{2}$'
+                  example: '2025-06'
+                  description: 希望月（YYYY-MM形式）
+                preferredDates:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                    format: date
+                  example: ['2025-06-01', '2025-06-03']
+                  description: 出勤希望日リスト
+      responses:
+        '201':
+          description: 希望提出成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shiftRequest:
+                    $ref: '#/components/schemas/ShiftRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    get:
+      summary: シフト希望一覧取得（admin専用）
+      description: 管理者が全スタッフのシフト希望を確認する。adminグループのみアクセス可能。
+      tags: [ShiftRequests]
+      parameters:
+        - name: month
+          in: query
+          description: 月で絞り込み（YYYY-MM）
+          required: false
+          schema:
+            type: string
+            pattern: '^\d{4}-\d{2}$'
+            example: '2025-06'
+      responses:
+        '200':
+          description: シフト希望一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shiftRequests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ShiftRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /swap-requests:
+    post:
+      summary: シフト交換申請
+      description: |
+        スタッフが自分のシフトを他のスタッフと交換するよう申請する。
+        自分が担当するシフトのIDを指定する。
+      tags: [SwapRequests]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [shiftId]
+              properties:
+                shiftId:
+                  type: string
+                  format: uuid
+                  description: 交換したいシフトのID（自分担当のもの）
+      responses:
+        '201':
+          description: 申請成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  swapRequest:
+                    $ref: '#/components/schemas/SwapRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: 他のスタッフのシフトを指定した場合
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /swap-requests/{id}/respond:
+    put:
+      summary: シフト交換への応答
+      description: |
+        他のスタッフのシフト交換申請に対して、受諾（accept: true）または拒否（accept: false）を返す。
+        自分自身の申請には応答不可。
+      tags: [SwapRequests]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 交換申請のID（swapId）
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [accept]
+              properties:
+                accept:
+                  type: boolean
+                  description: 受諾する場合は true、断る場合は false
+      responses:
+        '200':
+          description: 応答記録成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Response recorded'
+                  response:
+                    $ref: '#/components/schemas/SwapResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: 自分自身の申請に応答しようとした場合
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /swap-requests/{id}/approve:
+    put:
+      summary: シフト交換承認（admin専用）
+      description: |
+        管理者がシフト交換を最終承認する。
+        申請に対して accept: true のレスポンスが1件以上存在する必要がある。
+        承認と同時にシフトのuserIdをDynamoDBトランザクションで原子的に更新する。
+      tags: [SwapRequests]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 交換申請のID（swapId）
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 承認成功・シフト移譲完了
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Swap approved successfully'
+                  swapId:
+                    type: string
+                    format: uuid
+                  shiftId:
+                    type: string
+                    format: uuid
+                  previousAssignee:
+                    type: string
+                    format: uuid
+                    description: 元の担当者ID
+                  newAssignee:
+                    type: string
+                    format: uuid
+                    description: 新しい担当者ID
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'

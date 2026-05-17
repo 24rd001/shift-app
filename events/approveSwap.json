@@ -1,0 +1,22 @@
+{
+  "httpMethod": "PUT",
+  "path": "/swap-requests/REPLACE_SWAP_ID/approve",
+  "headers": {
+    "Authorization": "Bearer dummy-token-for-local-test"
+  },
+  "body": null,
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "sub": "admin-user-uuid-9999",
+        "email": "admin@example.com",
+        "cognito:groups": "admin"
+      }
+    }
+  },
+  "queryStringParameters": null,
+  "pathParameters": {
+    "id": "REPLACE_WITH_SWAP_ID"
+  },
+  "isBase64Encoded": false
+}

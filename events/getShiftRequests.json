@@ -1,0 +1,22 @@
+{
+  "httpMethod": "GET",
+  "path": "/shift-requests",
+  "headers": {
+    "Authorization": "Bearer dummy-token-for-local-test"
+  },
+  "body": null,
+  "requestContext": {
+    "authorizer": {
+      "claims": {
+        "sub": "admin-user-uuid-9999",
+        "email": "admin@example.com",
+        "cognito:groups": "admin"
+      }
+    }
+  },
+  "queryStringParameters": {
+    "month": "2025-06"
+  },
+  "pathParameters": null,
+  "isBase64Encoded": false
+}
