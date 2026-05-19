@@ -299,7 +299,7 @@
     }
 
     .month-badge {
-      font-size: 11px;
+      font-size: 14px;
       font-weight: 700;
       color: var(--primary);
       background: var(--primary-light);
@@ -370,7 +370,7 @@
     .s-duration { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
     .s-badge {
-      font-size: 10px;
+      font-size: 17px;
       font-weight: 700;
       padding: 3px 10px;
       border-radius: 20px;
@@ -427,6 +427,589 @@
       transition: background .15s;
     }
     .reload-btn:hover { background: #DDD6FE; }
+
+    /* ===================== Bottom Nav ===================== */
+    .bottom-nav {
+      position: sticky;
+      bottom: 0;
+      background: #fff;
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 30;
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 10px 4px 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--gray);
+      font-size: 10px;
+      font-weight: 600;
+      transition: color .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-item.active { color: var(--primary); }
+    .nav-item svg { transition: transform .15s; }
+    .nav-item.active svg { transform: scale(1.12); }
+
+    /* ===================== Shared Sub-header ===================== */
+    .sub-header {
+      background: #fff;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .sub-header-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -.3px;
+    }
+    .sub-header .header-icon-wrap { flex-shrink: 0; }
+
+    /* ===================== Section Card ===================== */
+    .section-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 18px 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    /* ===================== Wish Submit Screen ===================== */
+    .wish-body {
+      flex: 1;
+      background: var(--bg);
+      padding: 16px 14px 24px;
+      overflow-y: auto;
+    }
+
+    .wish-calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+    .cal-day-label {
+      text-align: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      padding: 4px 0;
+    }
+    .cal-day-label.sun { color: var(--red); }
+    .cal-day-label.sat { color: #2563EB; }
+
+    .cal-day {
+      aspect-ratio: 1;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--gray-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      transition: all .15s;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+    }
+    .cal-day:active { transform: scale(.93); }
+    .cal-day.empty { background: transparent; border-color: transparent; cursor: default; }
+    .cal-day.past  { opacity: .35; cursor: default; pointer-events: none; }
+    .cal-day.sun-col { color: var(--red); }
+    .cal-day.sat-col { color: #2563EB; }
+    .cal-day.selected {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(79,70,229,.35);
+    }
+    .cal-day.selected.sun-col,
+    .cal-day.selected.sat-col { color: #fff; }
+    .cal-day.has-shift::after {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      position: absolute;
+      bottom: 3px;
+    }
+    .cal-day.selected::after { background: rgba(255,255,255,.7); }
+
+    .wish-time-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .wish-time-row label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .wish-time-row .form-input {
+      padding-left: 14px;
+    }
+
+    .wish-note-wrap textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--gray-light);
+      resize: none;
+      outline: none;
+      font-family: inherit;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      line-height: 1.6;
+    }
+    .wish-note-wrap textarea:focus {
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+    }
+
+    .selected-dates-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 32px;
+      padding: 2px 0;
+    }
+    .date-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 20px;
+      padding: 4px 10px 4px 11px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .date-chip button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      padding: 0;
+      opacity: .7;
+    }
+    .date-chip button:hover { opacity: 1; }
+
+    .primary-btn {
+      width: 100%;
+      padding: 15px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background .2s, transform .1s, box-shadow .2s;
+      box-shadow: 0 4px 16px rgba(79,70,229,.3);
+    }
+    .primary-btn:hover { background: var(--primary-hover); box-shadow: 0 6px 20px rgba(79,70,229,.35); }
+    .primary-btn:active { transform: scale(.98); }
+    .primary-btn:disabled { background: var(--gray); box-shadow: none; cursor: not-allowed; transform: none; }
+
+    /* ===================== Swap Screen ===================== */
+    .swap-body {
+      flex: 1;
+      background: var(--bg);
+      padding: 16px 14px 24px;
+      overflow-y: auto;
+    }
+
+    .swap-shift-picker {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .swap-shift-item {
+      background: var(--gray-light);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .swap-shift-item:active { transform: scale(.99); }
+    .swap-shift-item.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .swap-shift-item .s-date-mini {
+      text-align: center;
+      min-width: 38px;
+    }
+    .swap-shift-item .s-date-mini .sday {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.1;
+    }
+    .swap-shift-item .s-date-mini .swd {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .swap-shift-item.selected .s-date-mini .sday,
+    .swap-shift-item.selected .s-date-mini .swd { color: var(--primary); }
+    .swap-divider-v { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; }
+    .swap-shift-item.selected .swap-divider-v { background: #C7D2FE; }
+    .swap-shift-meta { flex: 1; }
+    .swap-shift-meta .meta-time {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .swap-shift-meta .meta-dur {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .swap-check {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color .15s, background .15s;
+    }
+    .swap-shift-item.selected .swap-check {
+      border-color: var(--primary);
+      background: var(--primary);
+    }
+
+    .swap-target-input .form-input {
+      padding-left: 14px;
+    }
+
+    .swap-reason-wrap textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--gray-light);
+      resize: none;
+      outline: none;
+      font-family: inherit;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      line-height: 1.6;
+    }
+    .swap-reason-wrap textarea:focus {
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+    }
+
+    .danger-btn {
+      width: 100%;
+      padding: 15px;
+      background: #fff;
+      color: var(--red);
+      border: 1.5px solid #FECACA;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background .2s, border-color .2s;
+    }
+    .danger-btn:hover { background: var(--red-light); border-color: var(--red); }
+
+    /* ===================== Admin Screen ===================== */
+    .admin-body {
+      flex: 1;
+      background: var(--bg);
+      padding: 16px 14px 24px;
+      overflow-y: auto;
+    }
+
+    .admin-filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .admin-filter-bar::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      flex-shrink: 0;
+      padding: 7px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .filter-chip.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .admin-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 10px;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+    .stat-num {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -.5px;
+      line-height: 1.1;
+    }
+    .stat-label { font-size: 10px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+
+    .admin-shift-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px 15px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+      border-left: 4px solid transparent;
+    }
+    .admin-shift-card.s-scheduled { border-left-color: var(--primary); }
+    .admin-shift-card.s-pending   { border-left-color: var(--yellow); }
+    .admin-shift-card.s-cancelled { border-left-color: var(--red); opacity: .7; }
+    .admin-shift-card.s-swapped   { border-left-color: var(--green); }
+
+    .admin-card-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .admin-card-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .admin-card-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      flex: 1;
+    }
+    .admin-card-name span {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      display: block;
+    }
+    .admin-status-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .s-scheduled .admin-status-badge { background: var(--primary-light); color: var(--primary); }
+    .s-pending   .admin-status-badge { background: var(--yellow-light);  color: #92400E; }
+    .s-cancelled .admin-status-badge { background: var(--red-light);     color: var(--red); }
+    .s-swapped   .admin-status-badge { background: var(--green-light);   color: #065F46; }
+
+    .admin-card-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .admin-date-time {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .admin-date-time span { font-size: 11px; color: var(--muted); display: block; }
+
+    .admin-action-row {
+      display: flex;
+      gap: 6px;
+    }
+    .act-btn {
+      padding: 5px 11px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1.5px solid;
+      transition: background .15s;
+    }
+    .act-btn.approve {
+      background: var(--green-light);
+      color: #065F46;
+      border-color: #6EE7B7;
+    }
+    .act-btn.approve:hover { background: #A7F3D0; }
+    .act-btn.reject {
+      background: var(--red-light);
+      color: var(--red);
+      border-color: #FECACA;
+    }
+    .act-btn.reject:hover { background: #FEE2E2; }
+
+    /* ===================== Toast ===================== */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--text);
+      color: #fff;
+      padding: 11px 20px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity .25s, transform .25s;
+      z-index: 100;
+      pointer-events: none;
+      max-width: 320px;
+      text-align: center;
+    }
+    .toast.success { background: var(--green); }
+    .toast.error   { background: var(--red); }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ===================== Modal ===================== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 50;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-sheet {
+      background: #fff;
+      border-radius: 22px 22px 0 0;
+      padding: 24px 20px 36px;
+      width: 100%;
+      max-width: 430px;
+      animation: slideUp .22s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-handle {
+      width: 38px; height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+    .modal-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .modal-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+    .modal-btn-row {
+      display: flex;
+      gap: 10px;
+    }
+    .modal-btn {
+      flex: 1;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: background .15s;
+    }
+    .modal-btn.cancel { background: var(--gray-light); color: var(--muted); border: 1.5px solid var(--border); }
+    .modal-btn.cancel:hover { background: var(--border); }
+    .modal-btn.confirm { background: var(--primary); color: #fff; box-shadow: 0 4px 14px rgba(79,70,229,.3); }
+    .modal-btn.confirm:hover { background: var(--primary-hover); }
+    .modal-btn.confirm-danger { background: var(--red); color: #fff; box-shadow: 0 4px 14px rgba(239,68,68,.3); }
+    .modal-btn.confirm-danger:hover { background: #DC2626; }
+    .cal-day.today {
+      border-color: var(--primary);
+      color: var(--primary);
+      font-weight: 800;
+    }
+    .cal-day.today.has-shift::after {
+      background: var(--primary);
+    }
+    .mnav-btn {
+  font-size: 20px;  /* 現在16px → 少し大きく */
+  padding: 2px 10px;
+}
   </style>
 </head>
 <body>
@@ -516,11 +1099,30 @@
         </div>
       </div>
 
-      <div class="month-bar">
-        <div class="month-label" id="monthLabel">—</div>
-        <div class="month-badge" id="shiftCount">読込中</div>
-      </div>//aaa
+      <!-- カレンダー -->
+      <div class="section-card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <button onclick="shiftsPrevMonth()" class="mnav-btn">‹</button>
+          <span id="shiftsMonthLabel" style="font-size:15px;font-weight:800;color:var(--text)"></span>
+          <button onclick="shiftsNextMonth()" class="mnav-btn">›</button>
+        </div>
+        <div class="wish-calendar-grid">
+          <div class="cal-day-label sun">日</div>
+          <div class="cal-day-label">月</div>
+          <div class="cal-day-label">火</div>
+          <div class="cal-day-label">水</div>
+          <div class="cal-day-label">木</div>
+          <div class="cal-day-label">金</div>
+          <div class="cal-day-label sat">土</div>
+        </div>
+        <div class="wish-calendar-grid" id="shiftsCalGrid"></div>
+      </div>
 
+      <div class="month-bar">
+        <div class="month-label" id="monthLabel">今後のシフト</div>
+        <div class="month-badge" id="shiftCount">読込中</div>
+      </div>
+        
       <div id="shiftsContainer">
         <div class="center-state">
           <div class="big-spinner"></div>
@@ -529,7 +1131,293 @@
       </div>
 
     </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" id="navShifts" onclick="switchTab('shifts')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        シフト確認
+      </button>
+      <button class="nav-item" id="navWish" onclick="switchTab('wish')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        希望提出
+      </button>
+      <button class="nav-item" id="navSwap" onclick="switchTab('swap')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        交代申請
+      </button>
+    </nav>
   </div><!-- /shiftsScreen -->
+
+  <!-- ==================== Wish Submit Screen ==================== -->
+  <div class="screen" id="wishScreen">
+
+    <header class="sub-header">
+      <div class="header-icon-wrap" style="background:var(--primary)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+      </div>
+      <span class="sub-header-title">シフト希望提出</span>
+      <button class="logout-btn" style="margin-left:auto" onclick="doLogout()">ログアウト</button>
+    </header>
+
+    <div class="wish-body">
+
+      <!-- カレンダー -->
+      <div class="section-card">
+        <div class="section-title">希望日を選択</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <button onclick="wishPrevMonth()" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:4px 8px;border-radius:8px;font-size:18px;transition:background .15s" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background='none'">‹</button>
+          <span id="wishMonthLabel" style="font-size:15px;font-weight:800;color:var(--text)"></span>
+          <button onclick="wishNextMonth()" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:4px 8px;border-radius:8px;font-size:18px;transition:background .15s" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background='none'">›</button>
+        </div>
+        <div class="wish-calendar-grid">
+          <div class="cal-day-label sun">日</div>
+          <div class="cal-day-label">月</div>
+          <div class="cal-day-label">火</div>
+          <div class="cal-day-label">水</div>
+          <div class="cal-day-label">木</div>
+          <div class="cal-day-label">金</div>
+          <div class="cal-day-label sat">土</div>
+        </div>
+        <div class="wish-calendar-grid" id="wishCalGrid"></div>
+      </div>
+
+      <!-- 選択済み日付 -->
+      <div class="section-card">
+        <div class="section-title">選択中の希望日</div>
+        <div class="selected-dates-list" id="selectedDatesList">
+          <span style="font-size:13px;color:var(--muted)">カレンダーから日付を選択してください</span>
+        </div>
+      </div>
+
+      <!-- 希望時間帯 -->
+      <div class="section-card">
+        <div class="section-title">希望時間帯（任意）</div>
+        <div class="wish-time-row">
+          <label>開始</label>
+          <input class="form-input" type="time" id="wishStartTime" value="09:00">
+          <label>終了</label>
+          <input class="form-input" type="time" id="wishEndTime" value="17:00">
+        </div>
+      </div>
+
+      <!-- 備考 -->
+      <div class="section-card">
+        <div class="section-title">備考・メモ（任意）</div>
+        <div class="wish-note-wrap">
+          <textarea id="wishNote" rows="3" placeholder="例：午前のみ希望、〇〇と同じシフト希望 など"></textarea>
+        </div>
+      </div>
+
+      <button class="primary-btn" id="wishSubmitBtn" onclick="submitWish()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        希望を提出する
+      </button>
+
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <button class="nav-item" id="navShiftsW" onclick="switchTab('shifts')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        シフト確認
+      </button>
+      <button class="nav-item active" id="navWishW" onclick="switchTab('wish')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        希望提出
+      </button>
+      <button class="nav-item" id="navSwapW" onclick="switchTab('swap')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        交代申請
+      </button>
+    </nav>
+  </div><!-- /wishScreen -->
+
+  <!-- ==================== Swap Screen ==================== -->
+  <div class="screen" id="swapScreen">
+
+    <header class="sub-header">
+      <div class="header-icon-wrap" style="background:var(--yellow)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+      </div>
+      <span class="sub-header-title">シフト交代申請</span>
+      <button class="logout-btn" style="margin-left:auto" onclick="doLogout()">ログアウト</button>
+    </header>
+
+    <div class="swap-body">
+
+      <!-- 対象シフト -->
+      <div class="section-card">
+        <div class="section-title">交代したいシフトを選択</div>
+        <div class="swap-shift-picker" id="swapShiftPicker">
+          <div class="center-state" style="padding:30px 0">
+            <div class="big-spinner"></div>
+            <p class="state-sub">シフトを読み込み中...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 交代相手 -->
+      <div class="section-card">
+        <div class="section-title">交代相手のメールアドレス</div>
+        <div class="swap-target-input input-wrap">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <polyline points="2,4 12,13 22,4"/>
+          </svg>
+          <input class="form-input" type="email" id="swapTargetEmail" placeholder="例: colleague@example.com" inputmode="email">
+        </div>
+      </div>
+
+      <!-- 理由 -->
+      <div class="section-card">
+        <div class="section-title">交代理由</div>
+        <div class="swap-reason-wrap">
+          <textarea id="swapReason" rows="3" placeholder="例：急な用事のため、代わっていただけると助かります"></textarea>
+        </div>
+      </div>
+
+      <button class="primary-btn" id="swapSubmitBtn" onclick="showSwapConfirmModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 2 15 22 11 12 2 9 22 2"/>
+        </svg>
+        交代申請を送信する
+      </button>
+
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <button class="nav-item" id="navShiftsSw" onclick="switchTab('shifts')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        シフト確認
+      </button>
+      <button class="nav-item" id="navWishSw" onclick="switchTab('wish')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        希望提出
+      </button>
+      <button class="nav-item active" id="navSwapSw" onclick="switchTab('swap')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        交代申請
+      </button>
+    </nav>
+  </div><!-- /swapScreen -->
+
+  <!-- ==================== Admin Screen ==================== -->
+  <div class="screen" id="adminScreen">
+
+    <header class="sub-header">
+      <div class="header-icon-wrap" style="background:#0F172A">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <span class="sub-header-title">管理者：シフト一覧</span>
+      <button class="logout-btn" style="margin-left:auto" onclick="doLogout()">ログアウト</button>
+    </header>
+
+    <div class="admin-body">
+
+      <!-- 統計 -->
+      <div class="admin-stats-row" id="adminStatsRow">
+        <div class="stat-card"><div class="stat-num" id="statTotal">—</div><div class="stat-label">全シフト</div></div>
+        <div class="stat-card"><div class="stat-num" id="statPending" style="color:var(--yellow)">—</div><div class="stat-label">申請中</div></div>
+        <div class="stat-card"><div class="stat-num" id="statToday" style="color:var(--primary)">—</div><div class="stat-label">本日</div></div>
+      </div>
+
+      <!-- フィルター -->
+      <div class="admin-filter-bar">
+        <button class="filter-chip active" onclick="adminFilter('all', this)">すべて</button>
+        <button class="filter-chip" onclick="adminFilter('scheduled', this)">確定</button>
+        <button class="filter-chip" onclick="adminFilter('pending', this)">申請中</button>
+        <button class="filter-chip" onclick="adminFilter('swapped', this)">交換済み</button>
+        <button class="filter-chip" onclick="adminFilter('cancelled', this)">キャンセル</button>
+      </div>
+
+      <!-- 検索 -->
+      <div class="input-wrap" style="margin-bottom:14px">
+        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input class="form-input" type="search" id="adminSearch" placeholder="氏名・メールで検索…" oninput="renderAdminList()">
+      </div>
+
+      <!-- リスト -->
+      <div id="adminShiftList">
+        <div class="center-state">
+          <div class="big-spinner"></div>
+          <p class="state-sub">シフトを読み込み中...</p>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /adminScreen -->
+
+  <!-- ==================== Toast ==================== -->
+  <div class="toast" id="globalToast"></div>
+
+  <!-- ==================== Swap Confirm Modal ==================== -->
+  <div class="modal-overlay" id="swapConfirmModal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">交代申請を送信しますか？</div>
+      <div class="modal-sub" id="swapConfirmText">選択したシフトの交代申請を相手に送信します。</div>
+      <div class="modal-btn-row">
+        <button class="modal-btn cancel" onclick="closeModal('swapConfirmModal')">キャンセル</button>
+        <button class="modal-btn confirm" onclick="submitSwap()">送信する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Admin Action Modal ==================== -->
+  <div class="modal-overlay" id="adminActionModal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="adminModalTitle">申請を承認しますか？</div>
+      <div class="modal-sub" id="adminModalSub"></div>
+      <div class="modal-btn-row">
+        <button class="modal-btn cancel" onclick="closeModal('adminActionModal')">キャンセル</button>
+        <button class="modal-btn confirm" id="adminModalConfirmBtn" onclick="execAdminAction()">承認する</button>
+      </div>
+    </div>
+  </div>
 
 </div><!-- /app -->
 
@@ -641,9 +1529,9 @@
     return `
       <div class="shift-card s-${status}">
         <div class="shift-date-col">
-          <div class="s-weekday ${isWeekend}">${wd}</div>
-          <div class="s-day    ${isWeekend}">${day}</div>
-          <div class="s-month">${month}月</div>
+          <div class="s-day ${isWeekend}">${month}/${day}</div>
+          <div class="s-weekday ${isWeekend}">(${wd})</div>
+
         </div>
         <div class="v-divider"></div>
         <div class="shift-info">
@@ -666,12 +1554,15 @@
     document.getElementById('userEmailDisplay').textContent = userEmail;
 
     // 月ラベル
-    const now = new Date();
-    document.getElementById('monthLabel').textContent =
-      `${now.getFullYear()}年${now.getMonth() + 1}月`;
+    
     document.getElementById('shiftCount').textContent = '読込中…';
 
     showScreen('shiftsScreen');
+    // ボトムナビ アクティブ状態
+    ['navShifts'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    });
 
     const container = document.getElementById('shiftsContainer');
 
@@ -684,6 +1575,9 @@
 
     try {
       const shifts = await fetchMyShifts();
+
+      window._cachedShifts = shifts;   
+      renderShiftsCalendar(shifts);
 
       if (shifts.length === 0) {
         document.getElementById('shiftCount').textContent = '0件';
@@ -726,6 +1620,50 @@
         </div>`;
     }
   }
+
+
+  /* ===== シフト確認画面カレンダー ===== */
+  let shiftsCalYear  = new Date().getFullYear();
+  let shiftsCalMonth = new Date().getMonth();
+
+  function shiftsPrevMonth() {
+    shiftsCalMonth--;
+    if (shiftsCalMonth < 0) { shiftsCalMonth = 11; shiftsCalYear--; }
+    renderShiftsCalendar(window._cachedShifts || []);
+  }
+  function shiftsNextMonth() {
+    shiftsCalMonth++;
+    if (shiftsCalMonth > 11) { shiftsCalMonth = 0; shiftsCalYear++; }
+    renderShiftsCalendar(window._cachedShifts || []);
+  }
+
+  function renderShiftsCalendar(shifts) {
+    const shiftDates = new Set(shifts.map(s => s.date));
+    const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+    document.getElementById('shiftsMonthLabel').textContent =
+      `${shiftsCalYear}年 ${MONTHS[shiftsCalMonth]}`;
+
+    const today    = new Date();
+    today.setHours(0,0,0,0);
+    const firstDow = new Date(shiftsCalYear, shiftsCalMonth, 1).getDay();
+    const lastDay  = new Date(shiftsCalYear, shiftsCalMonth + 1, 0).getDate();
+
+    let html = '';
+    for (let i = 0; i < firstDow; i++) html += '<div class="cal-day empty"></div>';
+
+    for (let d = 1; d <= lastDay; d++) {
+      const dt      = new Date(shiftsCalYear, shiftsCalMonth, d);
+      const dow     = dt.getDay();
+      const dateStr = `${shiftsCalYear}-${String(shiftsCalMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isToday  = dt.getTime() === today.getTime();
+      const hasShift = shiftDates.has(dateStr);
+      const colCls   = dow === 0 ? 'sun-col' : dow === 6 ? 'sat-col' : '';
+
+      html += `<div class="cal-day ${colCls} ${isToday ? 'today' : ''} ${hasShift ? 'has-shift' : ''}">${d}</div>`;
+    }
+    document.getElementById('shiftsCalGrid').innerHTML = html;
+  }
+
 
   /* ===== ログアウト ===== */
   function doLogout() {
@@ -787,6 +1725,414 @@
   /* ===== 初期化: 既にログイン済みなら直接シフト画面へ ===== */
   if (idToken) {
     renderShiftsScreen();
+  }
+
+  /* ========================================================
+     ① ボトムナビ・タブ切り替え
+  ======================================================== */
+  function switchTab(tab) {
+    if (tab === 'shifts') {
+      renderShiftsScreen();
+    } else if (tab === 'wish') {
+      showScreen('wishScreen');
+      renderWishCalendar();
+    } else if (tab === 'swap') {
+      showScreen('swapScreen');
+      renderSwapShiftPicker();
+    } else if (tab === 'admin') {
+      showScreen('adminScreen');
+      renderAdminScreen();
+    }
+  }
+
+  /* ========================================================
+     ② トースト
+  ======================================================== */
+  function showToast(msg, type = '') {
+    const t = document.getElementById('globalToast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  /* ========================================================
+     ③ モーダル
+  ======================================================== */
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+  }
+  // オーバーレイクリックで閉じる
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('show'); });
+  });
+
+  /* ========================================================
+     ④ シフト希望提出画面
+  ======================================================== */
+  let wishYear  = new Date().getFullYear();
+  let wishMonth = new Date().getMonth(); // 0-indexed
+  let selectedWishDates = new Set();
+
+  function wishPrevMonth() {
+    wishMonth--;
+    if (wishMonth < 0) { wishMonth = 11; wishYear--; }
+    renderWishCalendar();
+  }
+  function wishNextMonth() {
+    wishMonth++;
+    if (wishMonth > 11) { wishMonth = 0; wishYear++; }
+    renderWishCalendar();
+  }
+
+  function renderWishCalendar() {
+    const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+    document.getElementById('wishMonthLabel').textContent = `${wishYear}年 ${MONTHS[wishMonth]}`;
+
+    const today   = new Date();
+    today.setHours(0,0,0,0);
+    const firstDow = new Date(wishYear, wishMonth, 1).getDay(); // 0=Sun
+    const lastDay  = new Date(wishYear, wishMonth + 1, 0).getDate();
+
+    let html = '';
+    for (let i = 0; i < firstDow; i++) html += '<div class="cal-day empty"></div>';
+    for (let d = 1; d <= lastDay; d++) {
+      const dt    = new Date(wishYear, wishMonth, d);
+      const dow   = dt.getDay();
+      const dateStr = `${wishYear}-${String(wishMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isPast  = dt < today;
+      const isSel   = selectedWishDates.has(dateStr);
+      const colCls  = dow === 0 ? 'sun-col' : dow === 6 ? 'sat-col' : '';
+      const classes = ['cal-day', colCls, isPast ? 'past' : '', isSel ? 'selected' : ''].filter(Boolean).join(' ');
+      html += `<div class="${classes}" onclick="toggleWishDate('${dateStr}')">${d}</div>`;
+    }
+    document.getElementById('wishCalGrid').innerHTML = html;
+    renderSelectedDateChips();
+  }
+
+  function toggleWishDate(dateStr) {
+    if (selectedWishDates.has(dateStr)) {
+      selectedWishDates.delete(dateStr);
+    } else {
+      selectedWishDates.add(dateStr);
+    }
+    renderWishCalendar();
+  }
+
+  function renderSelectedDateChips() {
+    const container = document.getElementById('selectedDatesList');
+    if (selectedWishDates.size === 0) {
+      container.innerHTML = '<span style="font-size:13px;color:var(--muted)">カレンダーから日付を選択してください</span>';
+      return;
+    }
+    const sorted = [...selectedWishDates].sort();
+    container.innerHTML = sorted.map(ds => {
+      const dt  = new Date(ds + 'T00:00:00');
+      const wd  = WEEKDAYS[dt.getDay()];
+      const label = `${dt.getMonth()+1}/${dt.getDate()}(${wd})`;
+      return `<span class="date-chip">${label}<button onclick="toggleWishDate('${ds}')" title="削除">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg></button></span>`;
+    }).join('');
+  }
+
+  async function submitWish() {
+    if (selectedWishDates.size === 0) {
+      showToast('希望日を1日以上選択してください', 'error');
+      return;
+    }
+    const btn = document.getElementById('wishSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spin"></div> 送信中...';
+
+    const payload = {
+      dates:     [...selectedWishDates].sort(),
+      startTime: document.getElementById('wishStartTime').value || null,
+      endTime:   document.getElementById('wishEndTime').value   || null,
+      note:      document.getElementById('wishNote').value.trim() || null,
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/shifts/wish`, {
+        method:  'POST',
+        headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `エラー (${res.status})`);
+      }
+      showToast('希望を提出しました ✓', 'success');
+      selectedWishDates.clear();
+      document.getElementById('wishNote').value = '';
+      renderWishCalendar();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 希望を提出する';
+    }
+  }
+
+  /* ========================================================
+     ⑤ シフト交代申請画面
+  ======================================================== */
+  let myShiftsCache = [];
+  let selectedSwapShiftId = null;
+
+  async function renderSwapShiftPicker() {
+    const picker = document.getElementById('swapShiftPicker');
+    picker.innerHTML = '<div class="center-state" style="padding:30px 0"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>';
+
+    try {
+      if (myShiftsCache.length === 0) myShiftsCache = await fetchMyShifts();
+
+      const today = new Date().toISOString().slice(0, 10);
+      const upcoming = myShiftsCache
+        .filter(s => (s.date || '') >= today && s.status === 'scheduled')
+        .sort((a, b) => (a.date||'').localeCompare(b.date||''));
+
+      if (upcoming.length === 0) {
+        picker.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:20px 0">交代申請できる予定シフトがありません</p>';
+        return;
+      }
+
+      picker.innerHTML = upcoming.map(s => {
+        const { month, day, wi } = parseDateParts(s.date);
+        const wd  = WEEKDAYS[wi];
+        const dur = calcDuration(s.startTime, s.endTime);
+        const sel = s.shiftId === selectedSwapShiftId ? 'selected' : '';
+        return `
+          <div class="swap-shift-item ${sel}" onclick="selectSwapShift('${s.shiftId}')">
+            <div class="s-date-mini">
+              <div class="sw-day">${month}/${day}</div>
+              <div class="sw-wd">(${wd})</div>
+            </div>
+            <div class="swap-divider-v"></div>
+            <div class="swap-shift-meta">
+              <div class="meta-time">${s.startTime || '--:--'} → ${s.endTime || '--:--'}</div>
+              ${dur ? `<div class="meta-dur">${dur}</div>` : ''}
+            </div>
+            <div class="swap-check">
+              ${sel ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+            </div>
+          </div>`;
+      }).join('');
+    } catch (err) {
+      picker.innerHTML = `<p style="font-size:13px;color:var(--red);text-align:center;padding:20px 0">${err.message}</p>`;
+    }
+  }
+
+  function selectSwapShift(shiftId) {
+    selectedSwapShiftId = shiftId;
+    renderSwapShiftPicker();
+  }
+
+  function showSwapConfirmModal() {
+    if (!selectedSwapShiftId) {
+      showToast('交代するシフトを選択してください', 'error');
+      return;
+    }
+    const email = document.getElementById('swapTargetEmail').value.trim();
+    if (!email) {
+      showToast('交代相手のメールアドレスを入力してください', 'error');
+      return;
+    }
+    const shift = myShiftsCache.find(s => s.shiftId === selectedSwapShiftId);
+    const { month, day, wi } = parseDateParts(shift.date);
+    document.getElementById('swapConfirmText').textContent =
+      `${month}月${day}日(${WEEKDAYS[wi]}曜日) ${shift.startTime}〜${shift.endTime} のシフトを ${email} さんに交代申請します。`;
+    document.getElementById('swapConfirmModal').classList.add('show');
+  }
+
+  async function submitSwap() {
+    closeModal('swapConfirmModal');
+    const btn = document.getElementById('swapSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spin"></div> 送信中...';
+
+    const payload = {
+      shiftId:     selectedSwapShiftId,
+      targetEmail: document.getElementById('swapTargetEmail').value.trim(),
+      reason:      document.getElementById('swapReason').value.trim() || null,
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/shifts/swap`, {
+        method:  'POST',
+        headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `エラー (${res.status})`);
+      }
+      showToast('交代申請を送信しました ✓', 'success');
+      selectedSwapShiftId = null;
+      document.getElementById('swapTargetEmail').value = '';
+      document.getElementById('swapReason').value      = '';
+      myShiftsCache = [];
+      renderSwapShiftPicker();
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 2 15 22 11 12 2 9 22 2"/></svg> 交代申請を送信する';
+    }
+  }
+
+  /* ========================================================
+     ⑥ 管理者用シフト一覧画面
+  ======================================================== */
+  let adminAllShifts = [];
+  let adminCurrentFilter = 'all';
+  let adminPendingAction = null; // { shiftId, action }
+
+  const ADMIN_STATUS_LABEL = { scheduled:'確定', pending:'申請中', cancelled:'キャンセル', swapped:'交換済み' };
+
+  async function renderAdminScreen() {
+    const listEl = document.getElementById('adminShiftList');
+    listEl.innerHTML = '<div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>';
+    ['statTotal','statPending','statToday'].forEach(id => document.getElementById(id).textContent = '—');
+
+    try {
+      const res = await fetch(`${API_BASE}/admin/shifts`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (res.status === 403) throw new Error('管理者権限が必要です');
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `エラー (${res.status})`);
+      }
+      const data = await res.json();
+      adminAllShifts = Array.isArray(data.shifts) ? data.shifts : [];
+      adminAllShifts.sort((a,b) => (a.date||'').localeCompare(b.date||''));
+      updateAdminStats();
+      renderAdminList();
+    } catch (err) {
+      listEl.innerHTML = `
+        <div class="center-state">
+          <div class="state-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <p class="state-title">読み込みに失敗しました</p>
+          <p class="state-sub">${err.message}</p>
+          <button class="reload-btn" onclick="renderAdminScreen()">再試行</button>
+        </div>`;
+    }
+  }
+
+  function updateAdminStats() {
+    const today = new Date().toISOString().slice(0,10);
+    document.getElementById('statTotal').textContent   = adminAllShifts.length;
+    document.getElementById('statPending').textContent = adminAllShifts.filter(s => s.status === 'pending').length;
+    document.getElementById('statToday').textContent   = adminAllShifts.filter(s => s.date === today).length;
+  }
+
+  function adminFilter(status, btn) {
+    adminCurrentFilter = status;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    renderAdminList();
+  }
+
+  function renderAdminList() {
+    const q = (document.getElementById('adminSearch').value || '').toLowerCase();
+    let list = adminAllShifts;
+
+    if (adminCurrentFilter !== 'all') {
+      list = list.filter(s => s.status === adminCurrentFilter);
+    }
+    if (q) {
+      list = list.filter(s =>
+        (s.email  || '').toLowerCase().includes(q) ||
+        (s.name   || '').toLowerCase().includes(q)
+      );
+    }
+
+    const listEl = document.getElementById('adminShiftList');
+    if (list.length === 0) {
+      listEl.innerHTML = '<div class="center-state" style="padding:40px 0"><p class="state-title">該当するシフトがありません</p></div>';
+      return;
+    }
+
+    listEl.innerHTML = list.map(s => {
+      const { month, day, wi } = parseDateParts(s.date);
+      const wd  = WEEKDAYS[wi];
+      const dur = calcDuration(s.startTime, s.endTime);
+      const status = s.status || 'scheduled';
+      const label  = ADMIN_STATUS_LABEL[status] || status;
+      const initial = (s.name || s.email || '?')[0].toUpperCase();
+      const actionBtns = status === 'pending' ? `
+        <div class="admin-action-row">
+          <button class="act-btn approve" onclick="openAdminModal('${s.shiftId}','approve')">承認</button>
+          <button class="act-btn reject"  onclick="openAdminModal('${s.shiftId}','reject')">却下</button>
+        </div>` : '';
+
+      return `
+        <div class="admin-shift-card s-${status}">
+          <div class="admin-card-top">
+            <div class="admin-card-avatar">${initial}</div>
+            <div class="admin-card-name">
+              ${s.name || '—'}
+              <span>${s.email || ''}</span>
+            </div>
+            <div class="admin-status-badge">${label}</div>
+          </div>
+          <div class="admin-card-bottom">
+            <div class="admin-date-time">
+              ${month}月${day}日（${wd}） ${s.startTime || '--:--'}〜${s.endTime || '--:--'}
+              <span>${dur || ''}</span>
+            </div>
+            ${actionBtns}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function openAdminModal(shiftId, action) {
+    adminPendingAction = { shiftId, action };
+    const shift = adminAllShifts.find(s => s.shiftId === shiftId);
+    const isApprove = action === 'approve';
+    const modal = document.getElementById('adminActionModal');
+    document.getElementById('adminModalTitle').textContent = isApprove ? '申請を承認しますか？' : '申請を却下しますか？';
+    const { month, day } = parseDateParts(shift.date);
+    document.getElementById('adminModalSub').textContent =
+      `${shift.name || shift.email} さんの ${month}月${day}日のシフト交代申請を${isApprove ? '承認' : '却下'}します。`;
+    const confirmBtn = document.getElementById('adminModalConfirmBtn');
+    confirmBtn.textContent  = isApprove ? '承認する' : '却下する';
+    confirmBtn.className    = `modal-btn ${isApprove ? 'confirm' : 'confirm-danger'}`;
+    modal.classList.add('show');
+  }
+
+  async function execAdminAction() {
+    if (!adminPendingAction) return;
+    closeModal('adminActionModal');
+
+    const { shiftId, action } = adminPendingAction;
+    adminPendingAction = null;
+
+    try {
+      const res = await fetch(`${API_BASE}/admin/shifts/${shiftId}/${action}`, {
+        method:  'POST',
+        headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `エラー (${res.status})`);
+      }
+      // ローカル更新
+      const idx = adminAllShifts.findIndex(s => s.shiftId === shiftId);
+      if (idx >= 0) adminAllShifts[idx].status = action === 'approve' ? 'swapped' : 'cancelled';
+      updateAdminStats();
+      renderAdminList();
+      showToast(action === 'approve' ? '申請を承認しました ✓' : '申請を却下しました', action === 'approve' ? 'success' : '');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
   }
 </script>
 </body>
