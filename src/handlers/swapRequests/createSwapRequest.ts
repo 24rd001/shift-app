@@ -7,6 +7,8 @@ import { badRequest, created, forbidden, internalError, notFound, unauthorized }
 
 interface CreateSwapRequestBody {
   shiftId: string;
+  targetEmail: string;  // 追加
+  reason?: string;      // 追加（?は任意という意味）
 }
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -23,6 +25,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 
   if (!body.shiftId) return badRequest('shiftId is required');
+  if (!body.targetEmail) return badRequest('targetEmail is required');
 
   try {
     // シフトの存在確認と所有権チェック
@@ -36,13 +39,15 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
 
     const item = {
-      swapId: uuidv4(),
-      requesterId: auth.userId,
-      shiftId: body.shiftId,
-      status: 'pending' as const,
-      responses: [] as Array<{ userId: string; accept: boolean; respondedAt: string }>,
-      createdAt: new Date().toISOString(),
-    };
+  swapId: uuidv4(),
+  requesterId: auth.userId,
+  shiftId: body.shiftId,
+  targetEmail: body.targetEmail,  // 追加
+  reason: body.reason ?? null,    // 追加（??はnullの場合nullを入れる）
+  status: 'pending' as const,
+  responses: [] as Array<{ userId: string; accept: boolean; respondedAt: string }>,
+  createdAt: new Date().toISOString(),
+};
 
     await docClient.send(new PutCommand({ TableName: TABLES.SWAP_REQUESTS, Item: item }));
 

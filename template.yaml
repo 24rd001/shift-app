@@ -249,6 +249,59 @@ Resources:
             Path: /shifts
             Method: GET
 
+  GetAdminShiftsFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/shifts/getAdminShifts.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: getAdminShifts.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ShiftsTable
+      Events:
+        GetAdminShiftsApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /admin/shifts
+            Method: GET
+
+  AdminShiftActionFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/shifts/adminShiftAction.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: adminShiftAction.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ShiftsTable
+      Events:
+        AdminShiftActionApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /admin/shifts/{id}/{action}
+            Method: POST
+            
+
   GetMyShiftsFunction:
     Type: AWS::Serverless::Function
     Metadata:
@@ -354,7 +407,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref ShiftAppApi
-            Path: /swap-requests
+            Path: /shifts/swap
             Method: POST
 
   RespondToSwapFunction:
