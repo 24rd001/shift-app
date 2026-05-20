@@ -1987,7 +1987,17 @@
       userEmail = email;
       localStorage.setItem('idToken',   idToken);
       localStorage.setItem('userEmail', userEmail);
-      await renderShiftsScreen();
+      // JWTトークンを解析してグループを確認
+const payload = JSON.parse(atob(idToken.split('.')[1]));
+const groups = payload['cognito:groups'] || [];
+const isAdmin = groups.includes('admin');
+
+// 管理者なら管理者画面、スタッフならスタッフ画面へ
+if (isAdmin) {
+  await renderAdminScreen();
+} else {
+  await renderShiftsScreen();
+}
     } catch (err) {
       errBox.textContent = err.message;
       errBox.classList.add('show');
@@ -2014,7 +2024,16 @@
 
   /* ===== 初期化: 既にログイン済みなら直接シフト画面へ ===== */
   if (idToken) {
+    // 保存済みトークンを解析してadminか確認
+  const payload = JSON.parse(atob(idToken.split('.')[1]));
+  const groups = payload['cognito:groups'] || [];
+  const isAdmin = groups.includes('admin');
+  
+  if (isAdmin) {
+    renderAdminScreen();
+  } else {
     renderShiftsScreen();
+  }
   }
 
   /* ========================================================
@@ -2474,6 +2493,7 @@
   const ADMIN_STATUS_LABEL = { scheduled:'確定', pending:'申請中', cancelled:'キャンセル', swapped:'交換済み' };
 
   async function renderAdminScreen() {
+    showScreen('adminScreen'); // 追加
     const listEl = document.getElementById('adminShiftList');
     listEl.innerHTML = '<div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>';
     ['statTotal','statPending','statToday'].forEach(id => document.getElementById(id).textContent = '—');

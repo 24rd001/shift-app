@@ -275,6 +275,87 @@ Resources:
             Path: /admin/shifts
             Method: GET
 
+  
+  GetAdminWishesFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/shifts/getAdminWishes.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: getAdminWishes.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ShiftRequestsTable
+      Events:
+        GetAdminWishesApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /admin/wishes
+            Method: GET
+
+  GetStaffFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/users/getStaff.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: getStaff.handler
+      Policies:
+        # UsersテーブルをReadする権限
+        - DynamoDBReadPolicy:
+            TableName: !Ref UsersTable
+      Events:
+        GetStaffApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /staff
+            Method: GET
+
+  GetNoticesFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/notices/getNotices.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: getNotices.handler
+      Policies:
+        # 基本的なLambda実行権限のみ（DynamoDBは使わない）
+        - AWSLambdaBasicExecutionRole
+      Events:
+        GetNoticesApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /notices
+            Method: GET
+
+
   AdminShiftActionFunction:
     Type: AWS::Serverless::Function
     Metadata:
