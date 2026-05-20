@@ -1006,10 +1006,64 @@
     .cal-day.today.has-shift::after {
       background: var(--primary);
     }
-    .mnav-btn {
-  font-size: 20px;  /* 現在16px → 少し大きく */
-  padding: 2px 10px;
-}
+    .mnav-btn { font-size: 20px; padding: 2px 10px; }
+
+    /* ===== 交代返答ボタン ===== */
+    .swap-reply-btn {
+      width: 100%; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700;
+      border: 1.5px solid; cursor: pointer; margin-bottom: 10px;
+      display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity .15s;
+    }
+    .swap-reply-btn:active { opacity: .8; }
+    .swap-reply-btn.green  { background: #D1FAE5; color: #065F46; border-color: #6EE7B7; }
+    .swap-reply-btn.pink   { background: #FEF2F2; color: var(--red); border-color: #FECACA; }
+    .swap-reply-btn.yellow { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+
+    /* ===== 申請履歴 ===== */
+    .swap-history-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+    }
+    .swap-history-item:last-child { border-bottom: none; }
+    .swap-history-name   { font-size: 13px; font-weight: 700; color: var(--text); }
+    .swap-history-reason { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ===== 重要連絡 ===== */
+    .notice-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .notice-item:last-child { border-bottom: none; }
+    .notice-tag {
+      display: inline-block; padding: 2px 8px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; margin-bottom: 5px;
+    }
+    .notice-tag.tag-rule    { background: #EEF2FF; color: #4338CA; }
+    .notice-tag.tag-reserve { background: #FEF3C7; color: #92400E; }
+    .notice-tag.tag-trouble { background: #FEF2F2; color: var(--red); }
+    .notice-tag.tag-other   { background: var(--green-light); color: #065F46; }
+    .notice-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+    .notice-pin  { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+    /* ===== 希望一覧カード ===== */
+    .wish-list-card {
+      background: #fff; border-radius: 14px; padding: 14px 15px; margin-bottom: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05); border-left: 4px solid #8B5CF6;
+    }
+    .wish-list-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .wish-list-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #EDE9FE; color: #7C3AED; font-size: 13px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .wish-list-name { font-size: 13px; font-weight: 700; color: var(--text); flex: 1; }
+    .wish-list-name span { font-size: 11px; font-weight: 500; color: var(--muted); display: block; }
+    .wish-dates-wrap { display: flex; flex-wrap: wrap; gap: 5px; }
+    .wish-date-chip { background: #EDE9FE; color: #5B21B6; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; }
+    .wish-time-badge { font-size: 11px; color: var(--muted); margin-top: 6px; }
+    .wish-note-badge { font-size: 11px; color: var(--muted); margin-top: 4px; font-style: italic; }
+    .wish-create-btn {
+      margin-top: 10px; padding: 7px 14px; background: var(--green-light); color: #065F46;
+      border: 1.5px solid #6EE7B7; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;
+    }
+    .wish-create-btn:hover { background: #A7F3D0; }
   </style>
 </head>
 <body>
@@ -1388,7 +1442,180 @@
       </div>
 
     </div>
+
+    <!-- Bottom Nav（管理者用） -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="switchTab('admin')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        シフト一覧
+      </button>
+      <button class="nav-item" onclick="switchTab('wishList')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <polyline points="16 11 18 13 22 9"/>
+        </svg>
+        希望一覧
+      </button>
+      <button class="nav-item" onclick="switchTab('shiftCreate')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/>
+        </svg>
+        シフト作成
+      </button>
+    </nav>
   </div><!-- /adminScreen -->
+
+  <!-- ==================== Wish List Screen ==================== -->
+  <div class="screen" id="wishListScreen">
+    <header class="sub-header">
+      <div class="header-icon-wrap" style="background:#8B5CF6">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <polyline points="16 11 18 13 22 9"/>
+        </svg>
+      </div>
+      <span class="sub-header-title">希望一覧</span>
+      <button class="logout-btn" style="margin-left:auto" onclick="doLogout()">ログアウト</button>
+    </header>
+    <div class="admin-body">
+      <div class="section-card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <button onclick="wishListPrevMonth()" class="mnav-btn">‹</button>
+          <span id="wishListMonthLabel" style="font-size:15px;font-weight:800;color:var(--text)"></span>
+          <button onclick="wishListNextMonth()" class="mnav-btn">›</button>
+        </div>
+      </div>
+      <div class="input-wrap" style="margin-bottom:14px">
+        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input class="form-input" type="search" id="wishListSearch"
+               placeholder="スタッフ名・メールで絞り込み…" oninput="renderWishList()">
+      </div>
+      <div id="wishListContainer">
+        <div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>
+      </div>
+    </div>
+    <nav class="bottom-nav">
+      <button class="nav-item" onclick="switchTab('admin')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        シフト一覧
+      </button>
+      <button class="nav-item active" onclick="switchTab('wishList')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <polyline points="16 11 18 13 22 9"/>
+        </svg>
+        希望一覧
+      </button>
+      <button class="nav-item" onclick="switchTab('shiftCreate')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/>
+        </svg>
+        シフト作成
+      </button>
+    </nav>
+  </div><!-- /wishListScreen -->
+
+  <!-- ==================== Shift Create Screen ==================== -->
+  <div class="screen" id="shiftCreateScreen">
+    <header class="sub-header">
+      <div class="header-icon-wrap" style="background:#10B981">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/>
+        </svg>
+      </div>
+      <span class="sub-header-title">シフト作成</span>
+      <button class="logout-btn" style="margin-left:auto" onclick="doLogout()">ログアウト</button>
+    </header>
+    <div class="admin-body">
+      <div class="section-card">
+        <div class="section-title">対象スタッフ</div>
+        <div class="input-wrap" style="margin-bottom:0">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          <input class="form-input" type="email" id="createStaffEmail"
+                 placeholder="スタッフのメールアドレス" inputmode="email">
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="section-title">シフト日</div>
+        <input class="form-input" type="date" id="createShiftDate" style="padding-left:14px;width:100%">
+      </div>
+      <div class="section-card">
+        <div class="section-title">時間帯</div>
+        <div class="wish-time-row">
+          <label>開始</label>
+          <input class="form-input" type="time" id="createStartTime" value="09:00">
+          <label>終了</label>
+          <input class="form-input" type="time" id="createEndTime" value="17:00">
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="section-title">備考（任意）</div>
+        <div class="wish-note-wrap">
+          <textarea id="createNote" rows="3" placeholder="例：レジ担当、研修シフト など"></textarea>
+        </div>
+      </div>
+      <div style="margin-bottom:12px">
+        <button onclick="switchTab('wishList')"
+          style="width:100%;padding:12px;background:#F3F4F6;border:1.5px solid var(--border);border-radius:12px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+          スタッフの希望一覧を参照する
+        </button>
+      </div>
+      <button class="primary-btn" id="createShiftBtn" onclick="submitCreateShift()"
+              style="background:var(--green);box-shadow:0 4px 16px rgba(16,185,129,.3)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        シフトを確定する
+      </button>
+    </div>
+    <nav class="bottom-nav">
+      <button class="nav-item" onclick="switchTab('admin')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        シフト一覧
+      </button>
+      <button class="nav-item" onclick="switchTab('wishList')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <polyline points="16 11 18 13 22 9"/>
+        </svg>
+        希望一覧
+      </button>
+      <button class="nav-item active" onclick="switchTab('shiftCreate')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/>
+        </svg>
+        シフト作成
+      </button>
+    </nav>
+  </div><!-- /shiftCreateScreen -->
 
   <!-- ==================== Toast ==================== -->
   <div class="toast" id="globalToast"></div>
@@ -1435,6 +1662,18 @@
   /* ===== 状態 ===== */
   let idToken   = localStorage.getItem('idToken');
   let userEmail = localStorage.getItem('userEmail') || '';
+  let isAdmin   = false; // ログイン後に設定
+
+  /* ===== 管理者判定（JWTのpayloadから cognitoグループを読む） ===== */
+  function checkIsAdmin(token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const groups  = payload['cognito:groups'] || [];
+      return groups.includes('admin') || groups.includes('admins') || groups.includes('manager');
+    } catch {
+      return false;
+    }
+  }
 
   /* ===== 画面切り替え ===== */
   function showScreen(id) {
@@ -1695,9 +1934,14 @@
     try {
       idToken   = await cognitoLogin(email, password);
       userEmail = email;
+      isAdmin   = checkIsAdmin(idToken);
       localStorage.setItem('idToken',   idToken);
       localStorage.setItem('userEmail', userEmail);
-      await renderShiftsScreen();
+      if (isAdmin) {
+        await renderAdminScreen();
+      } else {
+        await renderShiftsScreen();
+      }
     } catch (err) {
       errBox.textContent = err.message;
       errBox.classList.add('show');
@@ -1722,9 +1966,14 @@
   /* ===== イベント: ログアウト ===== */
   document.getElementById('logoutBtn').addEventListener('click', doLogout);
 
-  /* ===== 初期化: 既にログイン済みなら直接シフト画面へ ===== */
+  /* ===== 初期化: 既にログイン済みなら直接画面へ ===== */
   if (idToken) {
-    renderShiftsScreen();
+    isAdmin = checkIsAdmin(idToken);
+    if (isAdmin) {
+      renderAdminScreen();
+    } else {
+      renderShiftsScreen();
+    }
   }
 
   /* ========================================================
@@ -1742,6 +1991,143 @@
     } else if (tab === 'admin') {
       showScreen('adminScreen');
       renderAdminScreen();
+    } else if (tab === 'wishList') {
+      showScreen('wishListScreen');
+      renderWishListScreen();
+    } else if (tab === 'shiftCreate') {
+      showScreen('shiftCreateScreen');
+    }
+  }
+
+  /* ========================================================
+     ⑦ 希望一覧画面（管理者）
+  ======================================================== */
+  let allWishList = [];
+  let wishListYear  = new Date().getFullYear();
+  let wishListMonth = new Date().getMonth();
+
+  function wishListPrevMonth() {
+    wishListMonth--;
+    if (wishListMonth < 0) { wishListMonth = 11; wishListYear--; }
+    renderWishListScreen();
+  }
+  function wishListNextMonth() {
+    wishListMonth++;
+    if (wishListMonth > 11) { wishListMonth = 0; wishListYear++; }
+    renderWishListScreen();
+  }
+
+  async function renderWishListScreen() {
+    const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+    document.getElementById('wishListMonthLabel').textContent =
+      `${wishListYear}年 ${MONTHS[wishListMonth]}`;
+    const container = document.getElementById('wishListContainer');
+    container.innerHTML = '<div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>';
+    const ym = `${wishListYear}-${String(wishListMonth + 1).padStart(2,'0')}`;
+    try {
+      const res = await fetch(`${API_BASE}/admin/wishes?month=${ym}`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (res.status === 403) throw new Error('管理者権限が必要です');
+      if (!res.ok) throw new Error(`エラー (${res.status})`);
+      const data = await res.json();
+      allWishList = Array.isArray(data.wishes) ? data.wishes : [];
+      renderWishList();
+    } catch (err) {
+      container.innerHTML = `
+        <div class="center-state">
+          <div class="state-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <p class="state-title">読み込みに失敗しました</p>
+          <p class="state-sub">${err.message}</p>
+          <button class="reload-btn" onclick="renderWishListScreen()">再試行</button>
+        </div>`;
+    }
+  }
+
+  function renderWishList() {
+    const q = (document.getElementById('wishListSearch').value || '').toLowerCase();
+    let list = q
+      ? allWishList.filter(w =>
+          (w.email || '').toLowerCase().includes(q) ||
+          (w.name  || '').toLowerCase().includes(q))
+      : allWishList;
+    const container = document.getElementById('wishListContainer');
+    if (list.length === 0) {
+      container.innerHTML = '<div class="center-state" style="padding:40px 0"><p class="state-title">希望提出がありません</p></div>';
+      return;
+    }
+    container.innerHTML = list.map(w => {
+      const initial = (w.name || w.email || '?')[0].toUpperCase();
+      const dateChips = (w.dates || []).map(d => {
+        const dt = new Date(d + 'T00:00:00');
+        return `<span class="wish-date-chip">${dt.getMonth()+1}/${dt.getDate()}(${WEEKDAYS[dt.getDay()]})</span>`;
+      }).join('');
+      const timeStr = (w.startTime && w.endTime) ? `希望時間: ${w.startTime}〜${w.endTime}` : '';
+      return `
+        <div class="wish-list-card">
+          <div class="wish-list-top">
+            <div class="wish-list-avatar">${initial}</div>
+            <div class="wish-list-name">${w.name || '—'}<span>${w.email || ''}</span></div>
+          </div>
+          <div class="wish-dates-wrap">${dateChips}</div>
+          ${timeStr ? `<div class="wish-time-badge">${timeStr}</div>` : ''}
+          ${w.note ? `<div class="wish-note-badge">「${w.note}」</div>` : ''}
+          <button class="wish-create-btn"
+            onclick="goCreateFromWish('${w.email}','${w.startTime||''}','${w.endTime||''}')">
+            ＋ このスタッフのシフトを作成
+          </button>
+        </div>`;
+    }).join('');
+  }
+
+  function goCreateFromWish(email, startTime, endTime) {
+    switchTab('shiftCreate');
+    document.getElementById('createStaffEmail').value = email;
+    if (startTime) document.getElementById('createStartTime').value = startTime;
+    if (endTime)   document.getElementById('createEndTime').value   = endTime;
+  }
+
+  /* ========================================================
+     ⑧ シフト作成画面（管理者）
+  ======================================================== */
+  async function submitCreateShift() {
+    const email     = document.getElementById('createStaffEmail').value.trim();
+    const date      = document.getElementById('createShiftDate').value;
+    const startTime = document.getElementById('createStartTime').value;
+    const endTime   = document.getElementById('createEndTime').value;
+    if (!email)              { showToast('スタッフのメールアドレスを入力してください', 'error'); return; }
+    if (!date)               { showToast('シフト日を選択してください', 'error'); return; }
+    if (!startTime || !endTime) { showToast('時間帯を入力してください', 'error'); return; }
+    const btn = document.getElementById('createShiftBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spin"></div> 登録中...';
+    try {
+      const res = await fetch(`${API_BASE}/admin/shifts`, {
+        method:  'POST',
+        headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email, date, startTime, endTime,
+          note: document.getElementById('createNote').value.trim() || null,
+        }),
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (res.status === 403) throw new Error('管理者権限が必要です');
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `エラー (${res.status})`);
+      }
+      showToast('シフトを確定しました ✓', 'success');
+      document.getElementById('createStaffEmail').value = '';
+      document.getElementById('createShiftDate').value  = '';
+      document.getElementById('createNote').value       = '';
+      document.getElementById('createStartTime').value  = '09:00';
+      document.getElementById('createEndTime').value    = '17:00';
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> シフトを確定する';
     }
   }
 
