@@ -2056,18 +2056,40 @@ if (isAdmin) {
 
   /* ===== 管理者ホーム内タブ切り替え ===== */
   function adminSwitchTab(tab, btn) {
-    const shiftListWrap = document.getElementById('adminShiftList').parentElement;
-    shiftListWrap.style.display                          = 'none';
+    // admin-bodyは常に表示する
+    document.querySelector('.admin-body').style.display = 'block';
+    
+    // シフト一覧関連の要素を取得
+    const statsRow = document.getElementById('adminStatsRow');
+    const filterBar = document.querySelector('.admin-filter-bar');
+    const searchInput = document.getElementById('adminSearch').parentElement;
+    
+    // 各パネルを非表示にする
+    document.getElementById('adminShiftList').style.display = 'none';
     document.getElementById('adminWishesPanel').style.display = 'none';
     document.getElementById('adminCreatePanel').style.display = 'none';
+    
+    // タブのアクティブ状態を更新
     document.querySelectorAll('#adminScreen .nav-item').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    
     if (tab === 'adminShifts') {
-      shiftListWrap.style.display = 'block';
+      // シフト一覧の場合は統計・フィルタ・検索も表示
+      statsRow.style.display = 'grid';
+      filterBar.style.display = 'flex';
+      searchInput.style.display = 'block';
+      document.getElementById('adminShiftList').style.display = 'block';
     } else if (tab === 'adminWishes') {
+      // 希望一覧の場合は統計・フィルタ・検索を非表示
+      statsRow.style.display = 'none';
+      filterBar.style.display = 'none';
+      searchInput.style.display = 'none';
       document.getElementById('adminWishesPanel').style.display = 'block';
       renderWishListScreen();
     } else if (tab === 'adminCreate') {
+      statsRow.style.display = 'none';
+      filterBar.style.display = 'none';
+      searchInput.style.display = 'none';
       document.getElementById('adminCreatePanel').style.display = 'block';
     }
   }
@@ -2494,6 +2516,7 @@ if (isAdmin) {
 
   async function renderAdminScreen() {
     showScreen('adminScreen'); // 追加
+    document.querySelector('.admin-body').style.display = 'block'; // 追加
     const listEl = document.getElementById('adminShiftList');
     listEl.innerHTML = '<div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>';
     ['statTotal','statPending','statToday'].forEach(id => document.getElementById(id).textContent = '—');
