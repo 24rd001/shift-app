@@ -222,6 +222,45 @@ Resources:
             Auth:
               Authorizer: NONE
 
+  RegisterFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/auth/register.ts
+        External:
+          - "@aws-sdk/client-cognito-identity-provider"
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: register.handler
+      Policies:
+        # CognitoとDynamoDBへのアクセス権限が必要
+        - AWSLambdaBasicExecutionRole
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:SignUp
+                - cognito-idp:AdminConfirmSignUp
+                - cognito-idp:AdminAddUserToGroup
+              Resource: !GetAtt CognitoUserPool.Arn
+      Events:
+        RegisterApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /auth/register
+            Method: POST
+            # このエンドポイントは認証不要（新規登録のため）
+            Auth:
+              Authorizer: NONE
+
   # --- Shifts ---
   GetShiftsFunction:
     Type: AWS::Serverless::Function
@@ -294,6 +333,8 @@ Resources:
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref ShiftRequestsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref UsersTable
       Events:
         GetAdminWishesApi:
           Type: Api
@@ -382,6 +423,34 @@ Resources:
             Path: /admin/shifts/{id}/{action}
             Method: POST
             
+  CreateShiftFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/shifts/createShift.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: createShift.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ShiftsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref UsersTable
+      Events:
+        CreateShiftApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /admin/shifts
+            Method: POST
+
 
   GetMyShiftsFunction:
     Type: AWS::Serverless::Function

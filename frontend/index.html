@@ -3272,7 +3272,16 @@
     btn.innerHTML = '<div class="spin"></div> 登録中...';
 
     try {
-      await cognitoSignUp(name, email, password, 'staff');
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, role: 'staff' }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || `エラー (${res.status})`);
+      }
+      
       // 登録成功 → ログイン画面へ戻してメッセージ表示
       showScreen('loginScreen');
       const errLogin = document.getElementById('errorBox');
@@ -3680,14 +3689,14 @@
     const container = document.getElementById('staffListContainer');
     container.innerHTML = '<div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>';
     try {
-      const res = await fetch(`${API_BASE}/admin/users`, {
+      const res = await fetch(`${API_BASE}/staff`, {
         headers: { Authorization: `Bearer ${idToken}` },
       });
       if (res.status === 401) { doLogout(); return; }
       if (res.status === 403) throw new Error('管理者権限が必要です');
       if (!res.ok) throw new Error(`エラー (${res.status})`);
       const data = await res.json();
-      allStaffList = Array.isArray(data.users) ? data.users : [];
+      allStaffList = Array.isArray(data.users) ? data.staff : [];
       renderStaffList();
     } catch (err) {
       container.innerHTML = `
