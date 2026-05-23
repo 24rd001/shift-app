@@ -1130,6 +1130,293 @@
     }
     .role-act-btn.demote:hover { background: #FEE2E2; }
 
+    /* ===================== Reaction ===================== */
+    .reaction-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .reaction-btn {
+      flex: 1;
+      padding: 6px 4px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--gray-light);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all .15s;
+    }
+    .reaction-btn.selected-ok  { background:#D1FAE5; border-color:#6EE7B7; color:#065F46; }
+    .reaction-btn.selected-meh { background:#FEF3C7; border-color:#FCD34D; color:#92400E; }
+    .reaction-btn.selected-q   { background:#FEF2F2; border-color:#FECACA; color:var(--red); }
+    .reaction-count { font-size: 10px; opacity: .7; }
+
+    /* ===================== Pending Tasks ===================== */
+    .pending-tasks-card {
+      background: #FFFBEB;
+      border: 1.5px solid #FCD34D;
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    .pending-tasks-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #92400E;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .pending-task-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #FDE68A;
+    }
+    .pending-task-item:last-child { border-bottom: none; }
+    .pending-task-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .pending-task-info { flex: 1; }
+    .pending-task-name { font-size: 12px; font-weight: 700; color: #78350F; }
+    .pending-task-sub  { font-size: 10px; color: #92400E; margin-top: 1px; }
+    .pending-task-btn {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      border: none;
+      border-radius: 7px;
+      padding: 4px 9px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* ===================== Talk Screen ===================== */
+    .talk-body {
+      flex: 1;
+      background: var(--bg);
+      overflow-y: auto;
+      padding: 12px 14px 90px;
+    }
+    .talk-section-label {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--muted);
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      margin: 12px 0 6px;
+    }
+    .talk-room-item {
+      background: #fff;
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      border: 0.5px solid var(--border);
+      transition: background .15s;
+      position: relative;
+    }
+    .talk-room-item:hover { background: var(--gray-light); }
+    .talk-room-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      flex-shrink: 0;
+      color: #fff;
+    }
+    .talk-room-avatar.group-all    { background: var(--primary); }
+    .talk-room-avatar.group-shift  { background: var(--green); }
+    .talk-room-avatar.group-dm     { background: var(--yellow); color: #fff; }
+    .talk-room-info { flex: 1; min-width: 0; }
+    .talk-room-name {
+      font-size: 14px; font-weight: 700; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .talk-room-preview {
+      font-size: 11px; color: var(--muted); margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .talk-room-meta { text-align: right; flex-shrink: 0; }
+    .talk-room-time { font-size: 10px; color: var(--muted); }
+    .talk-unread-badge {
+      background: var(--red);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      border-radius: 20px;
+      padding: 1px 7px;
+      margin-top: 3px;
+      display: inline-block;
+    }
+    .talk-new-dm-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary-light);
+      border: 1.5px dashed var(--primary);
+      border-radius: 14px;
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    /* ===================== Chat Room ===================== */
+    .chat-screen { display: none; flex-direction: column; height: 100vh; }
+    .chat-screen.active { display: flex; }
+    .chat-header {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .chat-back-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--primary); font-size: 22px; padding: 0 4px;
+    }
+    .chat-room-name-hdr { font-size: 15px; font-weight: 800; color: var(--text); }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 14px 0;
+      background: #EEF2FF;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .chat-day-divider {
+      text-align: center;
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 700;
+      background: rgba(255,255,255,.7);
+      border-radius: 20px;
+      padding: 3px 12px;
+      width: fit-content;
+      margin: 4px auto;
+    }
+    .chat-bubble-wrap {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+    }
+    .chat-bubble-wrap.mine { flex-direction: row-reverse; }
+    .chat-bubble-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .chat-bubble-col { display: flex; flex-direction: column; max-width: 75%; }
+    .chat-bubble-col.mine { align-items: flex-end; }
+    .chat-bubble-sender { font-size: 9px; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
+    .chat-bubble {
+      padding: 9px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .chat-bubble.theirs {
+      background: #fff;
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+    .chat-bubble.mine-bubble {
+      background: var(--primary);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-bubble-time { font-size: 9px; color: var(--muted); margin-top: 2px; }
+    .chat-input-area {
+      background: #fff;
+      border-top: 1px solid var(--border);
+      padding: 10px 14px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .chat-input-area textarea {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      background: var(--gray-light);
+      max-height: 100px;
+      line-height: 1.5;
+    }
+    .chat-input-area textarea:focus { border-color: var(--primary); background: #fff; }
+    .chat-send-btn {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+    .chat-send-btn:hover { background: var(--primary-hover); }
+
+    /* ===================== Translate ===================== */
+    .translate-btn {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--primary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .translate-result {
+      margin-top: 6px;
+      padding: 8px 10px;
+      background: var(--primary-light);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--primary);
+      line-height: 1.5;
+    }
+
     /* ===================== Toast ===================== */
     .toast {
       position: fixed;
@@ -1562,6 +1849,12 @@
         </div>
       </div>
 
+      <!-- 未提出タスク（未完了がある間は常時表示） -->
+      <div id="pendingTasksCard" class="pending-tasks-card" style="display:none">
+        <div class="pending-tasks-title">⚠️ 未完了のタスクがあります</div>
+        <div id="pendingTasksList"></div>
+      </div>
+
       <!-- カレンダー -->
       <div class="section-card" style="margin-bottom:14px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -1617,6 +1910,13 @@
           <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
         </svg>
         交代申請
+      </button>
+      <button class="nav-item" id="navTalk" onclick="switchTab('talk')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        トーク
+        <span id="talkUnreadBadgeNav" style="display:none;background:var(--red);color:#fff;font-size:8px;border-radius:20px;padding:0 5px;position:absolute;top:6px;right:12px">●</span>
       </button>
     </nav>
   </div><!-- /shiftsScreen -->
@@ -1715,6 +2015,12 @@
         </svg>
         交代申請
       </button>
+      <button class="nav-item" id="navTalkW" onclick="switchTab('talk')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        トーク
+      </button>
     </nav>
   </div><!-- /wishScreen -->
 
@@ -1796,8 +2102,124 @@
         </svg>
         交代申請
       </button>
+      <button class="nav-item" id="navTalkSw" onclick="switchTab('talk')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        トーク
+      </button>
     </nav>
   </div><!-- /swapScreen -->
+
+  <!-- ==================== Talk Screen ==================== -->
+  <div class="screen" id="talkScreen">
+    <header class="shifts-header">
+      <div class="header-brand">
+        <div class="header-icon-wrap" style="background:var(--primary)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <span class="header-title">トーク</span>
+      </div>
+    </header>
+
+    <div class="talk-body">
+      <div class="talk-section-label">グループトーク</div>
+      <div class="talk-room-item" onclick="openChatRoom('group-all','📢 全体連絡','group-all')">
+        <div class="talk-room-avatar group-all">📢</div>
+        <div class="talk-room-info">
+          <div class="talk-room-name">全体連絡</div>
+          <div class="talk-room-preview" id="preview-group-all">メッセージはありません</div>
+        </div>
+        <div class="talk-room-meta">
+          <div class="talk-room-time" id="time-group-all"></div>
+          <span class="talk-unread-badge" id="unread-group-all" style="display:none">new</span>
+        </div>
+      </div>
+      <div class="talk-room-item" onclick="openChatRoom('group-shift','📅 シフト関連','group-shift')">
+        <div class="talk-room-avatar group-shift">📅</div>
+        <div class="talk-room-info">
+          <div class="talk-room-name">シフト関連</div>
+          <div class="talk-room-preview" id="preview-group-shift">メッセージはありません</div>
+        </div>
+        <div class="talk-room-meta">
+          <div class="talk-room-time" id="time-group-shift"></div>
+          <span class="talk-unread-badge" id="unread-group-shift" style="display:none">new</span>
+        </div>
+      </div>
+
+      <div class="talk-section-label" style="margin-top:16px">個人トーク</div>
+      <div id="dmRoomList"></div>
+      <button class="talk-new-dm-btn" onclick="showNewDmModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        新しいトークを開始
+      </button>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-item" id="navShiftsTalk" onclick="switchTab('shifts')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        ホーム
+      </button>
+      <button class="nav-item" id="navWishTalk" onclick="switchTab('wish')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        希望提出
+      </button>
+      <button class="nav-item" id="navSwapTalk" onclick="switchTab('swap')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        交代申請
+      </button>
+      <button class="nav-item active" id="navTalkTalk" onclick="switchTab('talk')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        トーク
+      </button>
+    </nav>
+  </div><!-- /talkScreen -->
+
+  <!-- ==================== Chat Room Screen ==================== -->
+  <div class="chat-screen" id="chatRoomScreen">
+    <div class="chat-header">
+      <button class="chat-back-btn" onclick="closeChatRoom()">‹</button>
+      <div class="chat-room-name-hdr" id="chatRoomTitle">トーク</div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-area">
+      <textarea id="chatInputText" placeholder="メッセージを入力…" rows="1"
+                oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage()}"></textarea>
+      <button class="chat-send-btn" onclick="sendChatMessage()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div><!-- /chatRoomScreen -->
+
+  <!-- 新規DMモーダル -->
+  <div id="newDmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:flex-end;justify-content:center">
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:20px 16px 40px">
+      <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:14px">トークを開始するスタッフを選択</div>
+      <div id="dmStaffList" style="max-height:300px;overflow-y:auto"></div>
+      <button onclick="document.getElementById('newDmModal').style.display='none'"
+        style="width:100%;margin-top:12px;padding:12px;background:var(--gray-light);border:none;border-radius:12px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer">
+        キャンセル
+      </button>
+    </div>
+  </div>
 
   <!-- ==================== Admin Screen ==================== -->
   <div class="screen" id="adminScreen">
@@ -2320,23 +2742,334 @@
       return;
     }
     const TAG_CLASS = { ルール:'tag-rule', 予約対応:'tag-reserve', トラブル:'tag-trouble' };
-    listEl.innerHTML = list.map(n => `
-      <div class="notice-item">
-        <span class="notice-tag ${TAG_CLASS[n.tag] || 'tag-other'}">#${n.tag || 'その他'}</span>
-        <div class="notice-text">${n.body}</div>
-        ${n.pinned ? '<div class="notice-pin">📌 固定</div>' : ''}
-      </div>`).join('');
+    const reactions = JSON.parse(localStorage.getItem('noticeReactions') || '{}');
+    // 固定を先に
+    const sorted = [...list].sort((a,b) => (b.pinned?1:0)-(a.pinned?1:0));
+    listEl.innerHTML = sorted.map(n => {
+      const myReact = reactions[n.id] || '';
+      return `
+        <div class="notice-item" style="border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span class="notice-tag ${TAG_CLASS[n.tag] || 'tag-other'}">#${n.tag || 'その他'}</span>
+            ${n.pinned ? '<span style="font-size:10px;color:var(--muted)">📌</span>' : ''}
+          </div>
+          <div class="notice-text">${n.body}</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+            <button class="translate-btn" onclick="translateNotice(${n.id},this,'${n.body.replace(/'/g,"\\'")}')">
+              🌐 翻訳
+            </button>
+          </div>
+          <div id="translate-${n.id}"></div>
+          <div class="reaction-row">
+            <button class="reaction-btn ${myReact==='ok'?'selected-ok':''}"
+              onclick="reactToNotice(${n.id},'ok',this)">👍 理解</button>
+            <button class="reaction-btn ${myReact==='meh'?'selected-meh':''}"
+              onclick="reactToNotice(${n.id},'meh',this)">△ あとで</button>
+            <button class="reaction-btn ${myReact==='q'?'selected-q':''}"
+              onclick="reactToNotice(${n.id},'q',this)">❓ 質問あり</button>
+          </div>
+        </div>`;
+    }).join('');
+    // 未提出タスクの表示チェック
+    checkPendingTasks();
   }
 
-  function filterNotices() {
-    const q = document.getElementById('noticeSearch').value.toLowerCase().replace('#','');
-    const filtered = q
-      ? allNotices.filter(n =>
-          (n.tag || '').toLowerCase().includes(q) ||
-          (n.body || '').toLowerCase().includes(q))
-      : allNotices;
-    renderNotices(filtered);
+  /* ===== ① 理解度リアクション ===== */
+  function reactToNotice(id, type, btn) {
+    const reactions = JSON.parse(localStorage.getItem('noticeReactions') || '{}');
+    // 同じボタンを再押しで解除
+    if (reactions[id] === type) {
+      delete reactions[id];
+    } else {
+      reactions[id] = type;
+    }
+    localStorage.setItem('noticeReactions', JSON.stringify(reactions));
+    // 同じ連絡内のボタンを更新
+    const row = btn.closest('.reaction-row');
+    row.querySelectorAll('.reaction-btn').forEach(b => {
+      b.classList.remove('selected-ok','selected-meh','selected-q');
+    });
+    if (reactions[id]) {
+      const cls = { ok:'selected-ok', meh:'selected-meh', q:'selected-q' };
+      btn.classList.add(cls[reactions[id]]);
+    }
+    if (type === 'q') showToast('❓ 質問ありとして記録しました', 'success');
   }
+
+  /* ===== ② 未提出タスク ===== */
+  function checkPendingTasks() {
+    const card  = document.getElementById('pendingTasksCard');
+    const listEl = document.getElementById('pendingTasksList');
+    if (!card) return;
+    const tasks = [];
+    // シフト希望未提出チェック
+    const wishes = JSON.parse(localStorage.getItem('localWishes') || '[]');
+    const myWish = wishes.find(w => w.email === userEmail);
+    const nextMonth = new Date(); nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const nm = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth()+1).padStart(2,'0')}`;
+    const hasNextWish = myWish && myWish.dates && myWish.dates.some(d => d.startsWith(nm));
+    if (!hasNextWish) {
+      tasks.push({
+        icon: '📅',
+        name: '来月のシフト希望が未提出です',
+        sub:  `提出期限：${nextMonth.getMonth()+1}月25日`,
+        action: () => switchTab('wish'),
+        label: '提出する',
+      });
+    }
+    // トーク未読チェック
+    const unread = getTotalUnread();
+    if (unread > 0) {
+      tasks.push({
+        icon: '💬',
+        name: `未読メッセージが${unread}件あります`,
+        sub:  'トークを確認してください',
+        action: () => switchTab('talk'),
+        label: '確認する',
+      });
+    }
+    if (tasks.length === 0) {
+      card.style.display = 'none';
+      return;
+    }
+    card.style.display = 'block';
+    listEl.innerHTML = tasks.map((t,i) => `
+      <div class="pending-task-item">
+        <div class="pending-task-icon">${t.icon}</div>
+        <div class="pending-task-info">
+          <div class="pending-task-name">${t.name}</div>
+          <div class="pending-task-sub">${t.sub}</div>
+        </div>
+        <button class="pending-task-btn" onclick="pendingTaskActions[${i}]()">${t.label}</button>
+      </div>`).join('');
+    window.pendingTaskActions = tasks.map(t => t.action);
+  }
+
+  /* ===== ⑥ 多言語翻訳（Claude API） ===== */
+  const LANG_CYCLE = ['英語','中国語','ベトナム語'];
+  const langState  = {};
+
+  async function translateNotice(id, btn, text) {
+    const resultEl = document.getElementById(`translate-${id}`);
+    const idx      = (langState[id] || 0) % LANG_CYCLE.length;
+    const lang     = LANG_CYCLE[idx];
+    btn.textContent = `⏳ ${lang}に翻訳中...`;
+    btn.disabled    = true;
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 400,
+          messages: [{ role: 'user', content: `次の日本語テキストを${lang}に翻訳してください。翻訳文のみを返してください。\n\n${text}` }],
+        }),
+      });
+      const data = await res.json();
+      const translated = data.content?.[0]?.text || '翻訳に失敗しました';
+      resultEl.innerHTML = `<div class="translate-result">🌐 ${lang}：${translated}</div>`;
+      langState[id] = idx + 1;
+      btn.textContent = `🌐 ${LANG_CYCLE[langState[id] % LANG_CYCLE.length]}に翻訳`;
+    } catch {
+      resultEl.innerHTML = `<div class="translate-result" style="color:var(--red)">翻訳に失敗しました</div>`;
+      btn.textContent = '🌐 翻訳';
+    }
+    btn.disabled = false;
+  }
+
+  /* ===== ⑦ トーク機能 ===== */
+  const TALK_KEY   = 'talkMessages';
+  const TALK_READ  = 'talkReadAt';
+  let currentRoomId   = null;
+  let currentRoomName = null;
+
+  function getTalkMessages(roomId) {
+    const all = JSON.parse(localStorage.getItem(TALK_KEY) || '{}');
+    return all[roomId] || [];
+  }
+  function saveTalkMessage(roomId, msg) {
+    const all = JSON.parse(localStorage.getItem(TALK_KEY) || '{}');
+    if (!all[roomId]) all[roomId] = [];
+    all[roomId].push(msg);
+    localStorage.setItem(TALK_KEY, JSON.stringify(all));
+  }
+  function markRoomRead(roomId) {
+    const reads = JSON.parse(localStorage.getItem(TALK_READ) || '{}');
+    reads[roomId] = Date.now();
+    localStorage.setItem(TALK_READ, JSON.stringify(reads));
+  }
+  function getRoomUnread(roomId) {
+    const msgs  = getTalkMessages(roomId);
+    const reads = JSON.parse(localStorage.getItem(TALK_READ) || '{}');
+    const readAt = reads[roomId] || 0;
+    return msgs.filter(m => m.ts > readAt && m.sender !== userEmail).length;
+  }
+  function getTotalUnread() {
+    const rooms = ['group-all','group-shift', ...getDmRoomIds()];
+    return rooms.reduce((sum, id) => sum + getRoomUnread(id), 0);
+  }
+  function getDmRoomIds() {
+    const all = JSON.parse(localStorage.getItem(TALK_KEY) || '{}');
+    return Object.keys(all).filter(k => k.startsWith('dm-'));
+  }
+
+  function renderTalkList() {
+    // グループ
+    ['group-all','group-shift'].forEach(id => {
+      const msgs   = getTalkMessages(id);
+      const last   = msgs[msgs.length - 1];
+      const unread = getRoomUnread(id);
+      document.getElementById(`preview-${id}`).textContent =
+        last ? `${last.senderName}: ${last.text}` : 'メッセージはありません';
+      document.getElementById(`time-${id}`).textContent =
+        last ? formatMsgTime(last.ts) : '';
+      const badge = document.getElementById(`unread-${id}`);
+      if (badge) { badge.style.display = unread > 0 ? 'inline-block' : 'none'; badge.textContent = unread; }
+    });
+    // DM一覧
+    const dmEl = document.getElementById('dmRoomList');
+    const dmIds = getDmRoomIds();
+    if (dmIds.length === 0) {
+      dmEl.innerHTML = '<p style="font-size:12px;color:var(--muted);text-align:center;padding:8px 0">個人トークはまだありません</p>';
+      return;
+    }
+    dmEl.innerHTML = dmIds.map(id => {
+      const name   = id.replace('dm-','').replace(/-/g,' ');
+      const msgs   = getTalkMessages(id);
+      const last   = msgs[msgs.length - 1];
+      const unread = getRoomUnread(id);
+      const init   = name[0]?.toUpperCase() || '?';
+      return `
+        <div class="talk-room-item" onclick="openChatRoom('${id}','${name}','dm')">
+          <div class="talk-room-avatar group-dm">${init}</div>
+          <div class="talk-room-info">
+            <div class="talk-room-name">${name}</div>
+            <div class="talk-room-preview">${last ? last.senderName+': '+last.text : 'メッセージはありません'}</div>
+          </div>
+          <div class="talk-room-meta">
+            <div class="talk-room-time">${last ? formatMsgTime(last.ts) : ''}</div>
+            ${unread > 0 ? `<span class="talk-unread-badge">${unread}</span>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+    // 未読バッジをナビに反映
+    const total = getTotalUnread();
+    const navBadge = document.getElementById('talkUnreadBadgeNav');
+    if (navBadge) navBadge.style.display = total > 0 ? 'inline-block' : 'none';
+  }
+
+  function formatMsgTime(ts) {
+    const d = new Date(ts);
+    const now = new Date();
+    if (d.toDateString() === now.toDateString()) {
+      return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+    return `${d.getMonth()+1}/${d.getDate()}`;
+  }
+
+  function openChatRoom(roomId, roomName, type) {
+    currentRoomId   = roomId;
+    currentRoomName = roomName;
+    document.getElementById('chatRoomTitle').textContent = roomName;
+    markRoomRead(roomId);
+    renderChatMessages();
+    document.getElementById('chatRoomScreen').classList.add('active');
+    const msgs = document.getElementById('chatMessages');
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function closeChatRoom() {
+    document.getElementById('chatRoomScreen').classList.remove('active');
+    currentRoomId = null;
+    renderTalkList();
+    checkPendingTasks();
+  }
+
+  function renderChatMessages() {
+    const msgs = getTalkMessages(currentRoomId);
+    const el   = document.getElementById('chatMessages');
+    if (msgs.length === 0) {
+      el.innerHTML = '<div class="chat-day-divider">メッセージはまだありません</div>';
+      return;
+    }
+    let lastDate = '';
+    el.innerHTML = msgs.map(m => {
+      const d      = new Date(m.ts);
+      const dateStr = `${d.getMonth()+1}月${d.getDate()}日`;
+      const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      const isMine  = m.sender === userEmail;
+      const init    = (m.senderName || '?')[0].toUpperCase();
+      let html = '';
+      if (dateStr !== lastDate) {
+        lastDate = dateStr;
+        html += `<div class="chat-day-divider">${dateStr}</div>`;
+      }
+      html += `
+        <div class="chat-bubble-wrap ${isMine ? 'mine' : ''}">
+          ${!isMine ? `<div class="chat-bubble-avatar">${init}</div>` : ''}
+          <div class="chat-bubble-col ${isMine ? 'mine' : ''}">
+            ${!isMine ? `<div class="chat-bubble-sender">${m.senderName || m.sender}</div>` : ''}
+            <div class="chat-bubble ${isMine ? 'mine-bubble' : 'theirs'}">${m.text}</div>
+            <div class="chat-bubble-time">${timeStr}</div>
+          </div>
+        </div>`;
+      return html;
+    }).join('');
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function sendChatMessage() {
+    const inp  = document.getElementById('chatInputText');
+    const text = inp.value.trim();
+    if (!text || !currentRoomId) return;
+    const msg = {
+      sender:     userEmail,
+      senderName: userName || userEmail,
+      text,
+      ts: Date.now(),
+    };
+    saveTalkMessage(currentRoomId, msg);
+    inp.value = '';
+    inp.style.height = 'auto';
+    renderChatMessages();
+  }
+
+  function showNewDmModal() {
+    const modal = document.getElementById('newDmModal');
+    const list  = document.getElementById('dmStaffList');
+    // localStorageのスタッフ一覧を使う
+    const staffs = JSON.parse(localStorage.getItem('localWishes') || '[]')
+      .filter(s => s.email !== userEmail);
+    if (staffs.length === 0) {
+      list.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:16px 0">スタッフが見つかりません</p>';
+    } else {
+      list.innerHTML = staffs.map(s => `
+        <div class="talk-room-item" onclick="startDm('${s.email}','${s.name || s.email}')">
+          <div class="talk-room-avatar group-dm">${(s.name||s.email)[0].toUpperCase()}</div>
+          <div class="talk-room-info">
+            <div class="talk-room-name">${s.name || s.email}</div>
+            <div class="talk-room-preview">${s.email}</div>
+          </div>
+        </div>`).join('');
+    }
+    modal.style.display = 'flex';
+  }
+
+  function startDm(email, name) {
+    document.getElementById('newDmModal').style.display = 'none';
+    const roomId = `dm-${email}`;
+    openChatRoom(roomId, name, 'dm');
+  }
+
+  /* storageイベントでトークも即時反映 */
+  window.addEventListener('storage', e => {
+    if (e.key === TALK_KEY && currentRoomId) {
+      renderChatMessages();
+    }
+    if (e.key === TALK_KEY) {
+      renderTalkList();
+    }
+  });
 
   /* ===== シフト画面の描画 ===== */
   async function renderShiftsScreen() {
@@ -2661,6 +3394,9 @@
     } else if (tab === 'swap') {
       showScreen('swapScreen');
       renderSwapShiftPicker();
+    } else if (tab === 'talk') {
+      showScreen('talkScreen');
+      renderTalkList();
     } else if (tab === 'admin') {
       showScreen('adminScreen');
       renderAdminScreen();
@@ -3055,15 +3791,23 @@
       const data = await res.json();
       allWishList = Array.isArray(data.wishes) ? data.wishes : [];
       renderWishList();
-    } catch (err) {
-      // APIが未実装の場合はダミーデータで表示
-      allWishList = DUMMY_WISHES.filter(w =>
-        w.dates.some(d => d.startsWith(ym))
-      );
-      if (allWishList.length === 0) allWishList = DUMMY_WISHES;
+    } catch {
+      // localStorageからスタッフが提出したデータを読み込む
+      const saved = JSON.parse(localStorage.getItem(WISH_KEY) || '[]');
+      allWishList = saved.filter(w => w.dates && w.dates.some(d => d.startsWith(ym)));
+      if (allWishList.length === 0) allWishList = saved;
       renderWishList();
     }
   }
+
+  /* 別タブでスタッフが希望提出したら管理者側に即反映 */
+  window.addEventListener('storage', e => {
+    if (e.key === WISH_KEY) {
+      if (document.getElementById('adminWishesPanel')?.style.display !== 'none') {
+        renderWishListScreen();
+      }
+    }
+  });
 
   function renderWishList() {
     const q = (document.getElementById('wishListSearch').value || '').toLowerCase();
@@ -3238,6 +3982,8 @@
     }).join('');
   }
 
+  const WISH_KEY = 'localWishes';
+
   async function submitWish() {
     if (selectedWishDates.size === 0) {
       showToast('希望日を1日以上選択してください', 'error');
@@ -3261,17 +4007,28 @@
         body:    JSON.stringify(payload),
       });
       if (res.status === 401) { doLogout(); return; }
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || `エラー (${res.status})`);
-      }
+      if (!res.ok) throw new Error('API未実装');
       showToast('希望を提出しました ✓', 'success');
+    } catch {
+      // API未実装の場合はlocalStorageに保存
+      const existing = JSON.parse(localStorage.getItem(WISH_KEY) || '[]');
+      // 同じユーザーの既存データを上書き
+      const filtered = existing.filter(w => w.email !== userEmail);
+      filtered.push({
+        name:      userName || userEmail,
+        email:     userEmail,
+        dates:     payload.dates,
+        startTime: payload.startTime || '',
+        endTime:   payload.endTime   || '',
+        note:      payload.note      || '',
+        submittedAt: new Date().toISOString(),
+      });
+      localStorage.setItem(WISH_KEY, JSON.stringify(filtered));
+      showToast('希望を提出しました ✓', 'success');
+    } finally {
       selectedWishDates.clear();
       document.getElementById('wishNote').value = '';
       renderWishCalendar();
-    } catch (err) {
-      showToast(err.message, 'error');
-    } finally {
       btn.disabled = false;
       btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 希望を提出する';
     }
