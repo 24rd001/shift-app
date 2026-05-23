@@ -3406,22 +3406,25 @@
 
   /* ===== 管理者ホーム内タブ切り替え ===== */
   function adminSwitchTab(tab, btn) {
-    const shiftListWrap = document.getElementById('adminShiftList').parentElement;
-    shiftListWrap.style.display                                = 'none';
-    document.getElementById('adminWishesPanel').style.display  = 'none';
-    document.getElementById('adminCreatePanel').style.display  = 'none';
-    document.getElementById('adminStaffPanel').style.display   = 'none';
+    // 各要素を取得
+    const statsRow = document.getElementById('adminStatsRow');
+    const filterBar = document.querySelector('.admin-filter-bar');
+    const searchInput = document.getElementById('adminSearch').parentElement;
+    
+    document.getElementById('adminShiftList').style.display = 'none';
+    document.getElementById('adminWishesPanel').style.display = 'none';
+    document.getElementById('adminCreatePanel').style.display = 'none';
+    document.getElementById('adminStaffPanel').style.display = 'none';
+    
     document.querySelectorAll('#adminScreen .nav-item').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     
     if (tab === 'adminShifts') {
-      // シフト一覧の場合は統計・フィルタ・検索も表示
       statsRow.style.display = 'grid';
       filterBar.style.display = 'flex';
       searchInput.style.display = 'block';
       document.getElementById('adminShiftList').style.display = 'block';
     } else if (tab === 'adminWishes') {
-      // 希望一覧の場合は統計・フィルタ・検索を非表示
       statsRow.style.display = 'none';
       filterBar.style.display = 'none';
       searchInput.style.display = 'none';
@@ -3435,10 +3438,13 @@
       renderAdminCal();
       loadAdminAllShifts();
     } else if (tab === 'adminStaff') {
+      statsRow.style.display = 'none';
+      filterBar.style.display = 'none';
+      searchInput.style.display = 'none';
       document.getElementById('adminStaffPanel').style.display = 'block';
       loadStaffList();
     }
-  }
+}
 
   /* ===== シフト一覧タブ: カレンダー ===== */
   let adminCalYear  = new Date().getFullYear();
