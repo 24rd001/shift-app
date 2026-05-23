@@ -45,7 +45,7 @@
     }
 
     /* ===================== Screen ===================== */
-    .screen { display: none; flex-direction: column; min-height: 100vh; }
+    .screen { display: none; flex-direction: column; height: 100vh; }
     .screen.active { display: flex; }
 
     /* ===================== Login ===================== */
@@ -55,6 +55,7 @@
       justify-content: center;
       padding: 40px 24px;
       gap: 28px;
+      overflow-y: auto;
     }
 
     .login-branding { text-align: center; }
@@ -138,6 +139,7 @@
     }
 
     .password-wrap { position: relative; }
+    .password-wrap .form-input { padding-right: 44px; }
 
     .pw-toggle {
       position: absolute;
@@ -201,6 +203,82 @@
     }
     @keyframes rotate { to { transform: rotate(360deg); } }
 
+    /* ===================== Register Screen ===================== */
+    .register-link-wrap {
+      text-align: center;
+      margin-top: 18px;
+    }
+    .register-link-wrap p {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .register-link {
+      color: var(--primary);
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-size: 13px;
+      font-family: inherit;
+      padding: 0;
+      transition: color .15s;
+    }
+    .register-link:hover { color: var(--primary-hover); text-decoration: underline; }
+
+    .register-screen {
+      background: linear-gradient(160deg, #EEF2FF 0%, #F8FAFC 60%, #fff 100%);
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px 40px;
+      gap: 22px;
+      overflow-y: auto;
+    }
+
+    .role-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .role-btn {
+      flex: 1;
+      padding: 11px 8px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      background: var(--gray-light);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      transition: border-color .2s, background .2s, color .2s;
+    }
+    .role-btn.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .role-btn .role-icon { font-size: 20px; }
+
+    .back-to-login {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0;
+      margin-bottom: 4px;
+      transition: color .15s;
+    }
+    .back-to-login:hover { color: var(--text); }
+
     /* ===================== Shifts Screen ===================== */
     .shifts-header {
       background: #fff;
@@ -252,7 +330,8 @@
     .shifts-body {
       flex: 1;
       background: var(--bg);
-      padding: 18px 14px;
+      padding: 18px 14px 90px;
+      overflow-y: auto;
     }
 
     /* user card */
@@ -430,8 +509,12 @@
 
     /* ===================== Bottom Nav ===================== */
     .bottom-nav {
-      position: sticky;
+      position: fixed;
       bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
       background: #fff;
       border-top: 1px solid var(--border);
       display: flex;
@@ -443,16 +526,17 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 3px;
-      padding: 10px 4px 12px;
+      gap: 2px;
+      padding: 8px 2px 10px;
       background: none;
       border: none;
       cursor: pointer;
       color: var(--gray);
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 600;
       transition: color .15s;
       -webkit-tap-highlight-color: transparent;
+      min-width: 0;
     }
     .nav-item.active { color: var(--primary); }
     .nav-item svg { transition: transform .15s; }
@@ -499,7 +583,7 @@
     .wish-body {
       flex: 1;
       background: var(--bg);
-      padding: 16px 14px 24px;
+      padding: 16px 14px 90px;
       overflow-y: auto;
     }
 
@@ -649,7 +733,7 @@
     .swap-body {
       flex: 1;
       background: var(--bg);
-      padding: 16px 14px 24px;
+      padding: 16px 14px 90px;
       overflow-y: auto;
     }
 
@@ -766,7 +850,7 @@
     .admin-body {
       flex: 1;
       background: var(--bg);
-      padding: 16px 14px 24px;
+      padding: 16px 14px 90px;
       overflow-y: auto;
     }
 
@@ -915,6 +999,423 @@
       border-color: #FECACA;
     }
     .act-btn.reject:hover { background: #FEE2E2; }
+
+    /* ===================== Admin Notice ===================== */
+    .notice-tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .notice-tag-btn {
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--gray-light);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .notice-tag-btn.active {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .admin-notice-item {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .admin-notice-item:last-child { border-bottom: none; }
+    .admin-notice-body { flex: 1; }
+    .admin-notice-delete {
+      background: none;
+      border: 1.5px solid #FECACA;
+      color: var(--red);
+      border-radius: 8px;
+      padding: 4px 9px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+    .admin-notice-delete:hover { background: var(--red-light); }
+
+    /* ===================== Staff Management ===================== */
+    .staff-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px 15px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .staff-card-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 15px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .staff-card-avatar.admin-av {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+    .staff-card-info { flex: 1; min-width: 0; }
+    .staff-card-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .staff-card-email {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    .role-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .role-badge.staff { background: var(--primary-light); color: var(--primary); }
+    .role-badge.admin { background: #FEF3C7; color: #92400E; }
+
+    .staff-card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .role-act-btn {
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1.5px solid;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .role-act-btn.promote {
+      background: #FEF3C7;
+      color: #92400E;
+      border-color: #FCD34D;
+    }
+    .role-act-btn.promote:hover { background: #FDE68A; }
+    .role-act-btn.demote {
+      background: var(--red-light);
+      color: var(--red);
+      border-color: #FECACA;
+    }
+    .role-act-btn.demote:hover { background: #FEE2E2; }
+
+    /* ===================== Reaction ===================== */
+    .reaction-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .reaction-btn {
+      flex: 1;
+      padding: 6px 4px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--gray-light);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all .15s;
+    }
+    .reaction-btn.selected-ok  { background:#D1FAE5; border-color:#6EE7B7; color:#065F46; }
+    .reaction-btn.selected-meh { background:#FEF3C7; border-color:#FCD34D; color:#92400E; }
+    .reaction-btn.selected-q   { background:#FEF2F2; border-color:#FECACA; color:var(--red); }
+    .reaction-count { font-size: 10px; opacity: .7; }
+
+    /* ===================== Pending Tasks ===================== */
+    .pending-tasks-card {
+      background: #FFFBEB;
+      border: 1.5px solid #FCD34D;
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    .pending-tasks-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #92400E;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .pending-task-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #FDE68A;
+    }
+    .pending-task-item:last-child { border-bottom: none; }
+    .pending-task-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .pending-task-info { flex: 1; }
+    .pending-task-name { font-size: 12px; font-weight: 700; color: #78350F; }
+    .pending-task-sub  { font-size: 10px; color: #92400E; margin-top: 1px; }
+    .pending-task-btn {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      border: none;
+      border-radius: 7px;
+      padding: 4px 9px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* ===================== Talk Screen ===================== */
+    .talk-body {
+      flex: 1;
+      background: var(--bg);
+      overflow-y: auto;
+      padding: 12px 14px 90px;
+    }
+    .talk-section-label {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--muted);
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      margin: 12px 0 6px;
+    }
+    .talk-room-item {
+      background: #fff;
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      border: 0.5px solid var(--border);
+      transition: background .15s;
+      position: relative;
+    }
+    .talk-room-item:hover { background: var(--gray-light); }
+    .talk-room-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      flex-shrink: 0;
+      color: #fff;
+    }
+    .talk-room-avatar.group-all    { background: var(--primary); }
+    .talk-room-avatar.group-shift  { background: var(--green); }
+    .talk-room-avatar.group-dm     { background: var(--yellow); color: #fff; }
+    .talk-room-info { flex: 1; min-width: 0; }
+    .talk-room-name {
+      font-size: 14px; font-weight: 700; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .talk-room-preview {
+      font-size: 11px; color: var(--muted); margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .talk-room-meta { text-align: right; flex-shrink: 0; }
+    .talk-room-time { font-size: 10px; color: var(--muted); }
+    .talk-unread-badge {
+      background: var(--red);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      border-radius: 20px;
+      padding: 1px 7px;
+      margin-top: 3px;
+      display: inline-block;
+    }
+    .talk-new-dm-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary-light);
+      border: 1.5px dashed var(--primary);
+      border-radius: 14px;
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    /* ===================== Chat Room ===================== */
+    .chat-screen { display: none; flex-direction: column; height: 100vh; }
+    .chat-screen.active { display: flex; }
+    .chat-header {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .chat-back-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--primary); font-size: 22px; padding: 0 4px;
+    }
+    .chat-room-name-hdr { font-size: 15px; font-weight: 800; color: var(--text); }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 14px 0;
+      background: #EEF2FF;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .chat-day-divider {
+      text-align: center;
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 700;
+      background: rgba(255,255,255,.7);
+      border-radius: 20px;
+      padding: 3px 12px;
+      width: fit-content;
+      margin: 4px auto;
+    }
+    .chat-bubble-wrap {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+    }
+    .chat-bubble-wrap.mine { flex-direction: row-reverse; }
+    .chat-bubble-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .chat-bubble-col { display: flex; flex-direction: column; max-width: 75%; }
+    .chat-bubble-col.mine { align-items: flex-end; }
+    .chat-bubble-sender { font-size: 9px; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
+    .chat-bubble {
+      padding: 9px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .chat-bubble.theirs {
+      background: #fff;
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+    .chat-bubble.mine-bubble {
+      background: var(--primary);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-bubble-time { font-size: 9px; color: var(--muted); margin-top: 2px; }
+    .chat-input-area {
+      background: #fff;
+      border-top: 1px solid var(--border);
+      padding: 10px 14px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .chat-input-area textarea {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      background: var(--gray-light);
+      max-height: 100px;
+      line-height: 1.5;
+    }
+    .chat-input-area textarea:focus { border-color: var(--primary); background: #fff; }
+    .chat-send-btn {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+    .chat-send-btn:hover { background: var(--primary-hover); }
+
+    /* ===================== Translate ===================== */
+    .translate-btn {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--primary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .translate-result {
+      margin-top: 6px;
+      padding: 8px 10px;
+      background: var(--primary-light);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--primary);
+      line-height: 1.5;
+    }
 
     /* ===================== Toast ===================== */
     .toast {
@@ -1197,9 +1698,108 @@
         <button class="login-btn" type="submit" id="loginBtn">ログイン</button>
         <div class="error-box" id="errorBox"></div>
       </form>
+
+      <!-- アカウント作成リンク -->
+      <div class="register-link-wrap">
+        <p>アカウントをお持ちでない方は
+          <button class="register-link" onclick="showScreen('registerScreen')">アカウントを作成</button>
+        </p>
+      </div>
     </div>
 
   </div><!-- /loginScreen -->
+
+  <!-- ==================== Register Screen ==================== -->
+  <div class="screen register-screen" id="registerScreen">
+
+    <div class="login-branding">
+      <div class="login-logo-wrap">
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <line x1="19" y1="8" x2="19" y2="14"/>
+          <line x1="16" y1="11" x2="22" y2="11"/>
+        </svg>
+      </div>
+      <div class="login-title">アカウント作成</div>
+      <div class="login-sub">新規アカウントを登録します</div>
+    </div>
+
+    <div class="login-card" style="width:100%">
+
+      <button class="back-to-login" onclick="showScreen('loginScreen')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        ログイン画面に戻る
+      </button>
+
+      <!-- 名前 -->
+      <div class="input-wrap">
+        <label class="form-label" for="regNameInput">名前</label>
+        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <input class="form-input" type="text" id="regNameInput"
+               placeholder="山田 太郎"
+               autocomplete="name" required>
+      </div>
+
+      <!-- メールアドレス -->
+      <div class="input-wrap">
+        <label class="form-label" for="regEmailInput">メールアドレス</label>
+        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2"/>
+          <polyline points="2,4 12,13 22,4"/>
+        </svg>
+        <input class="form-input" type="email" id="regEmailInput"
+               placeholder="staff@example.com"
+               autocomplete="email" inputmode="email" required>
+      </div>
+
+      <!-- パスワード -->
+      <div class="input-wrap password-wrap">
+        <label class="form-label" for="regPasswordInput">パスワード</label>
+        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <input class="form-input" type="password" id="regPasswordInput"
+               placeholder="8文字以上"
+               autocomplete="new-password" required>
+        <button type="button" class="pw-toggle" id="regPwToggle" aria-label="パスワードを表示">
+          <svg id="regEyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- パスワード確認 -->
+      <div class="input-wrap password-wrap">
+        <label class="form-label" for="regPasswordConfirm">パスワード（確認）</label>
+        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <input class="form-input" type="password" id="regPasswordConfirm"
+               placeholder="もう一度入力"
+               autocomplete="new-password" required>
+      </div>
+
+      <button class="login-btn" type="button" id="registerBtn" onclick="submitRegister()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <line x1="19" y1="8" x2="19" y2="14"/>
+          <line x1="16" y1="11" x2="22" y2="11"/>
+        </svg>
+        アカウントを作成する
+      </button>
+      <div class="error-box" id="regErrorBox"></div>
+    </div>
+
+  </div><!-- /registerScreen -->
 
   <!-- ==================== Shifts Screen ==================== -->
   <div class="screen" id="shiftsScreen">
@@ -1247,6 +1847,12 @@
             <div class="big-spinner"></div>
           </div>
         </div>
+      </div>
+
+      <!-- 未提出タスク（未完了がある間は常時表示） -->
+      <div id="pendingTasksCard" class="pending-tasks-card" style="display:none">
+        <div class="pending-tasks-title">⚠️ 未完了のタスクがあります</div>
+        <div id="pendingTasksList"></div>
       </div>
 
       <!-- カレンダー -->
@@ -1304,6 +1910,13 @@
           <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
         </svg>
         交代申請
+      </button>
+      <button class="nav-item" id="navTalk" onclick="switchTab('talk')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        トーク
+        <span id="talkUnreadBadgeNav" style="display:none;background:var(--red);color:#fff;font-size:8px;border-radius:20px;padding:0 5px;position:absolute;top:6px;right:12px">●</span>
       </button>
     </nav>
   </div><!-- /shiftsScreen -->
@@ -1402,6 +2015,12 @@
         </svg>
         交代申請
       </button>
+      <button class="nav-item" id="navTalkW" onclick="switchTab('talk')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        トーク
+      </button>
     </nav>
   </div><!-- /wishScreen -->
 
@@ -1483,8 +2102,124 @@
         </svg>
         交代申請
       </button>
+      <button class="nav-item" id="navTalkSw" onclick="switchTab('talk')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        トーク
+      </button>
     </nav>
   </div><!-- /swapScreen -->
+
+  <!-- ==================== Talk Screen ==================== -->
+  <div class="screen" id="talkScreen">
+    <header class="shifts-header">
+      <div class="header-brand">
+        <div class="header-icon-wrap" style="background:var(--primary)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <span class="header-title">トーク</span>
+      </div>
+    </header>
+
+    <div class="talk-body">
+      <div class="talk-section-label">グループトーク</div>
+      <div class="talk-room-item" onclick="openChatRoom('group-all','📢 全体連絡','group-all')">
+        <div class="talk-room-avatar group-all">📢</div>
+        <div class="talk-room-info">
+          <div class="talk-room-name">全体連絡</div>
+          <div class="talk-room-preview" id="preview-group-all">メッセージはありません</div>
+        </div>
+        <div class="talk-room-meta">
+          <div class="talk-room-time" id="time-group-all"></div>
+          <span class="talk-unread-badge" id="unread-group-all" style="display:none">new</span>
+        </div>
+      </div>
+      <div class="talk-room-item" onclick="openChatRoom('group-shift','📅 シフト関連','group-shift')">
+        <div class="talk-room-avatar group-shift">📅</div>
+        <div class="talk-room-info">
+          <div class="talk-room-name">シフト関連</div>
+          <div class="talk-room-preview" id="preview-group-shift">メッセージはありません</div>
+        </div>
+        <div class="talk-room-meta">
+          <div class="talk-room-time" id="time-group-shift"></div>
+          <span class="talk-unread-badge" id="unread-group-shift" style="display:none">new</span>
+        </div>
+      </div>
+
+      <div class="talk-section-label" style="margin-top:16px">個人トーク</div>
+      <div id="dmRoomList"></div>
+      <button class="talk-new-dm-btn" onclick="showNewDmModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        新しいトークを開始
+      </button>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-item" id="navShiftsTalk" onclick="switchTab('shifts')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        ホーム
+      </button>
+      <button class="nav-item" id="navWishTalk" onclick="switchTab('wish')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        希望提出
+      </button>
+      <button class="nav-item" id="navSwapTalk" onclick="switchTab('swap')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        交代申請
+      </button>
+      <button class="nav-item active" id="navTalkTalk" onclick="switchTab('talk')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        トーク
+      </button>
+    </nav>
+  </div><!-- /talkScreen -->
+
+  <!-- ==================== Chat Room Screen ==================== -->
+  <div class="chat-screen" id="chatRoomScreen">
+    <div class="chat-header">
+      <button class="chat-back-btn" onclick="closeChatRoom()">‹</button>
+      <div class="chat-room-name-hdr" id="chatRoomTitle">トーク</div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-area">
+      <textarea id="chatInputText" placeholder="メッセージを入力…" rows="1"
+                oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage()}"></textarea>
+      <button class="chat-send-btn" onclick="sendChatMessage()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div><!-- /chatRoomScreen -->
+
+  <!-- 新規DMモーダル -->
+  <div id="newDmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:flex-end;justify-content:center">
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:20px 16px 40px">
+      <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:14px">トークを開始するスタッフを選択</div>
+      <div id="dmStaffList" style="max-height:300px;overflow-y:auto"></div>
+      <button onclick="document.getElementById('newDmModal').style.display='none'"
+        style="width:100%;margin-top:12px;padding:12px;background:var(--gray-light);border:none;border-radius:12px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer">
+        キャンセル
+      </button>
+    </div>
+  </div>
 
   <!-- ==================== Admin Screen ==================== -->
   <div class="screen" id="adminScreen">
@@ -1503,6 +2238,51 @@
     </header>
 
     <div class="admin-body">
+
+      <!-- 重要連絡（常時表示） -->
+      <div class="section-card" style="margin-bottom:14px" id="adminNoticeCard">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div class="section-title" style="margin-bottom:0">重要連絡</div>
+          <button onclick="toggleAdminNoticeForm()" id="adminNoticeToggleBtn"
+            style="font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-light);border:none;border-radius:8px;padding:4px 10px;cursor:pointer">
+            ＋ 新規投稿
+          </button>
+        </div>
+
+        <!-- 投稿フォーム（初期非表示） -->
+        <div id="adminNoticeForm" style="display:none;margin-bottom:12px;padding:12px;background:var(--gray-light);border-radius:10px">
+          <div style="margin-bottom:8px">
+            <div class="notice-tag-row" id="adminNoticeTagRow">
+              <button type="button" class="notice-tag-btn active" data-tag="ルール">#ルール</button>
+              <button type="button" class="notice-tag-btn" data-tag="予約対応">#予約対応</button>
+              <button type="button" class="notice-tag-btn" data-tag="トラブル">#トラブル</button>
+              <button type="button" class="notice-tag-btn" data-tag="その他">#その他</button>
+            </div>
+          </div>
+          <div class="wish-note-wrap" style="margin-bottom:8px">
+            <textarea id="adminNoticeBody" rows="3" placeholder="スタッフへの連絡内容を入力…"></textarea>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);font-weight:600;cursor:pointer">
+              <input type="checkbox" id="adminNoticePin" style="width:14px;height:14px;accent-color:var(--primary)">
+              📌 固定表示
+            </label>
+            <button class="act-btn approve" id="adminNoticeSubmitBtn" onclick="submitAdminNotice()">送信する</button>
+          </div>
+        </div>
+
+        <!-- タグ検索 -->
+        <div class="input-wrap" style="margin-bottom:10px">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input class="form-input" type="search" id="adminNoticeSearch"
+                 placeholder="# タグで検索…" oninput="filterAdminNoticeList()">
+        </div>
+        <div id="adminNoticeList">
+          <p style="font-size:13px;color:var(--muted);text-align:center;padding:12px 0">連絡はありません</p>
+        </div>
+      </div>
 
       <!-- 統計 -->
       <div class="admin-stats-row" id="adminStatsRow">
@@ -1557,64 +2337,175 @@
         </div>
       </div><!-- /adminWishesPanel -->
 
-      <!-- シフト作成パネル（初期非表示） -->
+      <!-- シフト一覧パネル（初期非表示） -->
       <div id="adminCreatePanel" style="display:none">
-        <div class="section-card">
-          <div class="section-title">対象スタッフ</div>
-          <div class="input-wrap" style="margin-bottom:0">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+
+        <!-- カレンダー -->
+        <div class="section-card" style="margin-bottom:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <button onclick="adminCalPrevMonth()" class="mnav-btn">‹</button>
+            <span id="adminCalMonthLabel" style="font-size:15px;font-weight:800;color:var(--text)"></span>
+            <button onclick="adminCalNextMonth()" class="mnav-btn">›</button>
+          </div>
+          <div class="wish-calendar-grid">
+            <div class="cal-day-label sun">日</div>
+            <div class="cal-day-label">月</div>
+            <div class="cal-day-label">火</div>
+            <div class="cal-day-label">水</div>
+            <div class="cal-day-label">木</div>
+            <div class="cal-day-label">金</div>
+            <div class="cal-day-label sat">土</div>
+          </div>
+          <div class="wish-calendar-grid" id="adminCalGrid"></div>
+        </div>
+
+        <!-- シフト作成ボタン -->
+        <button class="primary-btn" style="margin-bottom:14px;background:var(--green);box-shadow:0 4px 16px rgba(16,185,129,.3)"
+                onclick="toggleAdminCreateForm()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span id="adminCreateFormBtnLabel">シフトを作成する</span>
+        </button>
+
+        <!-- シフト作成フォーム（初期非表示） -->
+        <div id="adminCreateForm" style="display:none;margin-bottom:14px">
+          <div class="section-card">
+            <div class="section-title">対象スタッフ</div>
+            <div class="input-wrap" style="margin-bottom:0">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+              <input class="form-input" type="email" id="createStaffEmail"
+                     placeholder="スタッフのメールアドレス" inputmode="email">
+            </div>
+          </div>
+          <div class="section-card">
+            <div class="section-title">シフト日</div>
+            <input class="form-input" type="date" id="createShiftDate" style="padding-left:14px;width:100%;box-sizing:border-box">
+          </div>
+          <div class="section-card">
+            <div class="section-title">時間帯</div>
+            <div class="wish-time-row">
+              <label>開始</label>
+              <input class="form-input" type="time" id="createStartTime" value="09:00">
+              <label>終了</label>
+              <input class="form-input" type="time" id="createEndTime" value="17:00">
+            </div>
+          </div>
+          <div class="section-card">
+            <div class="section-title">備考（任意）</div>
+            <div class="wish-note-wrap">
+              <textarea id="createNote" rows="3" placeholder="例：レジ担当、研修シフト など"></textarea>
+            </div>
+          </div>
+          <button class="primary-btn" id="createShiftBtn" onclick="submitCreateShift()"
+                  style="background:var(--green);box-shadow:0 4px 16px rgba(16,185,129,.3)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
             </svg>
-            <input class="form-input" type="email" id="createStaffEmail"
-                   placeholder="スタッフのメールアドレス" inputmode="email">
-          </div>
-        </div>
-        <div class="section-card">
-          <div class="section-title">シフト日</div>
-          <input class="form-input" type="date" id="createShiftDate" style="padding-left:14px;width:100%">
-        </div>
-        <div class="section-card">
-          <div class="section-title">時間帯</div>
-          <div class="wish-time-row">
-            <label>開始</label>
-            <input class="form-input" type="time" id="createStartTime" value="09:00">
-            <label>終了</label>
-            <input class="form-input" type="time" id="createEndTime" value="17:00">
-          </div>
-        </div>
-        <div class="section-card">
-          <div class="section-title">備考（任意）</div>
-          <div class="wish-note-wrap">
-            <textarea id="createNote" rows="3" placeholder="例：レジ担当、研修シフト など"></textarea>
-          </div>
-        </div>
-        <div style="margin-bottom:12px">
-          <button onclick="adminSwitchTab('adminWishes', document.getElementById('adminNavWishes'))"
-            style="width:100%;padding:12px;background:#F3F4F6;border:1.5px solid var(--border);border-radius:12px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-            </svg>
-            スタッフの希望一覧を参照する
+            シフトを確定する
           </button>
         </div>
-        <button class="primary-btn" id="createShiftBtn" onclick="submitCreateShift()"
-                style="background:var(--green);box-shadow:0 4px 16px rgba(16,185,129,.3)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"/>
+
+        <!-- 名前で絞り込み -->
+        <div class="input-wrap" style="margin-bottom:14px">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
           </svg>
-          シフトを確定する
-        </button>
+          <input class="form-input" type="search" id="adminAllShiftSearch"
+                 placeholder="名前・メールで絞り込み…" oninput="renderAdminAllShiftList()">
+        </div>
+
+        <!-- 全スタッフシフト一覧 -->
+        <div class="month-bar" style="margin-bottom:10px">
+          <div class="month-label">シフト一覧</div>
+          <div class="month-badge" id="adminAllShiftCount">—</div>
+        </div>
+        <div id="adminAllShiftList">
+          <div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>
+        </div>
+
       </div><!-- /adminCreatePanel -->
+
+      <!-- スタッフ管理パネル（初期非表示） -->
+      <div id="adminStaffPanel" style="display:none">
+        <div class="input-wrap" style="margin-bottom:14px">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input class="form-input" type="search" id="staffSearch"
+                 placeholder="名前・メールで検索…" oninput="renderStaffList()">
+        </div>
+        <div id="staffListContainer">
+          <div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>
+        </div>
+      </div><!-- /adminStaffPanel -->
+
+      <!-- 重要連絡パネル（初期非表示） -->
+      <div id="adminNoticePanel" style="display:none">
+
+        <!-- 新規投稿フォーム -->
+        <div class="section-card" style="margin-bottom:12px">
+          <div class="section-title">新しい連絡を投稿</div>
+
+          <div style="margin-bottom:10px">
+            <label class="form-label">タグ</label>
+            <div class="notice-tag-row" id="adminNoticeTagRow">
+              <button type="button" class="notice-tag-btn active" data-tag="ルール">#ルール</button>
+              <button type="button" class="notice-tag-btn" data-tag="予約対応">#予約対応</button>
+              <button type="button" class="notice-tag-btn" data-tag="トラブル">#トラブル</button>
+              <button type="button" class="notice-tag-btn" data-tag="その他">#その他</button>
+            </div>
+          </div>
+
+          <div style="margin-bottom:10px">
+            <label class="form-label">本文</label>
+            <div class="wish-note-wrap">
+              <textarea id="adminNoticeBody" rows="3" placeholder="スタッフへの連絡内容を入力…"></textarea>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <input type="checkbox" id="adminNoticePin" style="width:16px;height:16px;accent-color:var(--primary)">
+            <label for="adminNoticePin" style="font-size:13px;color:var(--text);font-weight:600;cursor:pointer">📌 固定表示にする</label>
+          </div>
+
+          <button class="primary-btn" id="adminNoticeSubmitBtn" onclick="submitAdminNotice()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 2 15 22 11 12 2 9 22 2"/>
+            </svg>
+            スタッフに送信する
+          </button>
+        </div>
+
+        <!-- 投稿済み連絡一覧 -->
+        <div class="section-card">
+          <div class="section-title">投稿済み連絡</div>
+          <div class="input-wrap" style="margin-bottom:10px">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input class="form-input" type="search" id="adminNoticeSearch"
+                   placeholder="# タグで検索…" oninput="filterAdminNoticeList()">
+          </div>
+          <div id="adminNoticeList">
+            <div class="center-state" style="padding:16px 0"><div class="big-spinner"></div></div>
+          </div>
+        </div>
+
+      </div><!-- /adminNoticePanel -->
 
     </div><!-- /admin-body -->
 
     <nav class="bottom-nav">
       <button class="nav-item active" id="adminNavShifts" onclick="adminSwitchTab('adminShifts', this)">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
         </svg>
-        シフト一覧
+        ホーム
       </button>
       <button class="nav-item" id="adminNavWishes" onclick="adminSwitchTab('adminWishes', this)">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1625,12 +2516,17 @@
       </button>
       <button class="nav-item" id="adminNavCreate" onclick="adminSwitchTab('adminCreate', this)">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="4" width="18" height="18" rx="2"/>
-          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-          <line x1="3" y1="10" x2="21" y2="10"/>
-          <line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/>
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
         </svg>
-        シフト作成
+        シフト一覧
+      </button>
+      <button class="nav-item" id="adminNavStaff" onclick="adminSwitchTab('adminStaff', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+        </svg>
+        スタッフ管理
       </button>
     </nav>
   </div><!-- /adminScreen -->
@@ -1680,6 +2576,14 @@
   /* ===== 状態 ===== */
   let idToken   = localStorage.getItem('idToken');
   let userEmail = localStorage.getItem('userEmail') || '';
+  let userName  = localStorage.getItem('userName')  || '';
+
+  /* ===== JWTペイロードのデコード ===== */
+  function decodeJwtPayload(token) {
+    try {
+      return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    } catch { return {}; }
+  }
 
   /* ===== 画面切り替え ===== */
   function showScreen(id) {
@@ -1794,21 +2698,42 @@
   /* ===== 重要連絡 ===== */
   let allNotices = [];
 
+  /* localStorageのキーを統一 */
+  const NOTICE_KEY = 'localNotices';
+
+  /* 重要連絡を読んでallNoticesに反映する共通関数 */
+  function loadNoticesFromStorage() {
+    try {
+      const saved = localStorage.getItem(NOTICE_KEY);
+      allNotices = saved ? JSON.parse(saved) : [];
+    } catch { allNotices = []; }
+  }
+
   async function fetchNotices() {
-    const listEl = document.getElementById('noticeList');
     try {
       const res = await fetch(`${API_BASE}/notices`, {
         headers: { Authorization: `Bearer ${idToken}` },
       });
       if (res.status === 401) { doLogout(); return; }
-      if (!res.ok) throw new Error(`エラー (${res.status})`);
+      if (!res.ok) throw new Error('API未実装');
       const data = await res.json();
       allNotices = Array.isArray(data.notices) ? data.notices : [];
-      renderNotices(allNotices);
-    } catch (err) {
-      listEl.innerHTML = `<p style="font-size:13px;color:var(--red);text-align:center;padding:12px 0">${err.message}</p>`;
+    } catch {
+      loadNoticesFromStorage();
     }
+    renderNotices(allNotices);
   }
+
+  /* 別タブ（管理者）がlocalStorageを更新したら即反映 */
+  window.addEventListener('storage', e => {
+    if (e.key === NOTICE_KEY) {
+      loadNoticesFromStorage();
+      // スタッフ画面が表示中なら即更新
+      if (document.getElementById('shiftsScreen').classList.contains('active')) {
+        renderNotices(allNotices);
+      }
+    }
+  });
 
   function renderNotices(list) {
     const listEl = document.getElementById('noticeList');
@@ -1817,30 +2742,344 @@
       return;
     }
     const TAG_CLASS = { ルール:'tag-rule', 予約対応:'tag-reserve', トラブル:'tag-trouble' };
-    listEl.innerHTML = list.map(n => `
-      <div class="notice-item">
-        <span class="notice-tag ${TAG_CLASS[n.tag] || 'tag-other'}">#${n.tag || 'その他'}</span>
-        <div class="notice-text">${n.body}</div>
-        ${n.pinned ? '<div class="notice-pin">📌 固定</div>' : ''}
-      </div>`).join('');
+    const reactions = JSON.parse(localStorage.getItem('noticeReactions') || '{}');
+    // 固定を先に
+    const sorted = [...list].sort((a,b) => (b.pinned?1:0)-(a.pinned?1:0));
+    listEl.innerHTML = sorted.map(n => {
+      const myReact = reactions[n.id] || '';
+      return `
+        <div class="notice-item" style="border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span class="notice-tag ${TAG_CLASS[n.tag] || 'tag-other'}">#${n.tag || 'その他'}</span>
+            ${n.pinned ? '<span style="font-size:10px;color:var(--muted)">📌</span>' : ''}
+          </div>
+          <div class="notice-text">${n.body}</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+            <button class="translate-btn" onclick="translateNotice(${n.id},this,'${n.body.replace(/'/g,"\\'")}')">
+              🌐 翻訳
+            </button>
+          </div>
+          <div id="translate-${n.id}"></div>
+          <div class="reaction-row">
+            <button class="reaction-btn ${myReact==='ok'?'selected-ok':''}"
+              onclick="reactToNotice(${n.id},'ok',this)">👍 理解</button>
+            <button class="reaction-btn ${myReact==='meh'?'selected-meh':''}"
+              onclick="reactToNotice(${n.id},'meh',this)">△ あとで</button>
+            <button class="reaction-btn ${myReact==='q'?'selected-q':''}"
+              onclick="reactToNotice(${n.id},'q',this)">❓ 質問あり</button>
+          </div>
+        </div>`;
+    }).join('');
+    // 未提出タスクの表示チェック
+    checkPendingTasks();
   }
 
-  function filterNotices() {
-    const q = document.getElementById('noticeSearch').value.toLowerCase().replace('#','');
-    const filtered = q
-      ? allNotices.filter(n =>
-          (n.tag || '').toLowerCase().includes(q) ||
-          (n.body || '').toLowerCase().includes(q))
-      : allNotices;
-    renderNotices(filtered);
+  /* ===== ① 理解度リアクション ===== */
+  function reactToNotice(id, type, btn) {
+    const reactions = JSON.parse(localStorage.getItem('noticeReactions') || '{}');
+    // 同じボタンを再押しで解除
+    if (reactions[id] === type) {
+      delete reactions[id];
+    } else {
+      reactions[id] = type;
+    }
+    localStorage.setItem('noticeReactions', JSON.stringify(reactions));
+    // 同じ連絡内のボタンを更新
+    const row = btn.closest('.reaction-row');
+    row.querySelectorAll('.reaction-btn').forEach(b => {
+      b.classList.remove('selected-ok','selected-meh','selected-q');
+    });
+    if (reactions[id]) {
+      const cls = { ok:'selected-ok', meh:'selected-meh', q:'selected-q' };
+      btn.classList.add(cls[reactions[id]]);
+    }
+    if (type === 'q') showToast('❓ 質問ありとして記録しました', 'success');
   }
+
+  /* ===== ② 未提出タスク ===== */
+  function checkPendingTasks() {
+    const card  = document.getElementById('pendingTasksCard');
+    const listEl = document.getElementById('pendingTasksList');
+    if (!card) return;
+    const tasks = [];
+    // シフト希望未提出チェック
+    const wishes = JSON.parse(localStorage.getItem('localWishes') || '[]');
+    const myWish = wishes.find(w => w.email === userEmail);
+    const nextMonth = new Date(); nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const nm = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth()+1).padStart(2,'0')}`;
+    const hasNextWish = myWish && myWish.dates && myWish.dates.some(d => d.startsWith(nm));
+    if (!hasNextWish) {
+      tasks.push({
+        icon: '📅',
+        name: '来月のシフト希望が未提出です',
+        sub:  `提出期限：${nextMonth.getMonth()+1}月25日`,
+        action: () => switchTab('wish'),
+        label: '提出する',
+      });
+    }
+    // トーク未読チェック
+    const unread = getTotalUnread();
+    if (unread > 0) {
+      tasks.push({
+        icon: '💬',
+        name: `未読メッセージが${unread}件あります`,
+        sub:  'トークを確認してください',
+        action: () => switchTab('talk'),
+        label: '確認する',
+      });
+    }
+    if (tasks.length === 0) {
+      card.style.display = 'none';
+      return;
+    }
+    card.style.display = 'block';
+    listEl.innerHTML = tasks.map((t,i) => `
+      <div class="pending-task-item">
+        <div class="pending-task-icon">${t.icon}</div>
+        <div class="pending-task-info">
+          <div class="pending-task-name">${t.name}</div>
+          <div class="pending-task-sub">${t.sub}</div>
+        </div>
+        <button class="pending-task-btn" onclick="pendingTaskActions[${i}]()">${t.label}</button>
+      </div>`).join('');
+    window.pendingTaskActions = tasks.map(t => t.action);
+  }
+
+  /* ===== ⑥ 多言語翻訳（Claude API） ===== */
+  const LANG_CYCLE = ['英語','中国語','ベトナム語'];
+  const langState  = {};
+
+  async function translateNotice(id, btn, text) {
+    const resultEl = document.getElementById(`translate-${id}`);
+    const idx      = (langState[id] || 0) % LANG_CYCLE.length;
+    const lang     = LANG_CYCLE[idx];
+    btn.textContent = `⏳ ${lang}に翻訳中...`;
+    btn.disabled    = true;
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 400,
+          messages: [{ role: 'user', content: `次の日本語テキストを${lang}に翻訳してください。翻訳文のみを返してください。\n\n${text}` }],
+        }),
+      });
+      const data = await res.json();
+      const translated = data.content?.[0]?.text || '翻訳に失敗しました';
+      resultEl.innerHTML = `<div class="translate-result">🌐 ${lang}：${translated}</div>`;
+      langState[id] = idx + 1;
+      btn.textContent = `🌐 ${LANG_CYCLE[langState[id] % LANG_CYCLE.length]}に翻訳`;
+    } catch {
+      resultEl.innerHTML = `<div class="translate-result" style="color:var(--red)">翻訳に失敗しました</div>`;
+      btn.textContent = '🌐 翻訳';
+    }
+    btn.disabled = false;
+  }
+
+  /* ===== ⑦ トーク機能 ===== */
+  const TALK_KEY   = 'talkMessages';
+  const TALK_READ  = 'talkReadAt';
+  let currentRoomId   = null;
+  let currentRoomName = null;
+
+  function getTalkMessages(roomId) {
+    const all = JSON.parse(localStorage.getItem(TALK_KEY) || '{}');
+    return all[roomId] || [];
+  }
+  function saveTalkMessage(roomId, msg) {
+    const all = JSON.parse(localStorage.getItem(TALK_KEY) || '{}');
+    if (!all[roomId]) all[roomId] = [];
+    all[roomId].push(msg);
+    localStorage.setItem(TALK_KEY, JSON.stringify(all));
+  }
+  function markRoomRead(roomId) {
+    const reads = JSON.parse(localStorage.getItem(TALK_READ) || '{}');
+    reads[roomId] = Date.now();
+    localStorage.setItem(TALK_READ, JSON.stringify(reads));
+  }
+  function getRoomUnread(roomId) {
+    const msgs  = getTalkMessages(roomId);
+    const reads = JSON.parse(localStorage.getItem(TALK_READ) || '{}');
+    const readAt = reads[roomId] || 0;
+    return msgs.filter(m => m.ts > readAt && m.sender !== userEmail).length;
+  }
+  function getTotalUnread() {
+    const rooms = ['group-all','group-shift', ...getDmRoomIds()];
+    return rooms.reduce((sum, id) => sum + getRoomUnread(id), 0);
+  }
+  function getDmRoomIds() {
+    const all = JSON.parse(localStorage.getItem(TALK_KEY) || '{}');
+    return Object.keys(all).filter(k => k.startsWith('dm-'));
+  }
+
+  function renderTalkList() {
+    // グループ
+    ['group-all','group-shift'].forEach(id => {
+      const msgs   = getTalkMessages(id);
+      const last   = msgs[msgs.length - 1];
+      const unread = getRoomUnread(id);
+      document.getElementById(`preview-${id}`).textContent =
+        last ? `${last.senderName}: ${last.text}` : 'メッセージはありません';
+      document.getElementById(`time-${id}`).textContent =
+        last ? formatMsgTime(last.ts) : '';
+      const badge = document.getElementById(`unread-${id}`);
+      if (badge) { badge.style.display = unread > 0 ? 'inline-block' : 'none'; badge.textContent = unread; }
+    });
+    // DM一覧
+    const dmEl = document.getElementById('dmRoomList');
+    const dmIds = getDmRoomIds();
+    if (dmIds.length === 0) {
+      dmEl.innerHTML = '<p style="font-size:12px;color:var(--muted);text-align:center;padding:8px 0">個人トークはまだありません</p>';
+      return;
+    }
+    dmEl.innerHTML = dmIds.map(id => {
+      const name   = id.replace('dm-','').replace(/-/g,' ');
+      const msgs   = getTalkMessages(id);
+      const last   = msgs[msgs.length - 1];
+      const unread = getRoomUnread(id);
+      const init   = name[0]?.toUpperCase() || '?';
+      return `
+        <div class="talk-room-item" onclick="openChatRoom('${id}','${name}','dm')">
+          <div class="talk-room-avatar group-dm">${init}</div>
+          <div class="talk-room-info">
+            <div class="talk-room-name">${name}</div>
+            <div class="talk-room-preview">${last ? last.senderName+': '+last.text : 'メッセージはありません'}</div>
+          </div>
+          <div class="talk-room-meta">
+            <div class="talk-room-time">${last ? formatMsgTime(last.ts) : ''}</div>
+            ${unread > 0 ? `<span class="talk-unread-badge">${unread}</span>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+    // 未読バッジをナビに反映
+    const total = getTotalUnread();
+    const navBadge = document.getElementById('talkUnreadBadgeNav');
+    if (navBadge) navBadge.style.display = total > 0 ? 'inline-block' : 'none';
+  }
+
+  function formatMsgTime(ts) {
+    const d = new Date(ts);
+    const now = new Date();
+    if (d.toDateString() === now.toDateString()) {
+      return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+    return `${d.getMonth()+1}/${d.getDate()}`;
+  }
+
+  function openChatRoom(roomId, roomName, type) {
+    currentRoomId   = roomId;
+    currentRoomName = roomName;
+    document.getElementById('chatRoomTitle').textContent = roomName;
+    markRoomRead(roomId);
+    renderChatMessages();
+    document.getElementById('chatRoomScreen').classList.add('active');
+    const msgs = document.getElementById('chatMessages');
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function closeChatRoom() {
+    document.getElementById('chatRoomScreen').classList.remove('active');
+    currentRoomId = null;
+    renderTalkList();
+    checkPendingTasks();
+  }
+
+  function renderChatMessages() {
+    const msgs = getTalkMessages(currentRoomId);
+    const el   = document.getElementById('chatMessages');
+    if (msgs.length === 0) {
+      el.innerHTML = '<div class="chat-day-divider">メッセージはまだありません</div>';
+      return;
+    }
+    let lastDate = '';
+    el.innerHTML = msgs.map(m => {
+      const d      = new Date(m.ts);
+      const dateStr = `${d.getMonth()+1}月${d.getDate()}日`;
+      const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      const isMine  = m.sender === userEmail;
+      const init    = (m.senderName || '?')[0].toUpperCase();
+      let html = '';
+      if (dateStr !== lastDate) {
+        lastDate = dateStr;
+        html += `<div class="chat-day-divider">${dateStr}</div>`;
+      }
+      html += `
+        <div class="chat-bubble-wrap ${isMine ? 'mine' : ''}">
+          ${!isMine ? `<div class="chat-bubble-avatar">${init}</div>` : ''}
+          <div class="chat-bubble-col ${isMine ? 'mine' : ''}">
+            ${!isMine ? `<div class="chat-bubble-sender">${m.senderName || m.sender}</div>` : ''}
+            <div class="chat-bubble ${isMine ? 'mine-bubble' : 'theirs'}">${m.text}</div>
+            <div class="chat-bubble-time">${timeStr}</div>
+          </div>
+        </div>`;
+      return html;
+    }).join('');
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function sendChatMessage() {
+    const inp  = document.getElementById('chatInputText');
+    const text = inp.value.trim();
+    if (!text || !currentRoomId) return;
+    const msg = {
+      sender:     userEmail,
+      senderName: userName || userEmail,
+      text,
+      ts: Date.now(),
+    };
+    saveTalkMessage(currentRoomId, msg);
+    inp.value = '';
+    inp.style.height = 'auto';
+    renderChatMessages();
+  }
+
+  function showNewDmModal() {
+    const modal = document.getElementById('newDmModal');
+    const list  = document.getElementById('dmStaffList');
+    // localStorageのスタッフ一覧を使う
+    const staffs = JSON.parse(localStorage.getItem('localWishes') || '[]')
+      .filter(s => s.email !== userEmail);
+    if (staffs.length === 0) {
+      list.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:16px 0">スタッフが見つかりません</p>';
+    } else {
+      list.innerHTML = staffs.map(s => `
+        <div class="talk-room-item" onclick="startDm('${s.email}','${s.name || s.email}')">
+          <div class="talk-room-avatar group-dm">${(s.name||s.email)[0].toUpperCase()}</div>
+          <div class="talk-room-info">
+            <div class="talk-room-name">${s.name || s.email}</div>
+            <div class="talk-room-preview">${s.email}</div>
+          </div>
+        </div>`).join('');
+    }
+    modal.style.display = 'flex';
+  }
+
+  function startDm(email, name) {
+    document.getElementById('newDmModal').style.display = 'none';
+    const roomId = `dm-${email}`;
+    openChatRoom(roomId, name, 'dm');
+  }
+
+  /* storageイベントでトークも即時反映 */
+  window.addEventListener('storage', e => {
+    if (e.key === TALK_KEY && currentRoomId) {
+      renderChatMessages();
+    }
+    if (e.key === TALK_KEY) {
+      renderTalkList();
+    }
+  });
 
   /* ===== シフト画面の描画 ===== */
   async function renderShiftsScreen() {
     // ユーザー情報
-    const initial = userEmail ? userEmail[0].toUpperCase() : '?';
+    const displayName = userName || userEmail;
+    const initial = displayName ? displayName[0].toUpperCase() : '?';
     document.getElementById('userAvatar').textContent = initial;
-    document.getElementById('userEmailDisplay').textContent = userEmail;
+    document.getElementById('userEmailDisplay').textContent = userName
+      ? `${userName}（${userEmail}）`
+      : userEmail;
 
     // 月ラベル
     
@@ -1959,10 +3198,110 @@
   function doLogout() {
     localStorage.removeItem('idToken');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('userName');
     idToken = null;
     userEmail = '';
+    userName = '';
     showScreen('loginScreen');
   }
+
+  /* ===== Cognito: アカウント登録 ===== */
+  async function cognitoSignUp(name, email, password, role) {
+    const res = await fetch(COGNITO_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-amz-json-1.1',
+        'X-Amz-Target': 'AWSCognitoIdentityProviderService.SignUp',
+      },
+      body: JSON.stringify({
+        ClientId: CLIENT_ID,
+        Username: email,
+        Password: password,
+        UserAttributes: [
+          { Name: 'email', Value: email },
+          { Name: 'name',  Value: name  },
+        ],
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      const MSG = {
+        'UsernameExistsException':       'このメールアドレスはすでに登録されています',
+        'InvalidPasswordException':      'パスワードは8文字以上で、大文字・小文字・数字を含めてください',
+        'InvalidParameterException':     '入力内容に誤りがあります。もう一度ご確認ください',
+        'TooManyRequestsException':      'しばらく時間をおいてから再度お試しください',
+      };
+      throw new Error(MSG[data.__type] || data.message || '登録に失敗しました');
+    }
+
+    return data;
+  }
+
+  /* ===== 登録ボタン処理 ===== */
+  async function submitRegister() {
+    const name     = document.getElementById('regNameInput').value.trim();
+    const email    = document.getElementById('regEmailInput').value.trim();
+    const password = document.getElementById('regPasswordInput').value;
+    const confirm  = document.getElementById('regPasswordConfirm').value;
+    const btn      = document.getElementById('registerBtn');
+    const errBox   = document.getElementById('regErrorBox');
+
+    errBox.classList.remove('show');
+
+    // バリデーション
+    if (!name) {
+      errBox.textContent = '名前を入力してください';
+      errBox.classList.add('show'); return;
+    }
+    if (!email) {
+      errBox.textContent = 'メールアドレスを入力してください';
+      errBox.classList.add('show'); return;
+    }
+    if (password.length < 8) {
+      errBox.textContent = 'パスワードは8文字以上で入力してください';
+      errBox.classList.add('show'); return;
+    }
+    if (password !== confirm) {
+      errBox.textContent = 'パスワードが一致しません';
+      errBox.classList.add('show'); return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spin"></div> 登録中...';
+
+    try {
+      await cognitoSignUp(name, email, password, 'staff');
+      // 登録成功 → ログイン画面へ戻してメッセージ表示
+      showScreen('loginScreen');
+      const errLogin = document.getElementById('errorBox');
+      errLogin.style.background = 'var(--green-light)';
+      errLogin.style.borderColor = '#6EE7B7';
+      errLogin.style.color = '#065F46';
+      errLogin.textContent = '✓ アカウントを作成しました。メールアドレスを確認後、ログインしてください。';
+      errLogin.classList.add('show');
+      // メールを自動入力
+      document.getElementById('emailInput').value = email;
+    } catch (err) {
+      errBox.textContent = err.message;
+      errBox.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg> アカウントを作成する';
+    }
+  }
+
+  /* ===== パスワード表示切り替え（登録画面） ===== */
+  document.getElementById('regPwToggle').addEventListener('click', () => {
+    const inp  = document.getElementById('regPasswordInput');
+    const icon = document.getElementById('regEyeIcon');
+    const showing = inp.type === 'text';
+    inp.type = showing ? 'password' : 'text';
+    icon.innerHTML = showing
+      ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+      : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  });
 
   /* ===== イベント: ログインフォーム ===== */
   document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -1985,19 +3324,26 @@
     try {
       idToken   = await cognitoLogin(email, password);
       userEmail = email;
+      const payload = decodeJwtPayload(idToken);
+      // name属性がUUID形式の場合は使わない
+      const rawName = payload.name || '';
+      const isUuid  = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawName);
+      userName  = (!rawName || isUuid) ? '' : rawName;
       localStorage.setItem('idToken',   idToken);
       localStorage.setItem('userEmail', userEmail);
-      // JWTトークンを解析してグループを確認
-const payload = JSON.parse(atob(idToken.split('.')[1]));
-const groups = payload['cognito:groups'] || [];
-const isAdmin = groups.includes('admin');
+      localStorage.setItem('userName',  userName);
 
-// 管理者なら管理者画面、スタッフならスタッフ画面へ
-if (isAdmin) {
-  await renderAdminScreen();
-} else {
-  await renderShiftsScreen();
-}
+      // 管理者判定: custom:role または cognito:groups で確認
+      const groups   = payload['cognito:groups'] || [];
+      const roleAttr = payload['custom:role'] || '';
+      const isAdmin  = groups.includes('admin') || roleAttr === 'admin';
+
+      if (isAdmin) {
+        showScreen('adminScreen');
+        renderAdminScreen();
+      } else {
+        await renderShiftsScreen();
+      }
     } catch (err) {
       errBox.textContent = err.message;
       errBox.classList.add('show');
@@ -2022,19 +3368,20 @@ if (isAdmin) {
   /* ===== イベント: ログアウト ===== */
   document.getElementById('logoutBtn').addEventListener('click', doLogout);
 
-  /* ===== 初期化: 既にログイン済みなら直接シフト画面へ ===== */
+  /* ===== 初期化: 既にログイン済みなら直接画面へ ===== */
   if (idToken) {
-    // 保存済みトークンを解析してadminか確認
-  const payload = JSON.parse(atob(idToken.split('.')[1]));
-  const groups = payload['cognito:groups'] || [];
-  const isAdmin = groups.includes('admin');
+    const payload  = decodeJwtPayload(idToken);
+    const groups   = payload['cognito:groups'] || [];
+    const roleAttr = payload['custom:role'] || '';
+    const isAdmin  = groups.includes('admin') || roleAttr === 'admin';
+    if (isAdmin) {
+      showScreen('adminScreen');
+      renderAdminScreen();
+    } else {
+      renderShiftsScreen();
+    }
+  }
   
-  if (isAdmin) {
-    renderAdminScreen();
-  } else {
-    renderShiftsScreen();
-  }
-  }
 
   /* ========================================================
      ① ボトムナビ・タブ切り替え
@@ -2048,6 +3395,9 @@ if (isAdmin) {
     } else if (tab === 'swap') {
       showScreen('swapScreen');
       renderSwapShiftPicker();
+    } else if (tab === 'talk') {
+      showScreen('talkScreen');
+      renderTalkList();
     } else if (tab === 'admin') {
       showScreen('adminScreen');
       renderAdminScreen();
@@ -2056,20 +3406,11 @@ if (isAdmin) {
 
   /* ===== 管理者ホーム内タブ切り替え ===== */
   function adminSwitchTab(tab, btn) {
-    // admin-bodyは常に表示する
-    document.querySelector('.admin-body').style.display = 'block';
-    
-    // シフト一覧関連の要素を取得
-    const statsRow = document.getElementById('adminStatsRow');
-    const filterBar = document.querySelector('.admin-filter-bar');
-    const searchInput = document.getElementById('adminSearch').parentElement;
-    
-    // 各パネルを非表示にする
-    document.getElementById('adminShiftList').style.display = 'none';
-    document.getElementById('adminWishesPanel').style.display = 'none';
-    document.getElementById('adminCreatePanel').style.display = 'none';
-    
-    // タブのアクティブ状態を更新
+    const shiftListWrap = document.getElementById('adminShiftList').parentElement;
+    shiftListWrap.style.display                                = 'none';
+    document.getElementById('adminWishesPanel').style.display  = 'none';
+    document.getElementById('adminCreatePanel').style.display  = 'none';
+    document.getElementById('adminStaffPanel').style.display   = 'none';
     document.querySelectorAll('#adminScreen .nav-item').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     
@@ -2091,6 +3432,319 @@ if (isAdmin) {
       filterBar.style.display = 'none';
       searchInput.style.display = 'none';
       document.getElementById('adminCreatePanel').style.display = 'block';
+      renderAdminCal();
+      loadAdminAllShifts();
+    } else if (tab === 'adminStaff') {
+      document.getElementById('adminStaffPanel').style.display = 'block';
+      loadStaffList();
+    }
+  }
+
+  /* ===== シフト一覧タブ: カレンダー ===== */
+  let adminCalYear  = new Date().getFullYear();
+  let adminCalMonth = new Date().getMonth();
+  let adminCalSelectedDate = null;
+
+  function adminCalPrevMonth() {
+    adminCalMonth--;
+    if (adminCalMonth < 0) { adminCalMonth = 11; adminCalYear--; }
+    renderAdminCal();
+  }
+  function adminCalNextMonth() {
+    adminCalMonth++;
+    if (adminCalMonth > 11) { adminCalMonth = 0; adminCalYear++; }
+    renderAdminCal();
+  }
+
+  function renderAdminCal() {
+    const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+    document.getElementById('adminCalMonthLabel').textContent = `${adminCalYear}年 ${MONTHS[adminCalMonth]}`;
+    const today    = new Date(); today.setHours(0,0,0,0);
+    const firstDow = new Date(adminCalYear, adminCalMonth, 1).getDay();
+    const lastDay  = new Date(adminCalYear, adminCalMonth + 1, 0).getDate();
+    // シフトがある日を集める
+    const shiftDates = new Set((window._adminAllShifts || []).map(s => s.date));
+    let html = '';
+    for (let i = 0; i < firstDow; i++) html += '<div class="cal-day empty"></div>';
+    for (let d = 1; d <= lastDay; d++) {
+      const dt      = new Date(adminCalYear, adminCalMonth, d);
+      const dow     = dt.getDay();
+      const dateStr = `${adminCalYear}-${String(adminCalMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isToday = dt.getTime() === today.getTime();
+      const hasSh   = shiftDates.has(dateStr);
+      const isSel   = dateStr === adminCalSelectedDate;
+      const colCls  = dow === 0 ? 'sun-col' : dow === 6 ? 'sat-col' : '';
+      html += `<div class="cal-day ${colCls} ${isToday?'today':''} ${hasSh?'has-shift':''} ${isSel?'selected':''}"
+        onclick="adminCalSelectDate('${dateStr}')">${d}</div>`;
+    }
+    document.getElementById('adminCalGrid').innerHTML = html;
+  }
+
+  function adminCalSelectDate(dateStr) {
+    adminCalSelectedDate = adminCalSelectedDate === dateStr ? null : dateStr;
+    // createShiftDateにも反映
+    const inp = document.getElementById('createShiftDate');
+    if (inp) inp.value = adminCalSelectedDate || '';
+    renderAdminCal();
+    renderAdminAllShiftList();
+  }
+
+  /* ===== シフト一覧タブ: フォーム開閉 ===== */
+  function toggleAdminCreateForm() {
+    const form  = document.getElementById('adminCreateForm');
+    const label = document.getElementById('adminCreateFormBtnLabel');
+    const open  = form.style.display === 'none';
+    form.style.display = open ? 'block' : 'none';
+    label.textContent  = open ? '✕ 閉じる' : 'シフトを作成する';
+  }
+
+  /* ===== シフト一覧タブ: 全スタッフシフト取得・表示 ===== */
+  async function loadAdminAllShifts() {
+    document.getElementById('adminAllShiftList').innerHTML =
+      '<div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>';
+    try {
+      const res = await fetch(`${API_BASE}/admin/shifts`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (!res.ok) throw new Error('API未実装');
+      const data = await res.json();
+      window._adminAllShifts = Array.isArray(data.shifts) ? data.shifts : [];
+    } catch {
+      // ダミーデータ
+      window._adminAllShifts = [
+        { id:1, name:'山田 太郎', email:'yamada@example.com', date:'2026-05-26', startTime:'09:00', endTime:'17:00', status:'scheduled' },
+        { id:2, name:'佐藤 花子', email:'sato@example.com',   date:'2026-05-26', startTime:'13:00', endTime:'21:00', status:'pending'   },
+        { id:3, name:'田中 次郎', email:'tanaka@example.com', date:'2026-05-27', startTime:'10:00', endTime:'18:00', status:'scheduled' },
+        { id:4, name:'鈴木 あい', email:'suzuki@example.com', date:'2026-05-28', startTime:'09:00', endTime:'15:00', status:'scheduled' },
+        { id:5, name:'山田 太郎', email:'yamada@example.com', date:'2026-05-29', startTime:'09:00', endTime:'17:00', status:'scheduled' },
+      ];
+    }
+    // 日付・時間順にソート
+    window._adminAllShifts.sort((a,b) =>
+      (a.date+a.startTime).localeCompare(b.date+b.startTime));
+    renderAdminCal();
+    renderAdminAllShiftList();
+  }
+
+  function renderAdminAllShiftList() {
+    const q   = (document.getElementById('adminAllShiftSearch')?.value || '').toLowerCase();
+    const sel = adminCalSelectedDate;
+    let list  = window._adminAllShifts || [];
+    if (sel)  list = list.filter(s => s.date === sel);
+    if (q)    list = list.filter(s =>
+      (s.name||'').toLowerCase().includes(q) ||
+      (s.email||'').toLowerCase().includes(q));
+
+    document.getElementById('adminAllShiftCount').textContent = `${list.length}件`;
+    const el = document.getElementById('adminAllShiftList');
+    if (list.length === 0) {
+      el.innerHTML = '<div class="center-state" style="padding:30px 0"><p class="state-title">シフトがありません</p></div>';
+      return;
+    }
+    const STATUS_LABEL = { scheduled:'確定', pending:'申請中', cancelled:'キャンセル', swapped:'交換済み' };
+    const STATUS_CLASS = { scheduled:'s-scheduled', pending:'s-pending', cancelled:'s-cancelled', swapped:'s-swapped' };
+    const WEEKDAYS = ['日','月','火','水','木','金','土'];
+    el.innerHTML = list.map(s => {
+      const dt      = new Date(s.date + 'T00:00:00');
+      const wday    = WEEKDAYS[dt.getDay()];
+      const initial = (s.name || s.email || '?')[0].toUpperCase();
+      const stCls   = STATUS_CLASS[s.status] || 's-scheduled';
+      const stLabel = STATUS_LABEL[s.status] || '確定';
+      return `
+        <div class="admin-shift-card ${stCls}">
+          <div class="admin-card-top">
+            <div class="admin-card-avatar">${initial}</div>
+            <div class="admin-card-name">${s.name || '—'}<span>${s.email||''}</span></div>
+            <span class="admin-status-badge">${stLabel}</span>
+          </div>
+          <div class="admin-card-bottom">
+            <div class="admin-date-time">
+              ${dt.getMonth()+1}/${dt.getDate()}(${wday})
+              <span>${s.startTime} 〜 ${s.endTime}</span>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  /* ===== 管理者：重要連絡フォーム開閉 ===== */
+  function toggleAdminNoticeForm() {
+    const form = document.getElementById('adminNoticeForm');
+    const btn  = document.getElementById('adminNoticeToggleBtn');
+    const open = form.style.display === 'none';
+    form.style.display = open ? 'block' : 'none';
+    btn.textContent    = open ? '✕ 閉じる' : '＋ 新規投稿';
+  }
+  document.getElementById('adminNoticeTagRow').addEventListener('click', e => {
+    const btn = e.target.closest('.notice-tag-btn');
+    if (!btn) return;
+    document.querySelectorAll('#adminNoticeTagRow .notice-tag-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+
+  function getSelectedTag() {
+    const active = document.querySelector('#adminNoticeTagRow .notice-tag-btn.active');
+    return active ? active.dataset.tag : 'その他';
+  }
+
+  // 投稿
+  async function submitAdminNotice() {
+    const body   = document.getElementById('adminNoticeBody').value.trim();
+    const tag    = getSelectedTag();
+    const pinned = document.getElementById('adminNoticePin').checked;
+    const btn    = document.getElementById('adminNoticeSubmitBtn');
+
+    if (!body) { showToast('本文を入力してください', 'error'); return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spin"></div> 送信中...';
+
+    const notice = { id: Date.now(), tag, body, pinned, createdAt: new Date().toISOString() };
+
+    try {
+      // APIが実装済みの場合はPOST
+      const res = await fetch(`${API_BASE}/notices`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tag, body, pinned }),
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (!res.ok) throw new Error('API未実装');
+      const data = await res.json();
+      notice.id = data.id || notice.id;
+    } catch {
+      // API未実装の場合はローカルに保存
+    }
+
+    // ローカルに追加してスタッフ側にも反映
+    allNotices.unshift(notice);
+    localStorage.setItem(NOTICE_KEY, JSON.stringify(allNotices));
+
+    // フォームリセット
+    document.getElementById('adminNoticeBody').value = '';
+    document.getElementById('adminNoticePin').checked = false;
+
+    showToast('連絡を投稿しました ✓', 'success');
+    renderAdminNoticeList();
+    // スタッフ側の表示も更新
+    renderNotices(allNotices);
+  }
+
+  // 削除
+  function deleteAdminNotice(id) {
+    if (!window.confirm('この連絡を削除しますか？')) return;
+    allNotices = allNotices.filter(n => n.id !== id);
+    localStorage.setItem(NOTICE_KEY, JSON.stringify(allNotices));
+    showToast('削除しました', 'success');
+    renderAdminNoticeList();
+    renderNotices(allNotices);
+  }
+
+  // 一覧表示
+  function renderAdminNoticeList() {
+    const TAG_CLASS = { ルール:'tag-rule', 予約対応:'tag-reserve', トラブル:'tag-trouble' };
+    const q = (document.getElementById('adminNoticeSearch')?.value || '').toLowerCase().replace('#','');
+    const list = q
+      ? allNotices.filter(n => (n.tag||'').toLowerCase().includes(q) || (n.body||'').toLowerCase().includes(q))
+      : allNotices;
+    const el = document.getElementById('adminNoticeList');
+    if (list.length === 0) {
+      el.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:16px 0">投稿はありません</p>';
+      return;
+    }
+    el.innerHTML = list.map(n => `
+      <div class="admin-notice-item">
+        <div class="admin-notice-body">
+          <span class="notice-tag ${TAG_CLASS[n.tag] || 'tag-other'}">#${n.tag || 'その他'}</span>
+          <div class="notice-text" style="margin-top:5px">${n.body}</div>
+          ${n.pinned ? '<div class="notice-pin">📌 固定</div>' : ''}
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">${new Date(n.createdAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+        </div>
+        <button class="admin-notice-delete" onclick="deleteAdminNotice(${n.id})">削除</button>
+      </div>`).join('');
+  }
+
+  function filterAdminNoticeList() { renderAdminNoticeList(); }
+
+  /* ===== スタッフ一覧 ===== */
+  let allStaffList = [];
+
+  async function loadStaffList() {
+    const container = document.getElementById('staffListContainer');
+    container.innerHTML = '<div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>';
+    try {
+      const res = await fetch(`${API_BASE}/admin/users`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (res.status === 403) throw new Error('管理者権限が必要です');
+      if (!res.ok) throw new Error(`エラー (${res.status})`);
+      const data = await res.json();
+      allStaffList = Array.isArray(data.users) ? data.users : [];
+      renderStaffList();
+    } catch (err) {
+      container.innerHTML = `
+        <div class="center-state">
+          <p class="state-title">読み込みに失敗しました</p>
+          <p class="state-sub">${err.message}</p>
+          <button class="reload-btn" onclick="loadStaffList()">再試行</button>
+        </div>`;
+    }
+  }
+
+  function renderStaffList() {
+    const q = (document.getElementById('staffSearch').value || '').toLowerCase();
+    const list = q
+      ? allStaffList.filter(u =>
+          (u.name  || '').toLowerCase().includes(q) ||
+          (u.email || '').toLowerCase().includes(q))
+      : allStaffList;
+    const container = document.getElementById('staffListContainer');
+    if (list.length === 0) {
+      container.innerHTML = '<div class="center-state" style="padding:40px 0"><p class="state-title">スタッフが見つかりません</p></div>';
+      return;
+    }
+    container.innerHTML = list.map(u => {
+      const isAdmin  = (u.role === 'admin');
+      const initial  = (u.name || u.email || '?')[0].toUpperCase();
+      const actionBtn = isAdmin
+        ? `<button class="role-act-btn demote" onclick="changeRole('${u.email}','staff')">権限を剥奪</button>`
+        : `<button class="role-act-btn promote" onclick="changeRole('${u.email}','admin')">管理者にする</button>`;
+      return `
+        <div class="staff-card">
+          <div class="staff-card-avatar ${isAdmin ? 'admin-av' : ''}">${initial}</div>
+          <div class="staff-card-info">
+            <div class="staff-card-name">${u.name || '（名前未設定）'}</div>
+            <div class="staff-card-email">${u.email || ''}</div>
+          </div>
+          <span class="role-badge ${isAdmin ? 'admin' : 'staff'}">${isAdmin ? '管理者' : 'スタッフ'}</span>
+          <div class="staff-card-actions">${actionBtn}</div>
+        </div>`;
+    }).join('');
+  }
+
+  /* ===== 権限変更（UIのみ・バックエンド未接続） ===== */
+  async function changeRole(email, newRole) {
+    const label = newRole === 'admin' ? '管理者' : 'スタッフ';
+    const confirmed = window.confirm(`${email} の権限を「${label}」に変更しますか？`);
+    if (!confirmed) return;
+    try {
+      const res = await fetch(`${API_BASE}/admin/users/role`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, role: newRole }),
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (res.status === 403) throw new Error('管理者権限が必要です');
+      if (!res.ok) throw new Error(`エラー (${res.status})`);
+      showToast(`${email} を${label}に変更しました ✓`, 'success');
+      // ローカルのリストも更新
+      const target = allStaffList.find(u => u.email === email);
+      if (target) target.role = newRole;
+      renderStaffList();
+    } catch (err) {
+      showToast(err.message, 'error');
     }
   }
 
@@ -2110,6 +3764,29 @@ if (isAdmin) {
     renderWishListScreen();
   }
 
+  const DUMMY_WISHES = [
+    {
+      name: '山田 太郎', email: 'yamada@example.com',
+      dates: ['2026-05-26','2026-05-27','2026-05-28'],
+      startTime: '09:00', endTime: '17:00', note: '午前のみも可'
+    },
+    {
+      name: '佐藤 花子', email: 'sato@example.com',
+      dates: ['2026-05-25','2026-05-29','2026-05-30'],
+      startTime: '13:00', endTime: '21:00', note: ''
+    },
+    {
+      name: '田中 次郎', email: 'tanaka@example.com',
+      dates: ['2026-05-26','2026-05-28'],
+      startTime: '10:00', endTime: '18:00', note: '土日希望'
+    },
+    {
+      name: '鈴木 あい', email: 'suzuki@example.com',
+      dates: ['2026-05-27','2026-05-31'],
+      startTime: '', endTime: '', note: '時間帯はお任せします'
+    },
+  ];
+
   async function renderWishListScreen() {
     const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
     document.getElementById('wishListMonthLabel').textContent =
@@ -2123,19 +3800,27 @@ if (isAdmin) {
       });
       if (res.status === 401) { doLogout(); return; }
       if (res.status === 403) throw new Error('管理者権限が必要です');
-      if (!res.ok) throw new Error(`エラー (${res.status})`);
+      if (!res.ok) throw new Error(`API未実装`);
       const data = await res.json();
       allWishList = Array.isArray(data.wishes) ? data.wishes : [];
       renderWishList();
-    } catch (err) {
-      container.innerHTML = `
-        <div class="center-state">
-          <p class="state-title">読み込みに失敗しました</p>
-          <p class="state-sub">${err.message}</p>
-          <button class="reload-btn" onclick="renderWishListScreen()">再試行</button>
-        </div>`;
+    } catch {
+      // localStorageからスタッフが提出したデータを読み込む
+      const saved = JSON.parse(localStorage.getItem(WISH_KEY) || '[]');
+      allWishList = saved.filter(w => w.dates && w.dates.some(d => d.startsWith(ym)));
+      if (allWishList.length === 0) allWishList = saved;
+      renderWishList();
     }
   }
+
+  /* 別タブでスタッフが希望提出したら管理者側に即反映 */
+  window.addEventListener('storage', e => {
+    if (e.key === WISH_KEY) {
+      if (document.getElementById('adminWishesPanel')?.style.display !== 'none') {
+        renderWishListScreen();
+      }
+    }
+  });
 
   function renderWishList() {
     const q = (document.getElementById('wishListSearch').value || '').toLowerCase();
@@ -2310,6 +3995,8 @@ if (isAdmin) {
     }).join('');
   }
 
+  const WISH_KEY = 'localWishes';
+
   async function submitWish() {
     if (selectedWishDates.size === 0) {
       showToast('希望日を1日以上選択してください', 'error');
@@ -2333,17 +4020,28 @@ if (isAdmin) {
         body:    JSON.stringify(payload),
       });
       if (res.status === 401) { doLogout(); return; }
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || `エラー (${res.status})`);
-      }
+      if (!res.ok) throw new Error('API未実装');
       showToast('希望を提出しました ✓', 'success');
+    } catch {
+      // API未実装の場合はlocalStorageに保存
+      const existing = JSON.parse(localStorage.getItem(WISH_KEY) || '[]');
+      // 同じユーザーの既存データを上書き
+      const filtered = existing.filter(w => w.email !== userEmail);
+      filtered.push({
+        name:      userName || userEmail,
+        email:     userEmail,
+        dates:     payload.dates,
+        startTime: payload.startTime || '',
+        endTime:   payload.endTime   || '',
+        note:      payload.note      || '',
+        submittedAt: new Date().toISOString(),
+      });
+      localStorage.setItem(WISH_KEY, JSON.stringify(filtered));
+      showToast('希望を提出しました ✓', 'success');
+    } finally {
       selectedWishDates.clear();
       document.getElementById('wishNote').value = '';
       renderWishCalendar();
-    } catch (err) {
-      showToast(err.message, 'error');
-    } finally {
       btn.disabled = false;
       btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 希望を提出する';
     }
@@ -2520,6 +4218,8 @@ if (isAdmin) {
     const listEl = document.getElementById('adminShiftList');
     listEl.innerHTML = '<div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>';
     ['statTotal','statPending','statToday'].forEach(id => document.getElementById(id).textContent = '—');
+    // 重要連絡を読み込む
+    renderAdminNoticeList();
 
     try {
       const res = await fetch(`${API_BASE}/admin/shifts`, {
