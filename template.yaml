@@ -586,6 +586,36 @@ Resources:
             Path: /shifts/swap
             Method: POST
 
+
+  GetMySwapRequestsFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/swapRequests/getMySwapRequests.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: getMySwapRequests.handler
+      Policies:
+        # SwapRequestsとUsersテーブルの読み取り権限が必要
+        - DynamoDBReadPolicy:
+            TableName: !Ref SwapRequestsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref UsersTable
+      Events:
+        GetMySwapRequestsApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /swap-requests/me
+            Method: GET
+
   RespondToSwapFunction:
     Type: AWS::Serverless::Function
     Metadata:

@@ -34,6 +34,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
 
     if (!shiftResult.Item) return notFound('Shift not found');
+    
+    console.log('shift userId:', shiftResult.Item['userId']);
+    console.log('auth userId:', auth.userId);
+    
     if (shiftResult.Item['userId'] !== auth.userId) {
       return forbidden('You can only request swaps for your own shifts');
     }
