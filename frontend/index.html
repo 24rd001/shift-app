@@ -3533,7 +3533,8 @@
       el.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:12px 0">自分宛の申請はありません</p>';
       return;
     }
-    el.innerHTML = pending.map((r, i) => {
+      const respondedIds = getRespondedSwapIds();
+      el.innerHTML = pending.map((r, i) => {
       const dateStr   = r.date || r.shiftDate || '';
       const dt        = new Date(dateStr + 'T00:00:00');
       const dateLabel = dateStr
@@ -3542,8 +3543,9 @@
       const name    = r.userName || r.requesterName || r.requesterEmail || '—';
       const initial = name[0].toUpperCase();
       const swapId  = r.swapId || r.shiftId;
+      const isResponded = respondedIds.includes(swapId);
       return `
-        <div class="swap-history-item" style="padding:12px 0" id="swapItem-${i}">
+        <div class="swap-history-item" style="padding:12px 0;${isResponded?'opacity:0.5':''}" id="swapItem-${i}">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
             <div class="staff-avatar" style="width:34px;height:34px;font-size:13px">${initial}</div>
             <div>
@@ -3553,7 +3555,9 @@
               ${r.reason ? `<div class="swap-history-reason" style="margin-top:2px">「${r.reason}」</div>` : ''}
             </div>
           </div>
-
+          ${isResponded ? `
+            <div style="font-size:12px;color:var(--muted);text-align:center;padding:6px 0">回答済み</div>
+          ` : `
           <div class="swap-3btn-row">
             <button class="swap-reply-btn green" onclick="respondSwap3('${swapId}', 'accept', ${i}, this)">
               ○ 代われる
@@ -3565,14 +3569,13 @@
               💬 相談する
             </button>
           </div>
-
-          <!-- 相談コメント入力欄（初期非表示） -->
           <div class="consult-input-wrap" id="consultWrap-${i}">
             <textarea id="consultText-${i}" rows="2" placeholder="コメントを入力…"></textarea>
             <button class="consult-send-btn" onclick="respondSwap3('${swapId}', 'consult', ${i}, this)">
               💬 コメントを送る
             </button>
           </div>
+          `}
         </div>`;
     }).join('');
   }
@@ -3583,7 +3586,23 @@
     wrap.classList.toggle('show');
   }
 
+  function getRespondedSwapIds() {
+    try { return JSON.parse(localStorage.getItem(SWAP_RESPONDED_KEY) || '[]'); }
+    catch { return []; }
+  }
+  function saveRespondedSwapId(swapId) {
+    const ids = getRespondedSwapIds();
+    if (!ids.includes(swapId)) {
+      ids.push(swapId);
+      localStorage.setItem(SWAP_RESPONDED_KEY, JSON.stringify(ids));
+    }
+  }
+
   async function respondSwap3(swapId, type, idx, btn) {
+    // すでに回答済みなら何もしない
+    if (getRespondedSwapIds().includes(swapId)) {
+      showToast('すでに回答済みです', 'error'); return;
+    }
     const labelMap = { accept:'代われる', reject:'無理', consult:'相談する' };
     const label    = labelMap[type] || type;
     const comment  = type === 'consult'
@@ -3608,16 +3627,23 @@
       });
       if (res.status === 401) { doLogout(); return; }
       if (!res.ok) throw new Error(`エラー (${res.status})`);
+
+      // 回答済みとして保存（ページリロードしても再押し不可）
+      saveRespondedSwapId(swapId);
+
       showToast(
         type === 'accept' ? '✓ 代われると回答しました' :
         type === 'reject' ? '断りました' :
         '💬 相談コメントを送りました', 'success'
       );
-      // 回答済みの項目をグレーアウト
+      // 回答済みの項目をグレーアウト・ボタン無効化
       const item = document.getElementById(`swapItem-${idx}`);
       if (item) {
         item.style.opacity = '0.5';
         item.querySelectorAll('button').forEach(b => b.disabled = true);
+        const labelJa = type === 'accept' ? '○ 代われる' : type === 'reject' ? '✕ 無理' : '💬 相談済み';
+        item.insertAdjacentHTML('beforeend',
+          `<div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center">回答済み：${labelJa}</div>`);
       }
     } catch (err) {
       showToast(err.message, 'error');
@@ -3628,18 +3654,19 @@
   /* ===== 管理者：交代申請一覧 ===== */
   let allAdminSwaps  = [];
   let adminSwapFilter = 'all';
+  const SWAP_RESPONDED_KEY = 'swapResponded'; // 回答済み申請IDを保存するキー
 
   async function loadAdminSwapList() {
     const el = document.getElementById('adminSwapList');
     el.innerHTML = '<div class="center-state"><div class="big-spinner"></div></div>';
     try {
-      const res = await fetch(`${API_BASE}/swap-requests/me`, {
+      const res = await fetch(`${API_BASE}/admin/swap-requests`, {
         headers: { Authorization: `Bearer ${idToken}` },
       });
       if (res.status === 401) { doLogout(); return; }
       if (!res.ok) throw new Error(`エラー (${res.status})`);
       const data = await res.json();
-      allAdminSwaps = Array.isArray(data.requests) ? data.requests : [];
+      allAdminSwaps = Array.isArray(data.swaps) ? data.swaps : [];
       renderAdminSwapList();
     } catch (err) {
       el.innerHTML = `<p style="font-size:13px;color:var(--red);text-align:center;padding:16px 0">${err.message}</p>`;
@@ -3670,22 +3697,36 @@
       el.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:20px 0">申請はありません</p>';
       return;
     }
+    const WEEKDAYS = ['日','月','火','水','木','金','土'];
     el.innerHTML = list.map(r => {
-      const dt = new Date((r.shiftDate||'')+'T00:00:00');
-      const dateLabel = r.shiftDate
-        ? `${dt.getMonth()+1}/${dt.getDate()}(${['日','月','火','水','木','金','土'][dt.getDay()]})`
+      // APIのフィールド名に合わせる
+      const dateStr   = r.date || r.shiftDate || '';
+      const dt        = new Date(dateStr + 'T00:00:00');
+      const dateLabel = dateStr
+        ? `${dt.getMonth()+1}/${dt.getDate()}(${WEEKDAYS[dt.getDay()]})`
         : '—';
-      const stLabel = STATUS_LABEL[r.status] || r.status;
-      const stStyle = STATUS_COLOR[r.status] || '';
-      const canApprove = r.status === 'responded';
+      const stLabel    = STATUS_LABEL[r.status] || r.status;
+      const stStyle    = STATUS_COLOR[r.status] || '';
+      // responded または pending(スタッフが承諾済み)なら承認ボタンを表示
+      const canApprove = r.status === 'responded' || r.status === 'pending';
+      // responses配列があれば承諾者を表示
+      const acceptedRes = (r.responses || []).filter(res => res.accept === true);
+      const acceptedLabel = acceptedRes.length > 0
+        ? `<div style="font-size:11px;color:#065F46;margin-top:4px">✓ ${acceptedRes.length}名が承諾済み</div>`
+        : '';
       return `
-        <div class="swap-history-item" style="padding:14px 0">
+        <div class="swap-history-item" style="padding:14px 0;border-bottom:1px solid var(--border)">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-            <div style="font-size:13px;font-weight:700;color:var(--text)">${r.requesterName || r.requesterEmail || '—'} → ${r.targetName || r.targetEmail || '—'}</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">
+              ${r.requesterName || r.requesterEmail || '—'}
+              <span style="color:var(--muted);font-weight:400"> → </span>
+              ${r.targetEmail || '—'}
+            </div>
             <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;${stStyle}">${stLabel}</span>
           </div>
-          <div class="swap-history-reason">${dateLabel} ${r.startTime||''}〜${r.endTime||''}</div>
+          <div class="swap-history-reason">${dateLabel}　${r.startTime||''}〜${r.endTime||''}</div>
           ${r.reason ? `<div class="swap-history-reason" style="margin-top:2px">「${r.reason}」</div>` : ''}
+          ${acceptedLabel}
           ${canApprove ? `
             <button class="act-btn approve" style="margin-top:10px;width:100%" onclick="approveSwap('${r.swapId}', this)">
               ✓ 承認する
