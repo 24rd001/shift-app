@@ -19,12 +19,23 @@
 ## 使用技術
 | カテゴリ | 技術 |
 |------|------|
-| フロントエンド | HTML / CSS / JavaScript |
-| バックエンド | TypeScript / AWS Lambda |
+| フロントエンド | HTML / CSS / JavaScript|
+| バックエンド | TypeScript / AWS Lambda（Node.js 20） |
 | データベース | AWS DynamoDB |
-| 認証 | AWS Cognito |
+| 認証 | AWS Cognito（JWT認証） |
 | インフラ | AWS SAM / API Gateway |
 | バージョン管理 | GitHub |
+
+## アーキテクチャ
+- サーバーレス構成（Lambda + API Gateway + DynamoDB）
+- Cognitoによる認証・認可（admin/staffグループによる権限管理）
+- IaC（AWS SAM）でインフラ全体をコード化
+
+## 工夫した点
+- DynamoDBのGSI（Global Secondary Index）で自分のシフトを効率的に検索
+- TransactWriteItemsでシフト交代承認時の整合性を担保
+- 多層防御（API Gatewayの認証 + Lambdaでのadmin判定）
+- フロント・バック分業のためAPI仕様を明文化して共有
 
 ## チーム構成
 | 役割 | 担当 |
@@ -34,4 +45,4 @@
 | バックエンド・インフラ | 24rd001 |
 
 ## 開発期間
-2026年5月（約2週間）
+2026年5月（約2週間、初期構築から基本機能完成まで）
