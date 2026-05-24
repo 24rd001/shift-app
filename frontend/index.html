@@ -527,12 +527,12 @@
       align-items: center;
       justify-content: center;
       gap: 2px;
-      padding: 8px 2px 10px;
+      padding: 8px 1px 10px;
       background: none;
       border: none;
       cursor: pointer;
       color: var(--gray);
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 600;
       transition: color .15s;
       -webkit-tap-highlight-color: transparent;
@@ -1532,6 +1532,41 @@
     .swap-reply-btn.green  { background: #D1FAE5; color: #065F46; border-color: #6EE7B7; }
     .swap-reply-btn.pink   { background: #FEF2F2; color: var(--red); border-color: #FECACA; }
     .swap-reply-btn.yellow { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+    .swap-3btn-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .swap-3btn-row .swap-reply-btn { flex: 1; text-align: center; font-size: 11px; }
+    .consult-input-wrap {
+      margin-top: 8px;
+      display: none;
+    }
+    .consult-input-wrap.show { display: block; }
+    .consult-input-wrap textarea {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-family: inherit;
+      resize: none;
+      background: var(--gray-light);
+      outline: none;
+    }
+    .consult-input-wrap textarea:focus { border-color: var(--primary); background: #fff; }
+    .consult-send-btn {
+      width: 100%;
+      margin-top: 6px;
+      padding: 8px;
+      background: var(--yellow);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
 
     /* ===== 申請履歴 ===== */
     .swap-history-item {
@@ -2040,6 +2075,19 @@
 
     <div class="swap-body">
 
+      <!-- 自分宛の交代申請 -->
+      <div class="section-card" style="margin-bottom:14px">
+        <div class="section-title">自分宛の交代申請</div>
+        <div id="incomingSwapList">
+          <div class="center-state" style="padding:20px 0"><div class="big-spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- 申請フォーム -->
+      <div class="section-card" style="margin-bottom:0">
+        <div class="section-title">新しく交代申請する</div>
+      </div>
+
       <!-- 対象シフト -->
       <div class="section-card">
         <div class="section-title">交代したいシフトを選択</div>
@@ -2496,6 +2544,21 @@
 
       </div><!-- /adminNoticePanel -->
 
+      <!-- 交代申請管理パネル（初期非表示） -->
+      <div id="adminSwapPanel" style="display:none">
+        <div class="section-card">
+          <div class="section-title">交代申請一覧</div>
+          <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+            <button class="chip-btn active" id="swapFilterAll"    onclick="filterAdminSwap('all',this)">すべて</button>
+            <button class="chip-btn"        id="swapFilterPending" onclick="filterAdminSwap('pending',this)">承認待ち</button>
+            <button class="chip-btn"        id="swapFilterDone"    onclick="filterAdminSwap('approved',this)">承認済み</button>
+          </div>
+          <div id="adminSwapList">
+            <div class="center-state"><div class="big-spinner"></div></div>
+          </div>
+        </div>
+      </div><!-- /adminSwapPanel -->
+
     </div><!-- /admin-body -->
 
     <nav class="bottom-nav">
@@ -2526,7 +2589,14 @@
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
           <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
         </svg>
-        スタッフ管理
+        スタッフ
+      </button>
+      <button class="nav-item" id="adminNavSwap" onclick="adminSwitchTab('adminSwap', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        交代申請
       </button>
     </nav>
   </div><!-- /adminScreen -->
@@ -3272,16 +3342,7 @@
     btn.innerHTML = '<div class="spin"></div> 登録中...';
 
     try {
-      const res = await fetch(`${API_BASE}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, role: 'staff' }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || `エラー (${res.status})`);
-      }
-      
+      await cognitoSignUp(name, email, password, 'staff');
       // 登録成功 → ログイン画面へ戻してメッセージ表示
       showScreen('loginScreen');
       const errLogin = document.getElementById('errorBox');
@@ -3390,7 +3451,6 @@
       renderShiftsScreen();
     }
   }
-  
 
   /* ========================================================
      ① ボトムナビ・タブ切り替え
@@ -3404,6 +3464,7 @@
     } else if (tab === 'swap') {
       showScreen('swapScreen');
       renderSwapShiftPicker();
+      loadIncomingSwapList();
     } else if (tab === 'talk') {
       showScreen('talkScreen');
       renderTalkList();
@@ -3415,45 +3476,241 @@
 
   /* ===== 管理者ホーム内タブ切り替え ===== */
   function adminSwitchTab(tab, btn) {
-    // 各要素を取得
-    const statsRow = document.getElementById('adminStatsRow');
-    const filterBar = document.querySelector('.admin-filter-bar');
-    const searchInput = document.getElementById('adminSearch').parentElement;
-    
-    document.getElementById('adminShiftList').style.display = 'none';
-    document.getElementById('adminWishesPanel').style.display = 'none';
-    document.getElementById('adminCreatePanel').style.display = 'none';
-    document.getElementById('adminStaffPanel').style.display = 'none';
-    
+    const shiftListWrap = document.getElementById('adminShiftList').parentElement;
+    shiftListWrap.style.display                                = 'none';
+    document.getElementById('adminWishesPanel').style.display  = 'none';
+    document.getElementById('adminCreatePanel').style.display  = 'none';
+    document.getElementById('adminStaffPanel').style.display   = 'none';
+    document.getElementById('adminSwapPanel').style.display    = 'none';
     document.querySelectorAll('#adminScreen .nav-item').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    
     if (tab === 'adminShifts') {
-      statsRow.style.display = 'grid';
-      filterBar.style.display = 'flex';
-      searchInput.style.display = 'block';
-      document.getElementById('adminShiftList').style.display = 'block';
+      shiftListWrap.style.display = 'block';
     } else if (tab === 'adminWishes') {
-      statsRow.style.display = 'none';
-      filterBar.style.display = 'none';
-      searchInput.style.display = 'none';
       document.getElementById('adminWishesPanel').style.display = 'block';
       renderWishListScreen();
     } else if (tab === 'adminCreate') {
-      statsRow.style.display = 'none';
-      filterBar.style.display = 'none';
-      searchInput.style.display = 'none';
       document.getElementById('adminCreatePanel').style.display = 'block';
       renderAdminCal();
       loadAdminAllShifts();
     } else if (tab === 'adminStaff') {
-      statsRow.style.display = 'none';
-      filterBar.style.display = 'none';
-      searchInput.style.display = 'none';
       document.getElementById('adminStaffPanel').style.display = 'block';
       loadStaffList();
+    } else if (tab === 'adminSwap') {
+      document.getElementById('adminSwapPanel').style.display = 'block';
+      loadAdminSwapList();
     }
-}
+  }
+
+  /* ===== スタッフ：自分宛の交代申請一覧 ===== */
+  async function loadIncomingSwapList() {
+    const el = document.getElementById('incomingSwapList');
+    if (!el) return;
+    el.innerHTML = '<div class="center-state" style="padding:16px 0"><div class="big-spinner"></div></div>';
+    try {
+      const res = await fetch(`${API_BASE}/swap-requests/me`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (!res.ok) throw new Error(`エラー (${res.status})`);
+      const data = await res.json();
+      // APIは "shifts" キーで返す
+      const list = Array.isArray(data.shifts) ? data.shifts
+                 : Array.isArray(data.requests) ? data.requests
+                 : [];
+      renderIncomingSwapList(list);
+    } catch (err) {
+      el.innerHTML = `<p style="font-size:12px;color:var(--red);text-align:center;padding:12px 0">${err.message}</p>`;
+    }
+  }
+
+  function renderIncomingSwapList(list) {
+    const el = document.getElementById('incomingSwapList');
+    const pending = list.filter(r =>
+      r.status === 'pending' || r.status === 'swap_requested' || r.status === 'scheduled'
+    );
+    if (pending.length === 0) {
+      el.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:12px 0">自分宛の申請はありません</p>';
+      return;
+    }
+    el.innerHTML = pending.map((r, i) => {
+      const dateStr   = r.date || r.shiftDate || '';
+      const dt        = new Date(dateStr + 'T00:00:00');
+      const dateLabel = dateStr
+        ? `${dt.getMonth()+1}/${dt.getDate()}(${['日','月','火','水','木','金','土'][dt.getDay()]})`
+        : '—';
+      const name    = r.userName || r.requesterName || r.requesterEmail || '—';
+      const initial = name[0].toUpperCase();
+      const swapId  = r.swapId || r.shiftId;
+      return `
+        <div class="swap-history-item" style="padding:12px 0" id="swapItem-${i}">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <div class="staff-avatar" style="width:34px;height:34px;font-size:13px">${initial}</div>
+            <div>
+              <div class="swap-history-name">${name}</div>
+              <div class="swap-history-reason">${dateLabel}　${r.startTime||''}〜${r.endTime||''}</div>
+              ${r.note   ? `<div class="swap-history-reason" style="margin-top:2px">「${r.note}」</div>`   : ''}
+              ${r.reason ? `<div class="swap-history-reason" style="margin-top:2px">「${r.reason}」</div>` : ''}
+            </div>
+          </div>
+
+          <div class="swap-3btn-row">
+            <button class="swap-reply-btn green" onclick="respondSwap3('${swapId}', 'accept', ${i}, this)">
+              ○ 代われる
+            </button>
+            <button class="swap-reply-btn pink" onclick="respondSwap3('${swapId}', 'reject', ${i}, this)">
+              ✕ 無理
+            </button>
+            <button class="swap-reply-btn yellow" onclick="showConsultInput(${i})">
+              💬 相談する
+            </button>
+          </div>
+
+          <!-- 相談コメント入力欄（初期非表示） -->
+          <div class="consult-input-wrap" id="consultWrap-${i}">
+            <textarea id="consultText-${i}" rows="2" placeholder="コメントを入力…"></textarea>
+            <button class="consult-send-btn" onclick="respondSwap3('${swapId}', 'consult', ${i}, this)">
+              💬 コメントを送る
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function showConsultInput(idx) {
+    const wrap = document.getElementById(`consultWrap-${idx}`);
+    if (!wrap) return;
+    wrap.classList.toggle('show');
+  }
+
+  async function respondSwap3(swapId, type, idx, btn) {
+    const labelMap = { accept:'代われる', reject:'無理', consult:'相談する' };
+    const label    = labelMap[type] || type;
+    const comment  = type === 'consult'
+      ? (document.getElementById(`consultText-${idx}`)?.value.trim() || '')
+      : '';
+    if (type === 'consult' && !comment) {
+      showToast('コメントを入力してください', 'error'); return;
+    }
+    if (!confirm(`「${label}」で回答しますか？`)) return;
+    btn.disabled = true;
+
+    try {
+      const accept = type === 'accept' ? true : type === 'reject' ? false : null;
+      const body   = accept !== null
+        ? { accept }
+        : { accept: null, comment };
+
+      const res = await fetch(`${API_BASE}/swap-requests/${swapId}/respond`, {
+        method:  'PUT',
+        headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+        body:    JSON.stringify(body),
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (!res.ok) throw new Error(`エラー (${res.status})`);
+      showToast(
+        type === 'accept' ? '✓ 代われると回答しました' :
+        type === 'reject' ? '断りました' :
+        '💬 相談コメントを送りました', 'success'
+      );
+      // 回答済みの項目をグレーアウト
+      const item = document.getElementById(`swapItem-${idx}`);
+      if (item) {
+        item.style.opacity = '0.5';
+        item.querySelectorAll('button').forEach(b => b.disabled = true);
+      }
+    } catch (err) {
+      showToast(err.message, 'error');
+      btn.disabled = false;
+    }
+  }
+
+  /* ===== 管理者：交代申請一覧 ===== */
+  let allAdminSwaps  = [];
+  let adminSwapFilter = 'all';
+
+  async function loadAdminSwapList() {
+    const el = document.getElementById('adminSwapList');
+    el.innerHTML = '<div class="center-state"><div class="big-spinner"></div></div>';
+    try {
+      const res = await fetch(`${API_BASE}/swap-requests/me`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (!res.ok) throw new Error(`エラー (${res.status})`);
+      const data = await res.json();
+      allAdminSwaps = Array.isArray(data.requests) ? data.requests : [];
+      renderAdminSwapList();
+    } catch (err) {
+      el.innerHTML = `<p style="font-size:13px;color:var(--red);text-align:center;padding:16px 0">${err.message}</p>`;
+    }
+  }
+
+  function filterAdminSwap(filter, btn) {
+    adminSwapFilter = filter;
+    document.querySelectorAll('#adminSwapPanel .chip-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderAdminSwapList();
+  }
+
+  function renderAdminSwapList() {
+    const el = document.getElementById('adminSwapList');
+    const STATUS_LABEL = { pending:'承認待ち', responded:'回答済み', approved:'承認済み', rejected:'却下' };
+    const STATUS_COLOR = {
+      pending:   'color:var(--yellow);background:var(--yellow-light)',
+      responded: 'color:var(--primary);background:var(--primary-light)',
+      approved:  'color:#065F46;background:var(--green-light)',
+      rejected:  'color:var(--red);background:var(--red-light)',
+    };
+    let list = allAdminSwaps;
+    if (adminSwapFilter !== 'all') {
+      list = list.filter(r => r.status === adminSwapFilter);
+    }
+    if (list.length === 0) {
+      el.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:20px 0">申請はありません</p>';
+      return;
+    }
+    el.innerHTML = list.map(r => {
+      const dt = new Date((r.shiftDate||'')+'T00:00:00');
+      const dateLabel = r.shiftDate
+        ? `${dt.getMonth()+1}/${dt.getDate()}(${['日','月','火','水','木','金','土'][dt.getDay()]})`
+        : '—';
+      const stLabel = STATUS_LABEL[r.status] || r.status;
+      const stStyle = STATUS_COLOR[r.status] || '';
+      const canApprove = r.status === 'responded';
+      return `
+        <div class="swap-history-item" style="padding:14px 0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-size:13px;font-weight:700;color:var(--text)">${r.requesterName || r.requesterEmail || '—'} → ${r.targetName || r.targetEmail || '—'}</div>
+            <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;${stStyle}">${stLabel}</span>
+          </div>
+          <div class="swap-history-reason">${dateLabel} ${r.startTime||''}〜${r.endTime||''}</div>
+          ${r.reason ? `<div class="swap-history-reason" style="margin-top:2px">「${r.reason}」</div>` : ''}
+          ${canApprove ? `
+            <button class="act-btn approve" style="margin-top:10px;width:100%" onclick="approveSwap('${r.swapId}', this)">
+              ✓ 承認する
+            </button>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  async function approveSwap(swapId, btn) {
+    if (!confirm('この交代申請を承認しますか？')) return;
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${API_BASE}/swap-requests/${swapId}/approve`, {
+        method:  'PUT',
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (!res.ok) throw new Error(`エラー (${res.status})`);
+      showToast('✓ 承認しました', 'success');
+      loadAdminSwapList();
+    } catch (err) {
+      showToast(err.message, 'error');
+      btn.disabled = false;
+    }
+  }
 
   /* ===== シフト一覧タブ: カレンダー ===== */
   let adminCalYear  = new Date().getFullYear();
@@ -3689,14 +3946,14 @@
     const container = document.getElementById('staffListContainer');
     container.innerHTML = '<div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>';
     try {
-      const res = await fetch(`${API_BASE}/staff`, {
+      const res = await fetch(`${API_BASE}/admin/users`, {
         headers: { Authorization: `Bearer ${idToken}` },
       });
       if (res.status === 401) { doLogout(); return; }
       if (res.status === 403) throw new Error('管理者権限が必要です');
       if (!res.ok) throw new Error(`エラー (${res.status})`);
       const data = await res.json();
-      allStaffList = Array.isArray(data.users) ? data.staff : [];
+      allStaffList = Array.isArray(data.users) ? data.users : [];
       renderStaffList();
     } catch (err) {
       container.innerHTML = `
@@ -4127,13 +4384,27 @@
   async function fetchSwapStaffList() {
     const listEl = document.getElementById('swapStaffList');
     try {
+      // まず /staff を試み、失敗したら /admin/users にフォールバック
+      let staffList = [];
       const res = await fetch(`${API_BASE}/staff`, {
         headers: { Authorization: `Bearer ${idToken}` },
       });
       if (res.status === 401) { doLogout(); return; }
-      if (!res.ok) throw new Error(`エラー (${res.status})`);
-      const data = await res.json();
-      const staffList = Array.isArray(data.staff) ? data.staff : [];
+      if (res.ok) {
+        const data = await res.json();
+        staffList = Array.isArray(data.staff) ? data.staff : [];
+      } else {
+        // /staff が未実装なら /admin/users を試す
+        const res2 = await fetch(`${API_BASE}/admin/users`, {
+          headers: { Authorization: `Bearer ${idToken}` },
+        });
+        if (res2.ok) {
+          const data2 = await res2.json();
+          staffList = Array.isArray(data2.users) ? data2.users : [];
+        }
+      }
+      // 自分自身を除外
+      staffList = staffList.filter(s => s.email !== userEmail);
       if (staffList.length === 0) {
         listEl.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:16px 0">スタッフが見つかりません</p>';
         return;
@@ -4228,8 +4499,6 @@
   const ADMIN_STATUS_LABEL = { scheduled:'確定', pending:'申請中', cancelled:'キャンセル', swapped:'交換済み' };
 
   async function renderAdminScreen() {
-    showScreen('adminScreen'); // 追加
-    document.querySelector('.admin-body').style.display = 'block'; // 追加
     const listEl = document.getElementById('adminShiftList');
     listEl.innerHTML = '<div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>';
     ['statTotal','statPending','statToday'].forEach(id => document.getElementById(id).textContent = '—');
