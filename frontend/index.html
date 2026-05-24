@@ -2554,9 +2554,9 @@
         <div class="section-card">
           <div class="section-title">交代申請一覧</div>
           <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
-            <button class="filter-chip active" id="swapFilterAll"    onclick="filterAdminSwap('all',this)">すべて</button>
-            <button class="filter-chip"        id="swapFilterPending" onclick="filterAdminSwap('pending',this)">承認待ち</button>
-            <button class="filter-chip"        id="swapFilterDone"    onclick="filterAdminSwap('approved',this)">承認済み</button>
+            <button class="chip-btn active" id="swapFilterAll"    onclick="filterAdminSwap('all',this)">すべて</button>
+            <button class="chip-btn"        id="swapFilterPending" onclick="filterAdminSwap('pending',this)">承認待ち</button>
+            <button class="chip-btn"        id="swapFilterDone"    onclick="filterAdminSwap('approved',this)">承認済み</button>
           </div>
           <div id="adminSwapList">
             <div class="center-state"><div class="big-spinner"></div></div>
@@ -3661,13 +3661,15 @@
     const el = document.getElementById('adminSwapList');
     el.innerHTML = '<div class="center-state"><div class="big-spinner"></div></div>';
     try {
-      const res = await fetch(`${API_BASE}/swap-requests/me`, {
+      const res = await fetch(`${API_BASE}/admin/swap-requests`, {
         headers: { Authorization: `Bearer ${idToken}` },
       });
       if (res.status === 401) { doLogout(); return; }
       if (!res.ok) throw new Error(`エラー (${res.status})`);
       const data = await res.json();
-      allAdminSwaps = Array.isArray(data.requests) ? data.requests : [];
+      allAdminSwaps = Array.isArray(data.swaps)    ? data.swaps
+                   : Array.isArray(data.requests)  ? data.requests
+                   : [];
       renderAdminSwapList();
     } catch (err) {
       el.innerHTML = `<p style="font-size:13px;color:var(--red);text-align:center;padding:16px 0">${err.message}</p>`;
@@ -3676,7 +3678,7 @@
 
   function filterAdminSwap(filter, btn) {
     adminSwapFilter = filter;
-    document.querySelectorAll('#adminSwapPanel .filter-chip').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#adminSwapPanel .chip-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     renderAdminSwapList();
   }
@@ -4008,17 +4010,16 @@
     const container = document.getElementById('staffListContainer');
     container.innerHTML = '<div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>';
     try {
-      const res = await fetch(`${API_BASE}/admin/users`, {
+      const res = await fetch(`${API_BASE}/staff`, {
         headers: { Authorization: `Bearer ${idToken}` },
       });
       if (res.status === 401) { doLogout(); return; }
       if (res.status === 403) throw new Error('管理者権限が必要です');
       if (!res.ok) throw new Error(`エラー (${res.status})`);
       const data = await res.json();
-      // レスポンスのキーがusers・staff・itemsなど複数パターンに対応
-      allStaffList = Array.isArray(data.users) ? data.users
-                   : Array.isArray(data.staff) ? data.staff
-                   : Array.isArray(data.items) ? data.items
+      allStaffList = Array.isArray(data.staff)  ? data.staff
+                   : Array.isArray(data.users)  ? data.users
+                   : Array.isArray(data.items)  ? data.items
                    : [];
       renderStaffList();
     } catch (err) {
@@ -4531,25 +4532,15 @@
   async function fetchSwapStaffList() {
     const listEl = document.getElementById('swapStaffList');
     try {
-      // まず /staff を試み、失敗したら /staff にフォールバック
-      let staffList = [];
       const res = await fetch(`${API_BASE}/staff`, {
         headers: { Authorization: `Bearer ${idToken}` },
       });
       if (res.status === 401) { doLogout(); return; }
-      if (res.ok) {
-        const data = await res.json();
-        staffList = Array.isArray(data.staff) ? data.staff : [];
-      } else {
-        // /staff が未実装なら /staff を試す
-        const res2 = await fetch(`${API_BASE}/staff`, {
-          headers: { Authorization: `Bearer ${idToken}` },
-        });
-        if (res2.ok) {
-          const data2 = await res2.json();
-          staffList = Array.isArray(data2.users) ? data2.users : [];
-        }
-      }
+      if (!res.ok) throw new Error(`エラー (${res.status})`);
+      const data = await res.json();
+      let staffList = Array.isArray(data.staff) ? data.staff
+                    : Array.isArray(data.users) ? data.users
+                    : [];
       // 自分自身を除外
       staffList = staffList.filter(s => s.email !== userEmail);
       if (staffList.length === 0) {
