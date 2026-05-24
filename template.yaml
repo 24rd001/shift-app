@@ -603,17 +603,50 @@ Resources:
       CodeUri: ./
       Handler: getMySwapRequests.handler
       Policies:
-        # SwapRequestsとUsersテーブルの読み取り権限が必要
+        # SwapRequests、Users、Shiftsテーブルの読み取り権限が必要
         - DynamoDBReadPolicy:
             TableName: !Ref SwapRequestsTable
         - DynamoDBReadPolicy:
             TableName: !Ref UsersTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref ShiftsTable
       Events:
         GetMySwapRequestsApi:
           Type: Api
           Properties:
             RestApiId: !Ref ShiftAppApi
             Path: /swap-requests/me
+            Method: GET
+
+  GetAdminSwapRequestsFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/swapRequests/getAdminSwapRequests.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: getAdminSwapRequests.handler
+      Policies:
+        # SwapRequests、Users、Shiftsテーブルの読み取り権限が必要
+        - DynamoDBReadPolicy:
+            TableName: !Ref SwapRequestsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref UsersTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref ShiftsTable
+      Events:
+        GetAdminSwapRequestsApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /admin/swap-requests
             Method: GET
 
   RespondToSwapFunction:
