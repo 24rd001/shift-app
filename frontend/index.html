@@ -3476,31 +3476,56 @@
 
   /* ===== 管理者ホーム内タブ切り替え ===== */
   function adminSwitchTab(tab, btn) {
-    const shiftListWrap = document.getElementById('adminShiftList').parentElement;
-    shiftListWrap.style.display                                = 'none';
-    document.getElementById('adminWishesPanel').style.display  = 'none';
-    document.getElementById('adminCreatePanel').style.display  = 'none';
-    document.getElementById('adminStaffPanel').style.display   = 'none';
-    document.getElementById('adminSwapPanel').style.display    = 'none';
+    // admin-bodyは常に表示する
+    document.querySelector('.admin-body').style.display = 'block';
+    
+    // 各要素を取得
+    const statsRow = document.getElementById('adminStatsRow');
+    const filterBar = document.querySelector('.admin-filter-bar');
+    const searchInput = document.getElementById('adminSearch').parentElement;
+    
+    // 各パネルを非表示にする
+    document.getElementById('adminShiftList').style.display = 'none';
+    document.getElementById('adminWishesPanel').style.display = 'none';
+    document.getElementById('adminCreatePanel').style.display = 'none';
+    document.getElementById('adminStaffPanel').style.display = 'none';
+    document.getElementById('adminSwapPanel').style.display = 'none';
+    
     document.querySelectorAll('#adminScreen .nav-item').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    
     if (tab === 'adminShifts') {
-      shiftListWrap.style.display = 'block';
+      statsRow.style.display = 'grid';
+      filterBar.style.display = 'flex';
+      searchInput.style.display = 'block';
+      document.getElementById('adminShiftList').style.display = 'block';
     } else if (tab === 'adminWishes') {
+      statsRow.style.display = 'none';
+      filterBar.style.display = 'none';
+      searchInput.style.display = 'none';
       document.getElementById('adminWishesPanel').style.display = 'block';
       renderWishListScreen();
     } else if (tab === 'adminCreate') {
+      statsRow.style.display = 'none';
+      filterBar.style.display = 'none';
+      searchInput.style.display = 'none';
       document.getElementById('adminCreatePanel').style.display = 'block';
       renderAdminCal();
       loadAdminAllShifts();
     } else if (tab === 'adminStaff') {
+      statsRow.style.display = 'none';
+      filterBar.style.display = 'none';
+      searchInput.style.display = 'none';
       document.getElementById('adminStaffPanel').style.display = 'block';
       loadStaffList();
     } else if (tab === 'adminSwap') {
+      statsRow.style.display = 'none';
+      filterBar.style.display = 'none';
+      searchInput.style.display = 'none';
       document.getElementById('adminSwapPanel').style.display = 'block';
       loadAdminSwapList();
     }
-  }
+}
 
   /* ===== スタッフ：自分宛の交代申請一覧 ===== */
   async function loadIncomingSwapList() {
@@ -3515,9 +3540,7 @@
       if (!res.ok) throw new Error(`エラー (${res.status})`);
       const data = await res.json();
       // APIは "shifts" キーで返す
-      const list = Array.isArray(data.shifts) ? data.shifts
-                 : Array.isArray(data.requests) ? data.requests
-                 : [];
+      const list = Array.isArray(data.swaps) ? data.swaps : [];
       renderIncomingSwapList(list);
     } catch (err) {
       el.innerHTML = `<p style="font-size:12px;color:var(--red);text-align:center;padding:12px 0">${err.message}</p>`;
