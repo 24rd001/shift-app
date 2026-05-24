@@ -3946,7 +3946,7 @@
     const container = document.getElementById('staffListContainer');
     container.innerHTML = '<div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>';
     try {
-      const res = await fetch(`${API_BASE}/admin/users`, {
+      const res = await fetch(`${API_BASE}/staff`, {
         headers: { Authorization: `Bearer ${idToken}` },
       });
       if (res.status === 401) { doLogout(); return; }
@@ -4002,7 +4002,7 @@
     const confirmed = window.confirm(`${email} の権限を「${label}」に変更しますか？`);
     if (!confirmed) return;
     try {
-      const res = await fetch(`${API_BASE}/admin/users/role`, {
+      const res = await fetch(`${API_BASE}/staff/role`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, role: newRole }),
@@ -4384,7 +4384,7 @@
   async function fetchSwapStaffList() {
     const listEl = document.getElementById('swapStaffList');
     try {
-      // まず /staff を試み、失敗したら /admin/users にフォールバック
+      // まず /staff を試み、失敗したら /staff にフォールバック
       let staffList = [];
       const res = await fetch(`${API_BASE}/staff`, {
         headers: { Authorization: `Bearer ${idToken}` },
@@ -4394,8 +4394,8 @@
         const data = await res.json();
         staffList = Array.isArray(data.staff) ? data.staff : [];
       } else {
-        // /staff が未実装なら /admin/users を試す
-        const res2 = await fetch(`${API_BASE}/admin/users`, {
+        // /staff が未実装なら /staff を試す
+        const res2 = await fetch(`${API_BASE}/staff`, {
           headers: { Authorization: `Bearer ${idToken}` },
         });
         if (res2.ok) {
