@@ -2554,9 +2554,9 @@
         <div class="section-card">
           <div class="section-title">交代申請一覧</div>
           <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
-            <button class="chip-btn active" id="swapFilterAll"    onclick="filterAdminSwap('all',this)">すべて</button>
-            <button class="chip-btn"        id="swapFilterPending" onclick="filterAdminSwap('pending',this)">承認待ち</button>
-            <button class="chip-btn"        id="swapFilterDone"    onclick="filterAdminSwap('approved',this)">承認済み</button>
+            <button class="filter-chip active" id="swapFilterAll"    onclick="filterAdminSwap('all',this)">すべて</button>
+            <button class="filter-chip"        id="swapFilterPending" onclick="filterAdminSwap('pending',this)">承認待ち</button>
+            <button class="filter-chip"        id="swapFilterDone"    onclick="filterAdminSwap('approved',this)">承認済み</button>
           </div>
           <div id="adminSwapList">
             <div class="center-state"><div class="big-spinner"></div></div>
@@ -3676,7 +3676,7 @@
 
   function filterAdminSwap(filter, btn) {
     adminSwapFilter = filter;
-    document.querySelectorAll('#adminSwapPanel .chip-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#adminSwapPanel .filter-chip').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     renderAdminSwapList();
   }
