@@ -47,6 +47,36 @@
 ## 開発期間
 2026年5月（約2週間、初期構築から基本機能完成まで）
 
+## アプリ画面
+
+### スタッフ画面
+
+| シフト管理 | シフト希望提出 |
+|------|------|
+| <img width="550" height="563" alt="image" src="https://github.com/user-attachments/assets/cb87eacc-ad5f-438d-b4f6-3d49dff5893e" />
+ |<img width="946" height="803" alt="image" src="https://github.com/user-attachments/assets/bba3b514-fdf0-42f9-a8b0-a72bf4bbd96a" />
+|
+
+| シフト交代申請 | トーク画面 |
+|------|------|
+| <img width="947" height="526" alt="image" src="https://github.com/user-attachments/assets/07b8d2db-f8d7-4c37-b414-00e0bdd7e572" />
+ | <img width="944" height="539" alt="image" src="https://github.com/user-attachments/assets/96d7a051-e56b-48f6-9d13-79737476c3cd" />
+ |
+
+### 管理者画面
+
+| シフト一覧 | 希望一覧 |
+|------|------|
+| <img width="937" height="517" alt="image" src="https://github.com/user-attachments/assets/d93891af-c356-4293-8a1f-72e0a7079235" />
+ | <img width="940" height="534" alt="image" src="https://github.com/user-attachments/assets/7dcd19bd-f778-44c9-84d2-00c37710988b" />
+ |
+
+| スタッフ管理 | 交代申請管理 |
+|------|------|
+| <img width="942" height="529" alt="image" src="https://github.com/user-attachments/assets/a06c3e6c-44f5-4b5e-9e2d-c7054155a26d" />
+ | <img width="944" height="566" alt="image" src="https://github.com/user-attachments/assets/67b52543-cb2d-451e-905f-1fbb1660f202" />
+ |
+
 ---
 
 ## PMの取り組み（Daiche-0624）
