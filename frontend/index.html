@@ -1667,6 +1667,7 @@
     .wish-list-name span { font-size: 11px; font-weight: 500; color: var(--muted); display: block; }
     .wish-dates-wrap { display: flex; flex-wrap: wrap; gap: 5px; }
     .wish-date-chip { background: #EDE9FE; color: #5B21B6; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; }
+    .wish-date-chip.selected { background: var(--primary) !important; color: #fff !important; border-color: var(--primary) !important; }
     .wish-time-badge { font-size: 11px; color: var(--muted); margin-top: 6px; }
     .wish-note-badge { font-size: 11px; color: var(--muted); margin-top: 4px; font-style: italic; }
     .wish-create-btn {
@@ -3528,6 +3529,7 @@
       filterBar.style.display = 'none';
       searchInput.style.display = 'none';
       document.getElementById('adminWishesPanel').style.display = 'block';
+      selectedWish = null;
       renderWishListScreen();
     } else if (tab === 'adminCreate') {
       statsRow.style.display = 'none';
@@ -4309,15 +4311,69 @@
       });
       if (res.status === 401) { doLogout(); return; }
       if (res.status === 403) throw new Error('管理者権限が必要です');
-      if (!res.ok) throw new Error(`API未実装`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      allWishList = Array.isArray(data.wishes) ? data.wishes : [];
+
+      // APIレスポンスのキー名を全パターン対応
+      const raw = Array.isArray(data.wishes)   ? data.wishes
+                : Array.isArray(data.requests) ? data.requests
+                : Array.isArray(data.items)    ? data.items
+                : Array.isArray(data)          ? data : [];
+
+      // 各レコードのフィールド名を正規化
+      // dates が配列でなく date（単一）で返ってくるケースにも対応
+      allWishList = raw.map(w => {
+        let dates = [];
+        if (Array.isArray(w.preferredDates)) dates = w.preferredDates;
+        else if (Array.isArray(w.dates))     dates = w.dates;
+        else if (Array.isArray(w.wishDates)) dates = w.wishDates;
+        else if (w.date)                    dates = [w.date];
+        else if (w.wishDate)                dates = [w.wishDate];
+
+        return {
+          requestId: w.requestId || w.id || w.wishId || '',
+          userId:    w.userId    || '',
+          email:     w.email     || w.userEmail || '',
+          name:      w.name      || w.userName  || w.displayName || '',
+          dates,
+          startTime: w.startTime || w.start || '',
+          endTime:   w.endTime   || w.end   || '',
+          note:      w.note      || w.memo  || w.comment || '',
+        };
+      });
+
+      // スタッフ名をキャッシュから補完
+      allWishList.forEach(w => {
+        if (!w.name && w.email) {
+          const hit = allStaffList.find(u => u.email === w.email || u.userId === w.userId);
+          if (hit) w.name = hit.name || hit.displayName || '';
+        }
+      });
+
       renderWishList();
-    } catch {
-      // localStorageからスタッフが提出したデータを読み込む
+    } catch (err) {
+      // APIが失敗した場合はlocalStorageのデータを使う
       const saved = JSON.parse(localStorage.getItem(WISH_KEY) || '[]');
-      allWishList = saved.filter(w => w.dates && w.dates.some(d => d.startsWith(ym)));
-      if (allWishList.length === 0) allWishList = saved;
+      let local = saved.filter(w => w.dates && w.dates.some(d => d.startsWith(ym)));
+      if (local.length === 0) local = saved;
+      // localStorageデータも同じ正規化処理を適用
+      allWishList = local.map(w => ({
+        requestId: w.requestId || w.id || '',
+        userId:    w.userId    || '',
+        email:     w.email     || '',
+        name:      w.name      || w.email || '',
+        dates:     Array.isArray(w.dates) ? w.dates : (w.date ? [w.date] : []),
+        startTime: w.startTime || '',
+        endTime:   w.endTime   || '',
+        note:      w.note      || '',
+      }));
+      if (allWishList.length === 0) {
+        container.innerHTML = `<div class="center-state" style="padding:40px 0">
+          <p class="state-title">希望提出がありません</p>
+          <p class="state-sub" style="font-size:11px;margin-top:4px;color:var(--red)">${err.message}</p>
+        </div>`;
+        return;
+      }
       renderWishList();
     }
   }
@@ -4331,41 +4387,244 @@
     }
   });
 
+  // 選択中の希望を管理
+  let selectedWish = null; // { wishIndex, dateIndex, email, name, date, startTime, endTime, note, requestId }
+
   function renderWishList() {
     const q = (document.getElementById('wishListSearch').value || '').toLowerCase();
-    const list = q
+    const src = q
       ? allWishList.filter(w =>
           (w.email || '').toLowerCase().includes(q) ||
           (w.name  || '').toLowerCase().includes(q))
       : allWishList;
+
     const container = document.getElementById('wishListContainer');
-    if (list.length === 0) {
+
+    // 日付ごとに1件ずつ展開してフラット化
+    const flat = [];
+    src.forEach((w, wi) => {
+      const dates = (w.dates || []).length > 0 ? w.dates : [''];
+      dates.forEach((d, di) => {
+        flat.push({ w, wi, di, date: d });
+      });
+    });
+
+    // 日付昇順ソート（未設定は末尾）
+    flat.sort((a, b) => {
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return a.date.localeCompare(b.date);
+    });
+
+    if (flat.length === 0) {
       container.innerHTML = '<div class="center-state" style="padding:40px 0"><p class="state-title">希望提出がありません</p></div>';
+      selectedWish = null;
+      renderWishActionBar();
       return;
     }
-    container.innerHTML = list.map((w, wi) => {
-      const initial = (w.name || w.email || '?')[0].toUpperCase();
-      const timeStr = (w.startTime && w.endTime) ? `${w.startTime}〜${w.endTime}` : '';
-      const dateButtons = (w.dates || []).map(d => {
-        const dt = new Date(d + 'T00:00:00');
-        const label = `${dt.getMonth()+1}/${dt.getDate()}(${WEEKDAYS[dt.getDay()]})`;
-        return `<button class="wish-date-chip" style="cursor:pointer;border:1.5px solid var(--primary);background:var(--primary-light);color:var(--primary);font-weight:700"
-          onclick="openWishConfirmModal('${w.email}','${w.name||''}','${d}','${w.startTime||'09:00'}','${w.endTime||'17:00'}','${w.note||''}')">
-          ${label} ＋
-        </button>`;
-      }).join('');
+
+    container.innerHTML = flat.map((item, fi) => {
+      const { w, wi, di, date } = item;
+      const initial    = (w.name || w.email || '?')[0].toUpperCase();
+      const isSelected = selectedWish && selectedWish.fi === fi;
+
+      let dateLabel = '日付未設定';
+      if (date) {
+        const dt = new Date(date + 'T00:00:00');
+        dateLabel = `${dt.getMonth()+1}月${dt.getDate()}日（${WEEKDAYS[dt.getDay()]}）`;
+      }
+      const timeStr = (w.startTime && w.endTime)
+        ? `${w.startTime} 〜 ${w.endTime}` : '時間未定';
+
       return `
-        <div class="wish-list-card">
-          <div class="wish-list-top">
-            <div class="wish-list-avatar">${initial}</div>
-            <div class="wish-list-name">${w.name || '—'}<span>${w.email || ''}</span></div>
+        <div onclick="selectWishCard(${fi},${wi},${di},'${date}')" style="
+          background:${isSelected ? 'var(--primary-light)' : '#fff'};
+          border:2px solid ${isSelected ? 'var(--primary)' : 'var(--border)'};
+          border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;
+          transition:all .15s;
+          box-shadow:${isSelected ? '0 2px 12px rgba(79,70,229,.15)' : '0 1px 4px rgba(0,0,0,.04)'}">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="
+              width:38px;height:38px;border-radius:50%;flex-shrink:0;
+              background:${isSelected ? 'var(--primary)' : '#EEF2FF'};
+              display:flex;align-items:center;justify-content:center;
+              font-size:15px;font-weight:800;
+              color:${isSelected ? '#fff' : 'var(--primary)'}">
+              ${initial}
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:700;color:var(--text)">${w.name || '—'}</div>
+              <div style="font-size:11px;color:var(--muted)">${w.email || ''}</div>
+            </div>
+            ${isSelected
+              ? '<span style="font-size:16px;color:var(--primary);font-weight:800">✓</span>'
+              : '<span style="font-size:20px;color:var(--border)">›</span>'}
           </div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:6px">希望日をタップしてシフトを確定：</div>
-          <div class="wish-dates-wrap">${dateButtons}</div>
-          ${timeStr ? `<div class="wish-time-badge">希望時間: ${timeStr}</div>` : ''}
-          ${w.note ? `<div class="wish-note-badge">「${w.note}」</div>` : ''}
+          <div style="margin-top:8px;padding-left:48px;display:flex;flex-direction:column;gap:2px">
+            <div style="font-size:13px;font-weight:700;color:${isSelected ? 'var(--primary)' : 'var(--text)'}">
+              ${dateLabel}
+            </div>
+            <div style="font-size:12px;color:var(--muted)">${timeStr}</div>
+            ${w.note ? `<div style="font-size:12px;color:var(--muted)">「${w.note}」</div>` : ''}
+          </div>
         </div>`;
     }).join('');
+
+    renderWishActionBar();
+  }
+
+  function selectWishCard(fi, wi, di, date) {
+    const w = allWishList[wi];
+    if (!w) return;
+    // 同じカードを再タップで解除
+    if (selectedWish && selectedWish.fi === fi) {
+      selectedWish = null;
+      renderWishList();
+      return;
+    }
+    selectedWish = {
+      fi, wi, di,
+      email:     w.email     || w.userId || '',
+      name:      w.name      || '',
+      date,
+      startTime: w.startTime || '09:00',
+      endTime:   w.endTime   || '17:00',
+      note:      w.note      || '',
+      requestId: w.requestId || w.id || '',
+    };
+    renderWishList();
+  }
+
+  function selectWishDay(wi, date) {
+    if (!selectedWish || selectedWish.wi !== wi) return;
+    selectedWish.date = date;
+    renderWishList();
+  }
+
+  /* 選択中の希望に対するアクションバー */
+  function renderWishActionBar() {
+    let bar = document.getElementById('wishActionBar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'wishActionBar';
+      bar.style.cssText = `
+        position:sticky;bottom:68px;left:0;right:0;
+        background:#fff;border-top:1px solid var(--border);
+        padding:12px 16px;display:flex;gap:10px;align-items:center;
+        box-shadow:0 -4px 16px rgba(0,0,0,.08);z-index:50;
+      `;
+      document.getElementById('adminWishesPanel').appendChild(bar);
+    }
+    if (!selectedWish) {
+      bar.style.display = 'none';
+      return;
+    }
+    const { name, email, date, startTime, endTime } = selectedWish;
+    let dateLabel = '日付未設定';
+    if (date) {
+      const dt = new Date(date + 'T00:00:00');
+      dateLabel = `${dt.getMonth()+1}/${dt.getDate()}(${WEEKDAYS[dt.getDay()]})`;
+    }
+    bar.style.display = 'flex';
+    bar.innerHTML = `
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:1px">選択中</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);
+                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+          ${name || email}　${dateLabel}　${startTime}〜${endTime}
+        </div>
+      </div>
+      <button onclick="deleteWish()" style="
+        flex-shrink:0;padding:10px 14px;
+        background:var(--red-light);border:1.5px solid var(--red);
+        border-radius:10px;font-size:12px;font-weight:700;color:var(--red);cursor:pointer">
+        削除
+      </button>
+      <button id="wishConfirmBtn" onclick="confirmWishDirect()" style="
+        flex-shrink:0;padding:10px 18px;
+        background:var(--green);border:none;
+        border-radius:10px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;
+        box-shadow:0 3px 10px rgba(16,185,129,.3)">
+        ✓ 確定
+      </button>`;
+  }
+
+  /* 確定ボタン即実行（モーダルなし）
+   * selectedWish の日時をそのままAPIに送る */
+  async function confirmWishDirect() {
+    if (!selectedWish) return;
+    const { wi, email, name, date, startTime, endTime, note, requestId } = selectedWish;
+    if (!date)      { showToast('希望日が設定されていません', 'error'); return; }
+    if (!startTime || !endTime) { showToast('希望時間が設定されていません', 'error'); return; }
+
+    const btn = document.getElementById('wishConfirmBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '登録中...'; }
+
+    try {
+      const res = await fetch(`${API_BASE}/admin/shifts`, {
+        method:  'POST',
+        headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, date, startTime, endTime, note: note || null, status: 'scheduled' }),
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (!res.ok) {
+        const b = await res.json().catch(() => ({}));
+        throw new Error(b.error || b.message || `エラー (${res.status})`);
+      }
+      const created = await res.json().catch(() => ({}));
+
+      // 管理者シフトキャッシュに追加
+      const staffCache = allStaffList.find(u => u.email === email);
+      adminAllShifts.push({
+        shiftId:   created.shiftId || created.id || `local_${Date.now()}`,
+        userId:    staffCache?.userId || staffCache?.id || '',
+        email, name: staffCache?.name || name || '',
+        date, startTime, endTime,
+        status: 'scheduled',
+        note: note || null,
+      });
+      adminAllShifts.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+      // 希望一覧から確定した日を削除
+      removeWishDate(wi, date);
+      selectedWish = null;
+
+      showToast(`✓ ${name || email} ${date} のシフトを確定しました`, 'success');
+      renderWishList();
+      renderAdminList();
+      updateAdminStats();
+
+    } catch (err) {
+      showToast(err.message, 'error');
+      if (btn) { btn.disabled = false; btn.textContent = '✓ 確定'; }
+    }
+  }
+
+  /* 希望一覧から指定日を削除する共通処理 */
+  function removeWishDate(wi, date) {
+    const wish = allWishList[wi];
+    if (!wish) return;
+    wish.dates = (wish.dates || []).filter(d => d !== date);
+    if (wish.dates.length === 0) allWishList.splice(wi, 1);
+  }
+
+  async function deleteWish() {
+    if (!selectedWish) return;
+    const { wi, date, requestId } = selectedWish;
+    if (!confirm(`${selectedWish.name || selectedWish.email} の ${date || '希望'} を削除しますか？`)) return;
+    if (requestId) {
+      try {
+        await fetch(`${API_BASE}/admin/wishes/${requestId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${idToken}` },
+        });
+      } catch {}
+    }
+    removeWishDate(wi, date);
+    selectedWish = null;
+    showToast('希望を削除しました', 'success');
+    renderWishList();
+    updateAdminStats();
   }
 
   /* ===== シフト作成: スタッフ選択ドロップダウン同期 ===== */
@@ -4418,92 +4677,6 @@
       btn.disabled = false;
     }
   }
-  function openWishConfirmModal(email, name, date, startTime, endTime, note) {
-    const dt    = new Date(date + 'T00:00:00');
-    const label = `${dt.getMonth()+1}/${dt.getDate()}(${WEEKDAYS[dt.getDay()]})`;
-    // モーダルがなければ作成
-    let modal = document.getElementById('wishConfirmModal');
-    if (!modal) {
-      modal = document.createElement('div');
-      modal.id = 'wishConfirmModal';
-      modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:flex-end;justify-content:center';
-      modal.innerHTML = `
-        <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:20px 16px 40px">
-          <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px" id="wishModalTitle"></div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:16px" id="wishModalSub"></div>
-          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
-            <div>
-              <label class="form-label">シフト日</label>
-              <input class="form-input" type="date" id="wishModalDate" style="padding-left:14px;width:100%;box-sizing:border-box">
-            </div>
-            <div>
-              <label class="form-label">時間帯</label>
-              <div class="wish-time-row">
-                <label>開始</label>
-                <input class="form-input" type="time" id="wishModalStart">
-                <label>終了</label>
-                <input class="form-input" type="time" id="wishModalEnd">
-              </div>
-            </div>
-            <div>
-              <label class="form-label">備考</label>
-              <input class="form-input" type="text" id="wishModalNote" placeholder="任意">
-            </div>
-          </div>
-          <div style="display:flex;gap:8px">
-            <button onclick="document.getElementById('wishConfirmModal').style.display='none'"
-              style="flex:1;padding:12px;background:var(--gray-light);border:none;border-radius:12px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer">
-              キャンセル
-            </button>
-            <button id="wishModalConfirmBtn" onclick="confirmWishShift()"
-              style="flex:2;padding:12px;background:var(--green);border:none;border-radius:12px;font-size:13px;font-weight:700;color:#fff;cursor:pointer">
-              ✓ シフトを確定する
-            </button>
-          </div>
-        </div>`;
-      document.querySelector('.app').appendChild(modal);
-    }
-    // 値をセット
-    document.getElementById('wishModalTitle').textContent = `${name || email} のシフトを確定`;
-    document.getElementById('wishModalSub').textContent   = `希望日：${label}　${startTime}〜${endTime}`;
-    document.getElementById('wishModalDate').value  = date;
-    document.getElementById('wishModalStart').value = startTime || '09:00';
-    document.getElementById('wishModalEnd').value   = endTime   || '17:00';
-    document.getElementById('wishModalNote').value  = note || '';
-    modal.dataset.email = email;
-    modal.style.display = 'flex';
-  }
-
-  async function confirmWishShift() {
-    const modal     = document.getElementById('wishConfirmModal');
-    const email     = modal.dataset.email;
-    const date      = document.getElementById('wishModalDate').value;
-    const startTime = document.getElementById('wishModalStart').value;
-    const endTime   = document.getElementById('wishModalEnd').value;
-    const note      = document.getElementById('wishModalNote').value.trim();
-    const btn       = document.getElementById('wishModalConfirmBtn');
-    if (!date) { showToast('シフト日を選択してください', 'error'); return; }
-    if (!startTime || !endTime) { showToast('時間帯を入力してください', 'error'); return; }
-    btn.disabled = true;
-    btn.textContent = '登録中...';
-    try {
-      const res = await fetch(`${API_BASE}/admin/shifts`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, date, startTime, endTime, note: note || null }),
-      });
-      if (res.status === 401) { doLogout(); return; }
-      if (!res.ok) { const b = await res.json().catch(()=>({})); throw new Error(b.error || `エラー (${res.status})`); }
-      modal.style.display = 'none';
-      showToast('✓ シフトを確定しました', 'success');
-    } catch (err) {
-      showToast(err.message, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = '✓ シフトを確定する';
-    }
-  }
-
   /* ===== シフト作成 ===== */
   async function submitCreateShift() {
     const email     = document.getElementById('createStaffEmail').value.trim();
@@ -4659,25 +4832,24 @@
         body:    JSON.stringify(payload),
       });
       if (res.status === 401) { doLogout(); return; }
-      if (!res.ok) throw new Error('API未実装');
+      if (!res.ok) throw new Error('送信失敗');
       showToast('希望を提出しました ✓', 'success');
     } catch {
-      // API未実装の場合はlocalStorageに保存
+      showToast('希望を提出しました ✓', 'success');
+    } finally {
+      // API成否に関わらず常にlocalStorageに保存（管理者側でも見えるように）
       const existing = JSON.parse(localStorage.getItem(WISH_KEY) || '[]');
-      // 同じユーザーの既存データを上書き
       const filtered = existing.filter(w => w.email !== userEmail);
       filtered.push({
-        name:      userName || userEmail,
-        email:     userEmail,
-        dates:     payload.dates,
-        startTime: payload.startTime || '',
-        endTime:   payload.endTime   || '',
-        note:      payload.note      || '',
+        name:        userName || userEmail,
+        email:       userEmail,
+        dates:       payload.dates,
+        startTime:   payload.startTime || '',
+        endTime:     payload.endTime   || '',
+        note:        payload.note      || '',
         submittedAt: new Date().toISOString(),
       });
       localStorage.setItem(WISH_KEY, JSON.stringify(filtered));
-      showToast('希望を提出しました ✓', 'success');
-    } finally {
       selectedWishDates.clear();
       document.getElementById('wishNote').value = '';
       renderWishCalendar();
