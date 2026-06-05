@@ -987,12 +987,7 @@
       border: 1.5px solid;
       transition: background .15s;
     }
-    .act-btn.reject {
-      background: var(--red-light);
-      color: var(--red);
-      border-color: #FECACA;
-    }
-    .act-btn.reject:hover { background: #FEE2E2; }
+    .act-btn.approve {
       background: var(--green-light);
       color: #065F46;
       border-color: #6EE7B7;
@@ -1672,6 +1667,7 @@
     .wish-list-name span { font-size: 11px; font-weight: 500; color: var(--muted); display: block; }
     .wish-dates-wrap { display: flex; flex-wrap: wrap; gap: 5px; }
     .wish-date-chip { background: #EDE9FE; color: #5B21B6; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; }
+    .wish-date-chip.selected { background: var(--primary) !important; color: #fff !important; border-color: var(--primary) !important; }
     .wish-time-badge { font-size: 11px; color: var(--muted); margin-top: 6px; }
     .wish-note-badge { font-size: 11px; color: var(--muted); margin-top: 4px; font-style: italic; }
     .wish-create-btn {
@@ -2338,10 +2334,23 @@
       </div>
 
       <!-- 統計 -->
-      <div class="admin-stats-row" id="adminStatsRow">
-        <div class="stat-card"><div class="stat-num" id="statTotal">—</div><div class="stat-label">全シフト</div></div>
-        <div class="stat-card"><div class="stat-num" id="statPending" style="color:var(--yellow)">—</div><div class="stat-label">申請中</div></div>
-        <div class="stat-card"><div class="stat-num" id="statToday" style="color:var(--primary)">—</div><div class="stat-label">本日</div></div>
+      <div class="admin-stats-row" id="adminStatsRow" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card" style="cursor:pointer" onclick="adminSwitchTab('adminCreate', document.getElementById('adminNavCreate'))">
+          <div class="stat-num" id="statTotal" style="color:var(--primary)">—</div>
+          <div class="stat-label">全シフト</div>
+        </div>
+        <div class="stat-card" style="cursor:pointer" onclick="adminSwitchTab('adminWishes', document.getElementById('adminNavWishes'))">
+          <div class="stat-num" id="statPending" style="color:var(--yellow)">—</div>
+          <div class="stat-label">申請中</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statToday" style="color:var(--green)">—</div>
+          <div class="stat-label">本日</div>
+        </div>
+        <div class="stat-card" style="cursor:pointer" onclick="adminSwitchTab('adminSwap', document.getElementById('adminNavSwap'))">
+          <div class="stat-num" id="statSwapPending" style="color:var(--red)">—</div>
+          <div class="stat-label">交代確認待ち</div>
+        </div>
       </div>
 
       <!-- フィルター -->
@@ -2425,12 +2434,21 @@
         <div id="adminCreateForm" style="display:none;margin-bottom:14px">
           <div class="section-card">
             <div class="section-title">対象スタッフ</div>
-            <div class="input-wrap" style="margin-bottom:0">
+            <div class="input-wrap" style="margin-bottom:8px">
               <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
               </svg>
+              <select class="form-input" id="createStaffSelect" onchange="onCreateStaffSelect(this.value)"
+                      style="appearance:none;-webkit-appearance:none;padding-left:42px">
+                <option value="">— スタッフを選択 —</option>
+              </select>
+            </div>
+            <div class="input-wrap" style="margin-bottom:0">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/>
+              </svg>
               <input class="form-input" type="email" id="createStaffEmail"
-                     placeholder="スタッフのメールアドレス" inputmode="email">
+                     placeholder="またはメールアドレスを直接入力" inputmode="email">
             </div>
           </div>
           <div class="section-card">
@@ -2554,9 +2572,10 @@
         <div class="section-card">
           <div class="section-title">交代申請一覧</div>
           <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
-            <button class="filter-chip active" id="swapFilterAll"    onclick="filterAdminSwap('all',this)">すべて</button>
-            <button class="filter-chip"        id="swapFilterPending" onclick="filterAdminSwap('pending',this)">承認待ち</button>
-            <button class="filter-chip"        id="swapFilterDone"    onclick="filterAdminSwap('approved',this)">承認済み</button>
+            <button class="chip-btn active" id="swapFilterAll"      onclick="filterAdminSwap('all',this)">すべて</button>
+            <button class="chip-btn"        id="swapFilterPending"  onclick="filterAdminSwap('pending',this)">承認待ち</button>
+            <button class="chip-btn"        id="swapFilterDone"     onclick="filterAdminSwap('approved',this)">承認済み</button>
+            <button class="chip-btn"        id="swapFilterRejected" onclick="filterAdminSwap('rejected',this)">却下</button>
           </div>
           <div id="adminSwapList">
             <div class="center-state"><div class="big-spinner"></div></div>
@@ -2596,12 +2615,13 @@
         </svg>
         スタッフ
       </button>
-      <button class="nav-item" id="adminNavSwap" onclick="adminSwitchTab('adminSwap', this)">
+      <button class="nav-item" id="adminNavSwap" onclick="adminSwitchTab('adminSwap', this)" style="position:relative">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
           <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
         </svg>
         交代申請
+        <span id="adminSwapBadge" style="display:none;position:absolute;top:5px;right:8px;background:var(--red);color:#fff;font-size:8px;font-weight:800;border-radius:10px;padding:1px 5px;min-width:14px;text-align:center">0</span>
       </button>
     </nav>
   </div><!-- /adminScreen -->
@@ -3509,6 +3529,7 @@
       filterBar.style.display = 'none';
       searchInput.style.display = 'none';
       document.getElementById('adminWishesPanel').style.display = 'block';
+      selectedWish = null;
       renderWishListScreen();
     } else if (tab === 'adminCreate') {
       statsRow.style.display = 'none';
@@ -3554,9 +3575,17 @@
 
   function renderIncomingSwapList(list) {
     const el = document.getElementById('incomingSwapList');
-    const pending = list.filter(r =>
-      r.status === 'pending' || r.status === 'swap_requested' || r.status === 'scheduled'
-    );
+    const pending = list.filter(r => {
+      // ステータスフィルター
+      if (r.status !== 'pending' && r.status !== 'swap_requested' && r.status !== 'scheduled') return false;
+      // 自分が申請者（requester）のものは除外
+      // APIが返すフィールド名が揺れる可能性があるため複数チェック
+      const requesterEmail = r.requesterEmail || r.fromEmail || r.senderEmail || '';
+      if (requesterEmail && requesterEmail === userEmail) return false;
+      const requesterId = r.requesterId || r.userId || r.fromUserId || '';
+      if (requesterId && requesterId === userEmail) return false;
+      return true;
+    });
     if (pending.length === 0) {
       el.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:12px 0">自分宛の申請はありません</p>';
       return;
@@ -3660,108 +3689,207 @@
   async function loadAdminSwapList() {
     const el = document.getElementById('adminSwapList');
     el.innerHTML = '<div class="center-state"><div class="big-spinner"></div></div>';
+    // 名前解決のためスタッフ一覧が未取得なら先に取得
+    if (allStaffList.length === 0) {
+      try {
+        const sr = await fetch(`${API_BASE}/staff`, { headers: { Authorization: `Bearer ${idToken}` } });
+        if (sr.ok) {
+          const sd = await sr.json();
+          allStaffList = Array.isArray(sd.staff) ? sd.staff : Array.isArray(sd.users) ? sd.users : [];
+        }
+      } catch {}
+    }
     try {
-      const res = await fetch(`${API_BASE}/swap-requests/me`, {
+      const res = await fetch(`${API_BASE}/admin/swap-requests`, {
         headers: { Authorization: `Bearer ${idToken}` },
       });
       if (res.status === 401) { doLogout(); return; }
       if (!res.ok) throw new Error(`エラー (${res.status})`);
       const data = await res.json();
-      allAdminSwaps = Array.isArray(data.requests) ? data.requests : [];
+      allAdminSwaps = Array.isArray(data.swaps)    ? data.swaps
+                   : Array.isArray(data.requests)  ? data.requests
+                   : [];
+      // デバッグ：実際のAPIレスポンス構造をコンソールに出力
+      if (allAdminSwaps.length > 0) {
+        console.log('[swap-requests] sample record:', JSON.stringify(allAdminSwaps[0], null, 2));
+        const sample = allAdminSwaps[0];
+        if (sample.responses && sample.responses.length > 0) {
+          console.log('[swap-requests] sample response keys:', Object.keys(sample.responses[0]));
+        }
+      }
+      updateAdminSwapBadge();
       renderAdminSwapList();
     } catch (err) {
       el.innerHTML = `<p style="font-size:13px;color:var(--red);text-align:center;padding:16px 0">${err.message}</p>`;
     }
   }
 
+  function updateAdminSwapBadge() {
+    // 交代確認待ち = 管理者がまだ確定/拒否していない全申請（pending + responded）
+    const waitingCount = allAdminSwaps.filter(r =>
+      r.status === 'pending' || r.status === 'responded'
+    ).length;
+    const badge = document.getElementById('adminSwapBadge');
+    const statEl = document.getElementById('statSwapPending');
+    if (badge) {
+      if (waitingCount > 0) {
+        badge.style.display = 'inline-block';
+        badge.textContent = waitingCount;
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+    if (statEl) statEl.textContent = waitingCount;
+  }
+
   function filterAdminSwap(filter, btn) {
     adminSwapFilter = filter;
-    document.querySelectorAll('#adminSwapPanel .filter-chip').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#adminSwapPanel .chip-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     renderAdminSwapList();
   }
 
   function renderAdminSwapList() {
     const el = document.getElementById('adminSwapList');
-    const STATUS_LABEL = { pending:'承認待ち', responded:'回答済み', approved:'確定済み', rejected:'却下' };
+    // ステータス表示ラベル
+    const STATUS_LABEL = {
+      pending:   '承認待ち',
+      responded: '承認待ち',  // respondedも管理者未確定なので「承認待ち」に統一
+      approved:  '承認済み',
+      rejected:  '却下',
+    };
     const STATUS_COLOR = {
       pending:   'color:var(--yellow);background:var(--yellow-light)',
-      responded: 'color:var(--primary);background:var(--primary-light)',
+      responded: 'color:var(--yellow);background:var(--yellow-light)',
       approved:  'color:#065F46;background:var(--green-light)',
       rejected:  'color:var(--red);background:var(--red-light)',
     };
+
+    // フィルタリング
+    // 「承認待ち」= pending / responded（管理者がまだ確定していない）
+    // 「承認済み」= approved
+    // 「却下」    = rejected
+    // 「すべて」  = 全件
     let list = allAdminSwaps;
-    if (adminSwapFilter !== 'all') {
-      list = list.filter(r => r.status === adminSwapFilter);
+    if (adminSwapFilter === 'pending') {
+      list = list.filter(r => r.status === 'pending' || r.status === 'responded');
+    } else if (adminSwapFilter === 'approved') {
+      list = list.filter(r => r.status === 'approved');
+    } else if (adminSwapFilter === 'rejected') {
+      list = list.filter(r => r.status === 'rejected');
     }
+    // 'all' はそのまま全件
+
     if (list.length === 0) {
       el.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:20px 0">申請はありません</p>';
       return;
     }
     const WEEKDAYS = ['日','月','火','水','木','金','土'];
     el.innerHTML = list.map(r => {
+      const swapId    = r.swapId || r.id || r.requestId || r.swap_id || r.swapRequestId || '';
       const dateStr   = r.date || r.shiftDate || '';
       const dt        = new Date(dateStr + 'T00:00:00');
-      const dateLabel = dateStr
-        ? `${dt.getMonth()+1}/${dt.getDate()}(${WEEKDAYS[dt.getDay()]})`
-        : '—';
-      const stLabel    = STATUS_LABEL[r.status] || r.status;
-      const stStyle    = STATUS_COLOR[r.status] || '';
-      // スタッフが「代われる」と回答済みなら確定/拒否ボタンを表示
+      const dateLabel = dateStr ? `${dt.getMonth()+1}/${dt.getDate()}(${WEEKDAYS[dt.getDay()]})` : '—';
+      const stLabel   = STATUS_LABEL[r.status] || r.status;
+      const stStyle   = STATUS_COLOR[r.status] || '';
+
+      // 「代われる」回答者を取得
       const acceptedRes = (r.responses || []).filter(res => res.accept === true);
-      const canDecide  = r.status === 'responded' && acceptedRes.length > 0;
-      const acceptedNames = acceptedRes.map(res => res.userName || res.userId || '').filter(Boolean).join('、');
+      const consultRes  = (r.responses || []).filter(res => res.accept === null && res.comment);
+      // 管理者がまだ確定/拒否していない = pending or responded
+      const canDecide   = r.status === 'pending' || r.status === 'responded';
+
+      // 名前解決ヘルパー
+      function resolveName(name, emailOrId) {
+        if (name && !/^[0-9a-f-]{32,}$/i.test(name)) return name;
+        const hit = allStaffList.find(u =>
+          emailOrId && (u.userId === emailOrId || u.sub === emailOrId || u.id === emailOrId || u.email === emailOrId)
+        );
+        return hit ? (hit.name || hit.displayName || hit.email || emailOrId || '—')
+                   : (emailOrId && !/^[0-9a-f-]{32,}$/i.test(emailOrId) ? emailOrId : '—');
+      }
+      const resolveResName = res => {
+        if (res.userName && !/^[0-9a-f-]{32,}$/i.test(res.userName)) return res.userName;
+        const key = res.userEmail || res.userId || '';
+        const hit = allStaffList.find(u =>
+          key && (u.userId === key || u.sub === key || u.id === key || u.email === key)
+        );
+        return hit ? (hit.name || hit.email || key) : (key && !/^[0-9a-f-]{32,}$/i.test(key) ? key : 'スタッフ');
+      };
+
+      const requesterLabel  = resolveName(r.requesterName, r.requesterEmail || r.requesterId);
+      const targetLabel     = resolveName(r.targetName,    r.targetEmail    || r.targetId);
+      const acceptedNames   = acceptedRes.map(resolveResName).filter(Boolean).join('、');
+
+      const consultBlock = consultRes.length > 0 ? `
+        <div style="margin-top:8px;padding:8px 10px;background:#FEF3C7;border-radius:8px;border:1px solid #FCD34D">
+          <div style="font-size:11px;font-weight:700;color:#92400E;margin-bottom:4px">💬 相談コメント</div>
+          ${consultRes.map(res => `
+            <div style="font-size:11px;color:var(--text);padding:4px 0;border-bottom:1px solid #FDE68A">
+              <span style="font-weight:700">${resolveResName(res)}</span>：${res.comment || ''}
+            </div>`).join('')}
+        </div>` : '';
+
       return `
-        <div class="swap-history-item" style="padding:14px 0;border-bottom:1px solid var(--border)">
+        <div style="padding:14px 0;border-bottom:1px solid var(--border)">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
             <div style="font-size:13px;font-weight:700;color:var(--text)">
-              ${r.requesterName || r.requesterEmail || '—'}
-              <span style="color:var(--muted);font-weight:400"> → </span>
-              ${r.targetName || r.targetEmail || '—'}
+              ${requesterLabel}<span style="color:var(--muted);font-weight:400"> → </span>${targetLabel}
             </div>
             <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;${stStyle}">${stLabel}</span>
           </div>
-          <div class="swap-history-reason">${dateLabel}　${r.startTime||''}〜${r.endTime||''}</div>
-          ${r.reason ? `<div class="swap-history-reason" style="margin-top:2px">「${r.reason}」</div>` : ''}
-          ${canDecide ? `
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px">${dateLabel}　${r.startTime||''}〜${r.endTime||''}</div>
+          ${r.reason ? `<div style="font-size:12px;color:var(--muted)">「${r.reason}」</div>` : ''}
+          ${consultBlock}
+          ${canDecide && acceptedRes.length > 0 ? `
             <div style="margin-top:10px;padding:10px;background:var(--primary-light);border-radius:10px;border:1px solid var(--primary)">
-              <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:6px">
+              <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:4px">
                 ✓ ${acceptedNames} が「代われる」と回答しました
               </div>
               <div style="font-size:11px;color:var(--text);margin-bottom:10px">
-                ${r.requesterName||'申請者'} → ${acceptedNames} への交代を確定しますか？
+                ${requesterLabel} → ${acceptedNames} への交代を確定しますか？
               </div>
               <div style="display:flex;gap:8px">
-                <button class="act-btn approve" style="flex:2"
-                  onclick="decideSwap('${r.swapId}', true, this)">
-                  ✓ 確定する
-                </button>
-                <button class="act-btn reject" style="flex:1"
-                  onclick="decideSwap('${r.swapId}', false, this)">
-                  ✕ 拒否
-                </button>
+                <button class="act-btn approve" style="flex:2" onclick="decideSwap('${swapId}',true,this)">✓ 確定する</button>
+                <button class="act-btn reject"  style="flex:1" onclick="decideSwap('${swapId}',false,this)">✕ 拒否</button>
               </div>
+            </div>` : canDecide ? `
+            <div style="margin-top:8px;padding:8px 10px;background:var(--yellow-light);border-radius:8px;font-size:12px;color:#92400E">
+              ⏳ スタッフの回答待ちです
             </div>` : ''}
-          ${r.status === 'approved' ? `
-            <div style="margin-top:8px;font-size:11px;color:#065F46;font-weight:700">
-              ✓ 交代が確定しました
-            </div>` : ''}
+          ${r.status === 'approved' ? `<div style="margin-top:8px;font-size:11px;color:#065F46;font-weight:700">✓ 交代が確定しました</div>` : ''}
+          ${r.status === 'rejected' ? `<div style="margin-top:8px;font-size:11px;color:var(--red);font-weight:700">✕ 申請が拒否されました</div>` : ''}
         </div>`;
     }).join('');
   }
 
   async function decideSwap(swapId, approve, btn) {
     const label = approve ? '確定' : '拒否';
+    // swapIdが取れていない場合は処理しない
+    if (!swapId || swapId === 'undefined' || swapId === 'null') {
+      showToast('申請IDが取得できません。画面を再読み込みしてください。', 'error');
+      return;
+    }
     if (!confirm(`この交代申請を「${label}」しますか？`)) return;
     btn.disabled = true;
+    console.log('[decideSwap]', { swapId, approve, body: { approve } });
     try {
       const res = await fetch(`${API_BASE}/swap-requests/${swapId}/approve`, {
         method:  'PUT',
         headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ approve }),
+        // バックエンドが approve/reject 両キーを期待する場合に備えて両方送る
+        body: JSON.stringify(approve
+          ? { approve: true,  reject: false }
+          : { approve: false, reject: true  }
+        ),
       });
+      console.log('[decideSwap] status:', res.status);
       if (res.status === 401) { doLogout(); return; }
-      if (!res.ok) throw new Error(`エラー (${res.status})`);
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        console.error('[decideSwap] error body:', errBody);
+        throw new Error(errBody.error || errBody.message || `エラー (${res.status})`);
+      }
       showToast(approve ? '✓ 交代を確定しました' : '申請を拒否しました', 'success');
       loadAdminSwapList();
     } catch (err) {
@@ -3830,6 +3958,8 @@
     const open  = form.style.display === 'none';
     form.style.display = open ? 'block' : 'none';
     label.textContent  = open ? '✕ 閉じる' : 'シフトを作成する';
+    // フォームを開いた際にスタッフドロップダウンが空なら補完
+    if (open) populateCreateStaffDropdown();
   }
 
   /* ===== シフト一覧タブ: 全スタッフシフト取得・表示 ===== */
@@ -3866,9 +3996,13 @@
     const sel = adminCalSelectedDate;
     let list  = window._adminAllShifts || [];
     if (sel)  list = list.filter(s => s.date === sel);
-    if (q)    list = list.filter(s =>
-      (s.name||'').toLowerCase().includes(q) ||
-      (s.email||'').toLowerCase().includes(q));
+    if (q)    list = list.filter(s => {
+      // s.name / s.email が空の場合は allStaffList から名前解決して検索する
+      const resolved = resolveStaffName(s);
+      const name  = (s.name  || resolved.name  || '').toLowerCase();
+      const email = (s.email || resolved.email || '').toLowerCase();
+      return name.includes(q) || email.includes(q);
+    });
 
     document.getElementById('adminAllShiftCount').textContent = `${list.length}件`;
     const el = document.getElementById('adminAllShiftList');
@@ -3882,14 +4016,18 @@
     el.innerHTML = list.map(s => {
       const dt      = new Date(s.date + 'T00:00:00');
       const wday    = WEEKDAYS[dt.getDay()];
-      const initial = (s.name || s.email || '?')[0].toUpperCase();
+      const resolved     = resolveStaffName(s);
+      const displayName  = s.name  || resolved.name  || '';
+      const displayEmail = s.email || resolved.email || '';
+      const initial = (displayName || displayEmail || '?')[0].toUpperCase();
       const stCls   = STATUS_CLASS[s.status] || 's-scheduled';
       const stLabel = STATUS_LABEL[s.status] || '確定';
+      const shiftId = s.shiftId || s.id || '';
       return `
         <div class="admin-shift-card ${stCls}">
           <div class="admin-card-top">
             <div class="admin-card-avatar">${initial}</div>
-            <div class="admin-card-name">${s.name || '—'}<span>${s.email||''}</span></div>
+            <div class="admin-card-name">${displayName || displayEmail || '—'}<span>${displayEmail}</span></div>
             <span class="admin-status-badge">${stLabel}</span>
           </div>
           <div class="admin-card-bottom">
@@ -3900,6 +4038,29 @@
           </div>
         </div>`;
     }).join('');
+  }
+
+  /* ===== 名前解決ヘルパー =====
+   * ShiftsTable は userId を持つ。UsersTable も userId がキー。
+   * GET /staff レスポンスの各ユーザーオブジェクトから name を引く。
+   * userId / email / sub など複数フィールドで突き合わせる。
+  ============================= */
+  function resolveStaffName(shiftOrId) {
+    // 引数がオブジェクト(shift)の場合は userId / email を取り出す
+    const userId = typeof shiftOrId === 'object'
+      ? (shiftOrId.userId || shiftOrId.sub || shiftOrId.id || '')
+      : shiftOrId;
+    const email  = typeof shiftOrId === 'object' ? (shiftOrId.email || '') : '';
+
+    const hit = allStaffList.find(u =>
+      (userId && (u.userId === userId || u.sub === userId || u.id === userId)) ||
+      (email  && u.email === email)
+    );
+    if (!hit) return { name: '', email };
+    return {
+      name:  hit.name || hit.displayName || hit.preferred_username || '',
+      email: hit.email || email,
+    };
   }
 
   /* ===== 管理者：重要連絡フォーム開閉 ===== */
@@ -4008,19 +4169,24 @@
     const container = document.getElementById('staffListContainer');
     container.innerHTML = '<div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>';
     try {
-      const res = await fetch(`${API_BASE}/admin/users`, {
+      const res = await fetch(`${API_BASE}/staff`, {
         headers: { Authorization: `Bearer ${idToken}` },
       });
       if (res.status === 401) { doLogout(); return; }
-      if (res.status === 403) throw new Error('管理者権限が必要です');
-      if (!res.ok) throw new Error(`エラー (${res.status})`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || body.message || `HTTP ${res.status}`);
+      }
       const data = await res.json();
-      // レスポンスのキーがusers・staff・itemsなど複数パターンに対応
-      allStaffList = Array.isArray(data.users) ? data.users
-                   : Array.isArray(data.staff) ? data.staff
-                   : Array.isArray(data.items) ? data.items
+      allStaffList = Array.isArray(data.staff)   ? data.staff
+                   : Array.isArray(data.users)   ? data.users
+                   : Array.isArray(data.items)   ? data.items
+                   : Array.isArray(data.members) ? data.members
+                   : Array.isArray(data.data)    ? data.data
+                   : Array.isArray(data)         ? data
                    : [];
       renderStaffList();
+      populateCreateStaffDropdown();
     } catch (err) {
       container.innerHTML = `
         <div class="center-state">
@@ -4044,11 +4210,13 @@
       return;
     }
     container.innerHTML = list.map(u => {
-      const isAdmin  = (u.role === 'admin');
+      const isAdmin  = (u.role === 'admin' || (u.groups || []).includes('admin'));
       const initial  = (u.name || u.email || '?')[0].toUpperCase();
+      // userId / id / email の優先順で識別子を決定
+      const uid = u.userId || u.id || u.email || '';
       const actionBtn = isAdmin
-        ? `<button class="role-act-btn demote" onclick="changeRole('${u.email}','staff')">権限を剥奪</button>`
-        : `<button class="role-act-btn promote" onclick="changeRole('${u.email}','admin')">管理者にする</button>`;
+        ? `<button class="role-act-btn demote"  onclick="changeRole('${uid}','staff')">権限を剥奪</button>`
+        : `<button class="role-act-btn promote" onclick="changeRole('${uid}','admin')">管理者にする</button>`;
       return `
         <div class="staff-card">
           <div class="staff-card-avatar ${isAdmin ? 'admin-av' : ''}">${initial}</div>
@@ -4062,23 +4230,32 @@
     }).join('');
   }
 
-  /* ===== 権限変更（UIのみ・バックエンド未接続） ===== */
-  async function changeRole(email, newRole) {
+  /* ===== 権限変更 =====
+   * template.yaml に /staff/role エンドポイントは存在しない。
+   * POST /admin/shifts/{id}/{action} パターンに倣い
+   * POST /admin/users/{userId}/role を試みる。
+   * 404 の場合はバックエンド未実装である旨を案内する。
+   ============================= */
+  async function changeRole(userId, newRole) {
+    const target = allStaffList.find(u =>
+      u.userId === userId || u.id === userId || u.email === userId
+    );
+    const displayName = target ? (target.name || target.email || userId) : userId;
     const label = newRole === 'admin' ? '管理者' : 'スタッフ';
-    const confirmed = window.confirm(`${email} の権限を「${label}」に変更しますか？`);
-    if (!confirmed) return;
+    if (!window.confirm(`${displayName} を「${label}」に変更しますか？`)) return;
     try {
-      const res = await fetch(`${API_BASE}/staff/role`, {
-        method: 'POST',
+      const res = await fetch(`${API_BASE}/admin/users/${encodeURIComponent(userId)}/role`, {
+        method:  'POST',
         headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, role: newRole }),
+        body:    JSON.stringify({ role: newRole }),
       });
       if (res.status === 401) { doLogout(); return; }
-      if (res.status === 403) throw new Error('管理者権限が必要です');
+      if (res.status === 404 || res.status === 405) {
+        showToast('権限変更APIは未実装です。AWSコンソールから変更してください。', 'error');
+        return;
+      }
       if (!res.ok) throw new Error(`エラー (${res.status})`);
-      showToast(`${email} を${label}に変更しました ✓`, 'success');
-      // ローカルのリストも更新
-      const target = allStaffList.find(u => u.email === email);
+      showToast(`${displayName} を${label}に変更しました ✓`, 'success');
       if (target) target.role = newRole;
       renderStaffList();
     } catch (err) {
@@ -4138,15 +4315,69 @@
       });
       if (res.status === 401) { doLogout(); return; }
       if (res.status === 403) throw new Error('管理者権限が必要です');
-      if (!res.ok) throw new Error(`API未実装`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      allWishList = Array.isArray(data.wishes) ? data.wishes : [];
+
+      // APIレスポンスのキー名を全パターン対応
+      const raw = Array.isArray(data.wishes)   ? data.wishes
+                : Array.isArray(data.requests) ? data.requests
+                : Array.isArray(data.items)    ? data.items
+                : Array.isArray(data)          ? data : [];
+
+      // 各レコードのフィールド名を正規化
+      // dates が配列でなく date（単一）で返ってくるケースにも対応
+      allWishList = raw.map(w => {
+        let dates = [];
+        if (Array.isArray(w.preferredDates)) dates = w.preferredDates;
+        else if (Array.isArray(w.dates))     dates = w.dates;
+        else if (Array.isArray(w.wishDates)) dates = w.wishDates;
+        else if (w.date)                    dates = [w.date];
+        else if (w.wishDate)                dates = [w.wishDate];
+
+        return {
+          requestId: w.requestId || w.id || w.wishId || '',
+          userId:    w.userId    || '',
+          email:     w.email     || w.userEmail || '',
+          name:      w.name      || w.userName  || w.displayName || '',
+          dates,
+          startTime: w.startTime || w.start || '',
+          endTime:   w.endTime   || w.end   || '',
+          note:      w.note      || w.memo  || w.comment || '',
+        };
+      });
+
+      // スタッフ名をキャッシュから補完
+      allWishList.forEach(w => {
+        if (!w.name && w.email) {
+          const hit = allStaffList.find(u => u.email === w.email || u.userId === w.userId);
+          if (hit) w.name = hit.name || hit.displayName || '';
+        }
+      });
+
       renderWishList();
-    } catch {
-      // localStorageからスタッフが提出したデータを読み込む
+    } catch (err) {
+      // APIが失敗した場合はlocalStorageのデータを使う
       const saved = JSON.parse(localStorage.getItem(WISH_KEY) || '[]');
-      allWishList = saved.filter(w => w.dates && w.dates.some(d => d.startsWith(ym)));
-      if (allWishList.length === 0) allWishList = saved;
+      let local = saved.filter(w => w.dates && w.dates.some(d => d.startsWith(ym)));
+      if (local.length === 0) local = saved;
+      // localStorageデータも同じ正規化処理を適用
+      allWishList = local.map(w => ({
+        requestId: w.requestId || w.id || '',
+        userId:    w.userId    || '',
+        email:     w.email     || '',
+        name:      w.name      || w.email || '',
+        dates:     Array.isArray(w.dates) ? w.dates : (w.date ? [w.date] : []),
+        startTime: w.startTime || '',
+        endTime:   w.endTime   || '',
+        note:      w.note      || '',
+      }));
+      if (allWishList.length === 0) {
+        container.innerHTML = `<div class="center-state" style="padding:40px 0">
+          <p class="state-title">希望提出がありません</p>
+          <p class="state-sub" style="font-size:11px;margin-top:4px;color:var(--red)">${err.message}</p>
+        </div>`;
+        return;
+      }
       renderWishList();
     }
   }
@@ -4160,130 +4391,296 @@
     }
   });
 
+  // 選択中の希望を管理
+  let selectedWish = null; // { wishIndex, dateIndex, email, name, date, startTime, endTime, note, requestId }
+
   function renderWishList() {
     const q = (document.getElementById('wishListSearch').value || '').toLowerCase();
-    const list = q
+    const src = q
       ? allWishList.filter(w =>
           (w.email || '').toLowerCase().includes(q) ||
           (w.name  || '').toLowerCase().includes(q))
       : allWishList;
+
     const container = document.getElementById('wishListContainer');
-    if (list.length === 0) {
+
+    // 日付ごとに1件ずつ展開してフラット化
+    const flat = [];
+    src.forEach((w, wi) => {
+      const dates = (w.dates || []).length > 0 ? w.dates : [''];
+      dates.forEach((d, di) => {
+        flat.push({ w, wi, di, date: d });
+      });
+    });
+
+    // 日付昇順ソート（未設定は末尾）
+    flat.sort((a, b) => {
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return a.date.localeCompare(b.date);
+    });
+
+    if (flat.length === 0) {
       container.innerHTML = '<div class="center-state" style="padding:40px 0"><p class="state-title">希望提出がありません</p></div>';
+      selectedWish = null;
+      renderWishActionBar();
       return;
     }
-    container.innerHTML = list.map((w, wi) => {
-      const initial = (w.name || w.email || '?')[0].toUpperCase();
-      const timeStr = (w.startTime && w.endTime) ? `${w.startTime}〜${w.endTime}` : '';
-      const dateButtons = (w.dates || []).map(d => {
-        const dt = new Date(d + 'T00:00:00');
-        const label = `${dt.getMonth()+1}/${dt.getDate()}(${WEEKDAYS[dt.getDay()]})`;
-        return `<button class="wish-date-chip" style="cursor:pointer;border:1.5px solid var(--primary);background:var(--primary-light);color:var(--primary);font-weight:700"
-          onclick="openWishConfirmModal('${w.email}','${w.name||''}','${d}','${w.startTime||'09:00'}','${w.endTime||'17:00'}','${w.note||''}')">
-          ${label} ＋
-        </button>`;
-      }).join('');
+
+    container.innerHTML = flat.map((item, fi) => {
+      const { w, wi, di, date } = item;
+      const initial    = (w.name || w.email || '?')[0].toUpperCase();
+      const isSelected = selectedWish && selectedWish.fi === fi;
+
+      let dateLabel = '日付未設定';
+      if (date) {
+        const dt = new Date(date + 'T00:00:00');
+        dateLabel = `${dt.getMonth()+1}月${dt.getDate()}日（${WEEKDAYS[dt.getDay()]}）`;
+      }
+      const timeStr = (w.startTime && w.endTime)
+        ? `${w.startTime} 〜 ${w.endTime}` : '時間未定';
+
       return `
-        <div class="wish-list-card">
-          <div class="wish-list-top">
-            <div class="wish-list-avatar">${initial}</div>
-            <div class="wish-list-name">${w.name || '—'}<span>${w.email || ''}</span></div>
+        <div onclick="selectWishCard(${fi},${wi},${di},'${date}')" style="
+          background:${isSelected ? 'var(--primary-light)' : '#fff'};
+          border:2px solid ${isSelected ? 'var(--primary)' : 'var(--border)'};
+          border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;
+          transition:all .15s;
+          box-shadow:${isSelected ? '0 2px 12px rgba(79,70,229,.15)' : '0 1px 4px rgba(0,0,0,.04)'}">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="
+              width:38px;height:38px;border-radius:50%;flex-shrink:0;
+              background:${isSelected ? 'var(--primary)' : '#EEF2FF'};
+              display:flex;align-items:center;justify-content:center;
+              font-size:15px;font-weight:800;
+              color:${isSelected ? '#fff' : 'var(--primary)'}">
+              ${initial}
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:700;color:var(--text)">${w.name || '—'}</div>
+              <div style="font-size:11px;color:var(--muted)">${w.email || ''}</div>
+            </div>
+            ${isSelected
+              ? '<span style="font-size:16px;color:var(--primary);font-weight:800">✓</span>'
+              : '<span style="font-size:20px;color:var(--border)">›</span>'}
           </div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:6px">希望日をタップしてシフトを確定：</div>
-          <div class="wish-dates-wrap">${dateButtons}</div>
-          ${timeStr ? `<div class="wish-time-badge">希望時間: ${timeStr}</div>` : ''}
-          ${w.note ? `<div class="wish-note-badge">「${w.note}」</div>` : ''}
+          <div style="margin-top:8px;padding-left:48px;display:flex;flex-direction:column;gap:2px">
+            <div style="font-size:13px;font-weight:700;color:${isSelected ? 'var(--primary)' : 'var(--text)'}">
+              ${dateLabel}
+            </div>
+            <div style="font-size:12px;color:var(--muted)">${timeStr}</div>
+            ${w.note ? `<div style="font-size:12px;color:var(--muted)">「${w.note}」</div>` : ''}
+          </div>
         </div>`;
     }).join('');
+
+    renderWishActionBar();
   }
 
-  /* ===== 希望→シフト確定モーダル ===== */
-  function openWishConfirmModal(email, name, date, startTime, endTime, note) {
-    const dt    = new Date(date + 'T00:00:00');
-    const label = `${dt.getMonth()+1}/${dt.getDate()}(${WEEKDAYS[dt.getDay()]})`;
-    // モーダルがなければ作成
-    let modal = document.getElementById('wishConfirmModal');
-    if (!modal) {
-      modal = document.createElement('div');
-      modal.id = 'wishConfirmModal';
-      modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:flex-end;justify-content:center';
-      modal.innerHTML = `
-        <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:20px 16px 40px">
-          <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px" id="wishModalTitle"></div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:16px" id="wishModalSub"></div>
-          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
-            <div>
-              <label class="form-label">シフト日</label>
-              <input class="form-input" type="date" id="wishModalDate" style="padding-left:14px;width:100%;box-sizing:border-box">
-            </div>
-            <div>
-              <label class="form-label">時間帯</label>
-              <div class="wish-time-row">
-                <label>開始</label>
-                <input class="form-input" type="time" id="wishModalStart">
-                <label>終了</label>
-                <input class="form-input" type="time" id="wishModalEnd">
-              </div>
-            </div>
-            <div>
-              <label class="form-label">備考</label>
-              <input class="form-input" type="text" id="wishModalNote" placeholder="任意">
-            </div>
-          </div>
-          <div style="display:flex;gap:8px">
-            <button onclick="document.getElementById('wishConfirmModal').style.display='none'"
-              style="flex:1;padding:12px;background:var(--gray-light);border:none;border-radius:12px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer">
-              キャンセル
-            </button>
-            <button id="wishModalConfirmBtn" onclick="confirmWishShift()"
-              style="flex:2;padding:12px;background:var(--green);border:none;border-radius:12px;font-size:13px;font-weight:700;color:#fff;cursor:pointer">
-              ✓ シフトを確定する
-            </button>
-          </div>
-        </div>`;
-      document.querySelector('.app').appendChild(modal);
+  function selectWishCard(fi, wi, di, date) {
+    const w = allWishList[wi];
+    if (!w) return;
+    // 同じカードを再タップで解除
+    if (selectedWish && selectedWish.fi === fi) {
+      selectedWish = null;
+      renderWishList();
+      return;
     }
-    // 値をセット
-    document.getElementById('wishModalTitle').textContent = `${name || email} のシフトを確定`;
-    document.getElementById('wishModalSub').textContent   = `希望日：${label}　${startTime}〜${endTime}`;
-    document.getElementById('wishModalDate').value  = date;
-    document.getElementById('wishModalStart').value = startTime || '09:00';
-    document.getElementById('wishModalEnd').value   = endTime   || '17:00';
-    document.getElementById('wishModalNote').value  = note || '';
-    modal.dataset.email = email;
-    modal.style.display = 'flex';
+    selectedWish = {
+      fi, wi, di,
+      email:     w.email     || w.userId || '',
+      name:      w.name      || '',
+      date,
+      startTime: w.startTime || '09:00',
+      endTime:   w.endTime   || '17:00',
+      note:      w.note      || '',
+      requestId: w.requestId || w.id || '',
+    };
+    renderWishList();
   }
 
-  async function confirmWishShift() {
-    const modal     = document.getElementById('wishConfirmModal');
-    const email     = modal.dataset.email;
-    const date      = document.getElementById('wishModalDate').value;
-    const startTime = document.getElementById('wishModalStart').value;
-    const endTime   = document.getElementById('wishModalEnd').value;
-    const note      = document.getElementById('wishModalNote').value.trim();
-    const btn       = document.getElementById('wishModalConfirmBtn');
-    if (!date) { showToast('シフト日を選択してください', 'error'); return; }
-    if (!startTime || !endTime) { showToast('時間帯を入力してください', 'error'); return; }
-    btn.disabled = true;
-    btn.textContent = '登録中...';
+  function selectWishDay(wi, date) {
+    if (!selectedWish || selectedWish.wi !== wi) return;
+    selectedWish.date = date;
+    renderWishList();
+  }
+
+  /* 選択中の希望に対するアクションバー */
+  function renderWishActionBar() {
+    let bar = document.getElementById('wishActionBar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'wishActionBar';
+      bar.style.cssText = `
+        position:sticky;bottom:68px;left:0;right:0;
+        background:#fff;border-top:1px solid var(--border);
+        padding:12px 16px;display:flex;gap:10px;align-items:center;
+        box-shadow:0 -4px 16px rgba(0,0,0,.08);z-index:50;
+      `;
+      document.getElementById('adminWishesPanel').appendChild(bar);
+    }
+    if (!selectedWish) {
+      bar.style.display = 'none';
+      return;
+    }
+    const { name, email, date, startTime, endTime } = selectedWish;
+    let dateLabel = '日付未設定';
+    if (date) {
+      const dt = new Date(date + 'T00:00:00');
+      dateLabel = `${dt.getMonth()+1}/${dt.getDate()}(${WEEKDAYS[dt.getDay()]})`;
+    }
+    bar.style.display = 'flex';
+    bar.innerHTML = `
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:1px">選択中</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);
+                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+          ${name || email}　${dateLabel}　${startTime}〜${endTime}
+        </div>
+      </div>
+      <button onclick="deleteWish()" style="
+        flex-shrink:0;padding:10px 14px;
+        background:var(--red-light);border:1.5px solid var(--red);
+        border-radius:10px;font-size:12px;font-weight:700;color:var(--red);cursor:pointer">
+        削除
+      </button>
+      <button id="wishConfirmBtn" onclick="confirmWishDirect()" style="
+        flex-shrink:0;padding:10px 18px;
+        background:var(--green);border:none;
+        border-radius:10px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;
+        box-shadow:0 3px 10px rgba(16,185,129,.3)">
+        ✓ 確定
+      </button>`;
+  }
+
+  /* 確定ボタン即実行（モーダルなし）
+   * selectedWish の日時をそのままAPIに送る */
+  async function confirmWishDirect() {
+    if (!selectedWish) return;
+    const { wi, email, name, date, startTime, endTime, note, requestId } = selectedWish;
+    if (!date)      { showToast('希望日が設定されていません', 'error'); return; }
+    if (!startTime || !endTime) { showToast('希望時間が設定されていません', 'error'); return; }
+
+    const btn = document.getElementById('wishConfirmBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '登録中...'; }
+
     try {
       const res = await fetch(`${API_BASE}/admin/shifts`, {
-        method: 'POST',
+        method:  'POST',
         headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, date, startTime, endTime, note: note || null }),
+        body:    JSON.stringify({ email, date, startTime, endTime, note: note || null, status: 'scheduled' }),
       });
       if (res.status === 401) { doLogout(); return; }
-      if (!res.ok) { const b = await res.json().catch(()=>({})); throw new Error(b.error || `エラー (${res.status})`); }
-      modal.style.display = 'none';
-      showToast('✓ シフトを確定しました', 'success');
+      if (!res.ok) {
+        const b = await res.json().catch(() => ({}));
+        throw new Error(b.error || b.message || `エラー (${res.status})`);
+      }
+      const created = await res.json().catch(() => ({}));
+
+      // 管理者シフトキャッシュに追加
+      const staffCache = allStaffList.find(u => u.email === email);
+      adminAllShifts.push({
+        shiftId:   created.shiftId || created.id || `local_${Date.now()}`,
+        userId:    staffCache?.userId || staffCache?.id || '',
+        email, name: staffCache?.name || name || '',
+        date, startTime, endTime,
+        status: 'scheduled',
+        note: note || null,
+      });
+      adminAllShifts.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+      // 希望一覧から確定した日を削除
+      removeWishDate(wi, date);
+      selectedWish = null;
+
+      showToast(`✓ ${name || email} ${date} のシフトを確定しました`, 'success');
+      renderWishList();
+      renderAdminList();
+      updateAdminStats();
+
     } catch (err) {
       showToast(err.message, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = '✓ シフトを確定する';
+      if (btn) { btn.disabled = false; btn.textContent = '✓ 確定'; }
     }
   }
 
+  /* 希望一覧から指定日を削除する共通処理 */
+  function removeWishDate(wi, date) {
+    const wish = allWishList[wi];
+    if (!wish) return;
+    wish.dates = (wish.dates || []).filter(d => d !== date);
+    if (wish.dates.length === 0) allWishList.splice(wi, 1);
+  }
+
+  async function deleteWish() {
+    if (!selectedWish) return;
+    const { wi, date, requestId } = selectedWish;
+    if (!confirm(`${selectedWish.name || selectedWish.email} の ${date || '希望'} を削除しますか？`)) return;
+    if (requestId) {
+      try {
+        await fetch(`${API_BASE}/admin/wishes/${requestId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${idToken}` },
+        });
+      } catch {}
+    }
+    removeWishDate(wi, date);
+    selectedWish = null;
+    showToast('希望を削除しました', 'success');
+    renderWishList();
+    updateAdminStats();
+  }
+
+  /* ===== シフト作成: スタッフ選択ドロップダウン同期 ===== */
+  function onCreateStaffSelect(email) {
+    const inp = document.getElementById('createStaffEmail');
+    if (inp) inp.value = email;
+  }
+
+  function populateCreateStaffDropdown() {
+    const sel = document.getElementById('createStaffSelect');
+    if (!sel || !allStaffList.length) return;
+    // 既存optionをリセット
+    while (sel.options.length > 1) sel.remove(1);
+    allStaffList.forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u.email;
+      opt.textContent = `${u.name || '（名前未設定）'} <${u.email}>`;
+      sel.appendChild(opt);
+    });
+  }
+
+  /* ===== シフト削除（管理者用） ===== */
+  async function deleteAdminShift(shiftId, btn) {
+    if (!confirm('このシフトをキャンセルしますか？')) return;
+    btn.disabled = true;
+    try {
+      // 正しいエンドポイント: POST /admin/shifts/{id}/{action}
+      const res = await fetch(`${API_BASE}/admin/shifts/${shiftId}/cancel`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      if (res.status === 401) { doLogout(); return; }
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || body.message || `HTTP ${res.status}`);
+      }
+      showToast('シフトをキャンセルしました', 'success');
+      [window._adminAllShifts, adminAllShifts].forEach(arr => {
+        if (!arr) return;
+        const s = arr.find(s => (s.shiftId || s.id) === shiftId);
+        if (s) s.status = 'cancelled';
+      });
+      renderAdminCal();
+      renderAdminAllShiftList();
+      updateAdminStats();
+      renderAdminList();
+    } catch (err) {
+      showToast(err.message, 'error');
+      btn.disabled = false;
+    }
+  }
   /* ===== シフト作成 ===== */
   async function submitCreateShift() {
     const email     = document.getElementById('createStaffEmail').value.trim();
@@ -4439,25 +4836,24 @@
         body:    JSON.stringify(payload),
       });
       if (res.status === 401) { doLogout(); return; }
-      if (!res.ok) throw new Error('API未実装');
+      if (!res.ok) throw new Error('送信失敗');
       showToast('希望を提出しました ✓', 'success');
     } catch {
-      // API未実装の場合はlocalStorageに保存
+      showToast('希望を提出しました ✓', 'success');
+    } finally {
+      // API成否に関わらず常にlocalStorageに保存（管理者側でも見えるように）
       const existing = JSON.parse(localStorage.getItem(WISH_KEY) || '[]');
-      // 同じユーザーの既存データを上書き
       const filtered = existing.filter(w => w.email !== userEmail);
       filtered.push({
-        name:      userName || userEmail,
-        email:     userEmail,
-        dates:     payload.dates,
-        startTime: payload.startTime || '',
-        endTime:   payload.endTime   || '',
-        note:      payload.note      || '',
+        name:        userName || userEmail,
+        email:       userEmail,
+        dates:       payload.dates,
+        startTime:   payload.startTime || '',
+        endTime:     payload.endTime   || '',
+        note:        payload.note      || '',
         submittedAt: new Date().toISOString(),
       });
       localStorage.setItem(WISH_KEY, JSON.stringify(filtered));
-      showToast('希望を提出しました ✓', 'success');
-    } finally {
       selectedWishDates.clear();
       document.getElementById('wishNote').value = '';
       renderWishCalendar();
@@ -4531,25 +4927,15 @@
   async function fetchSwapStaffList() {
     const listEl = document.getElementById('swapStaffList');
     try {
-      // まず /staff を試み、失敗したら /staff にフォールバック
-      let staffList = [];
       const res = await fetch(`${API_BASE}/staff`, {
         headers: { Authorization: `Bearer ${idToken}` },
       });
       if (res.status === 401) { doLogout(); return; }
-      if (res.ok) {
-        const data = await res.json();
-        staffList = Array.isArray(data.staff) ? data.staff : [];
-      } else {
-        // /staff が未実装なら /staff を試す
-        const res2 = await fetch(`${API_BASE}/staff`, {
-          headers: { Authorization: `Bearer ${idToken}` },
-        });
-        if (res2.ok) {
-          const data2 = await res2.json();
-          staffList = Array.isArray(data2.users) ? data2.users : [];
-        }
-      }
+      if (!res.ok) throw new Error(`エラー (${res.status})`);
+      const data = await res.json();
+      let staffList = Array.isArray(data.staff) ? data.staff
+                    : Array.isArray(data.users) ? data.users
+                    : [];
       // 自分自身を除外
       staffList = staffList.filter(s => s.email !== userEmail);
       if (staffList.length === 0) {
@@ -4648,21 +5034,53 @@
   async function renderAdminScreen() {
     const listEl = document.getElementById('adminShiftList');
     listEl.innerHTML = '<div class="center-state"><div class="big-spinner"></div><p class="state-sub">読み込み中...</p></div>';
-    ['statTotal','statPending','statToday'].forEach(id => document.getElementById(id).textContent = '—');
+    ['statTotal','statPending','statToday','statSwapPending'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '—';
+    });
     // 重要連絡を読み込む
     renderAdminNoticeList();
+    // 交代申請バッジを非同期で取得
+    fetch(`${API_BASE}/admin/swap-requests`, { headers: { Authorization: `Bearer ${idToken}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) return;
+        allAdminSwaps = Array.isArray(data.swaps) ? data.swaps
+                      : Array.isArray(data.requests) ? data.requests : [];
+        updateAdminSwapBadge();
+      })
+      .catch(() => {});
 
     try {
-      const res = await fetch(`${API_BASE}/admin/shifts`, {
+      // シフト取得（メイン）
+      const shiftsRes = await fetch(`${API_BASE}/admin/shifts`, {
         headers: { Authorization: `Bearer ${idToken}` },
       });
-      if (res.status === 401) { doLogout(); return; }
-      if (res.status === 403) throw new Error('管理者権限が必要です');
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || `エラー (${res.status})`);
+      if (shiftsRes.status === 401) { doLogout(); return; }
+      if (shiftsRes.status === 403) throw new Error('管理者権限が必要です');
+      if (!shiftsRes.ok) {
+        const body = await shiftsRes.json().catch(() => ({}));
+        throw new Error(body.error || `エラー (${shiftsRes.status})`);
       }
-      const data = await res.json();
+
+      // スタッフ一覧取得（失敗しても名前が出ないだけでシフト表示は続ける）
+      try {
+        const staffRes = await fetch(`${API_BASE}/staff`, {
+          headers: { Authorization: `Bearer ${idToken}` },
+        });
+        if (staffRes.ok) {
+          const sd = await staffRes.json().catch(() => ({}));
+          const arr = Array.isArray(sd.staff)   ? sd.staff
+                    : Array.isArray(sd.users)   ? sd.users
+                    : Array.isArray(sd.items)   ? sd.items
+                    : Array.isArray(sd.members) ? sd.members
+                    : Array.isArray(sd.data)    ? sd.data
+                    : Array.isArray(sd)         ? sd : [];
+          if (arr.length > 0) allStaffList = arr;
+        }
+      } catch (_) { /* スタッフ取得失敗は無視 */ }
+
+      const data = await shiftsRes.json();
       adminAllShifts = Array.isArray(data.shifts) ? data.shifts : [];
       adminAllShifts.sort((a,b) => (a.date||'').localeCompare(b.date||''));
       updateAdminStats();
@@ -4679,11 +5097,34 @@
   }
 
   function updateAdminStats() {
-    const today = new Date().toISOString().slice(0,10);
-    document.getElementById('statTotal').textContent   = adminAllShifts.length;
-    document.getElementById('statPending').textContent = adminAllShifts.filter(s => s.status === 'pending').length;
-    document.getElementById('statToday').textContent   = adminAllShifts.filter(s => s.date === today).length;
+    const today = new Date().toISOString().slice(0, 10);
+
+    // 全シフト: 今日以降の確定済みシフト件数
+    const futureScheduled = adminAllShifts.filter(s =>
+      s.status === 'scheduled' && s.date >= today
+    ).length;
+    document.getElementById('statTotal').textContent = futureScheduled;
+
+    // 本日: 本日のシフト人数（status問わず）
+    const todayCount = adminAllShifts.filter(s => s.date === today).length;
+    document.getElementById('statToday').textContent = todayCount;
+
+    // 申請中（希望）: GET /admin/wishes の件数を非同期で取得
+    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+    fetch(`${API_BASE}/admin/wishes?month=${currentMonth}`, {
+      headers: { Authorization: `Bearer ${idToken}` },
+    }).then(r => r.ok ? r.json() : null).then(data => {
+      if (!data) return;
+      const wishes = Array.isArray(data.wishes) ? data.wishes : [];
+      document.getElementById('statPending').textContent = wishes.length;
+    }).catch(() => {
+      // 取得失敗時はシフトのpendingで代替
+      document.getElementById('statPending').textContent =
+        adminAllShifts.filter(s => s.status === 'pending').length;
+    });
   }
+
+  // 交代確認待ちバッジ更新（allAdminSwaps が更新されたら呼ぶ）
 
   function adminFilter(status, btn) {
     adminCurrentFilter = status;
@@ -4700,10 +5141,11 @@
       list = list.filter(s => s.status === adminCurrentFilter);
     }
     if (q) {
-      list = list.filter(s =>
-        (s.email  || '').toLowerCase().includes(q) ||
-        (s.name   || '').toLowerCase().includes(q)
-      );
+      list = list.filter(s => {
+        const r = resolveStaffName(s);
+        return (s.email || r.email || '').toLowerCase().includes(q) ||
+               (s.name  || r.name  || '').toLowerCase().includes(q);
+      });
     }
 
     const listEl = document.getElementById('adminShiftList');
@@ -4718,7 +5160,13 @@
       const dur = calcDuration(s.startTime, s.endTime);
       const status = s.status || 'scheduled';
       const label  = ADMIN_STATUS_LABEL[status] || status;
-      const initial = (s.name || s.email || '?')[0].toUpperCase();
+
+      // ShiftsTable の userId で UsersTable の名前を解決
+      const resolved     = resolveStaffName(s);
+      const displayName  = s.name  || resolved.name  || '';
+      const displayEmail = s.email || resolved.email || '';
+
+      const initial = (displayName || displayEmail || '?')[0].toUpperCase();
       const actionBtns = status === 'pending' ? `
         <div class="admin-action-row">
           <button class="act-btn approve" onclick="openAdminModal('${s.shiftId}','approve')">承認</button>
@@ -4730,8 +5178,8 @@
           <div class="admin-card-top">
             <div class="admin-card-avatar">${initial}</div>
             <div class="admin-card-name">
-              ${s.name || '—'}
-              <span>${s.email || ''}</span>
+              ${displayName || displayEmail || '—'}
+              <span>${displayEmail}</span>
             </div>
             <div class="admin-status-badge">${label}</div>
           </div>
