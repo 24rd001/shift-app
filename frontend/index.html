@@ -3291,12 +3291,39 @@
 
   /* ===== ログアウト ===== */
   function doLogout() {
+    // --- localStorage クリア ---
     localStorage.removeItem('idToken');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('userName');
-    idToken = null;
+    localStorage.removeItem('isAdmin');
+
+    // --- 認証情報 ---
+    idToken   = null;
     userEmail = '';
-    userName = '';
+    userName  = '';
+
+    // --- スタッフ・シフトキャッシュ ---
+    allStaffList        = [];
+    myShiftsCache       = [];
+    window._cachedShifts      = [];
+    window._adminAllShifts    = [];
+
+    // --- 交代申請キャッシュ ---
+    selectedSwapShiftId   = null;
+    selectedSwapStaffEmail = null;
+    allAdminSwaps         = [];
+
+    // --- 管理者シフトキャッシュ ---
+    adminAllShifts        = [];
+    adminCurrentFilter    = 'all';
+    adminPendingAction    = null;
+
+    // --- 希望キャッシュ ---
+    selectedWishDates     = new Set();
+
+    // --- 重要連絡キャッシュ ---
+    allNotices            = [];
+
     showScreen('loginScreen');
   }
 
@@ -3427,6 +3454,20 @@
       localStorage.setItem('idToken',   idToken);
       localStorage.setItem('userEmail', userEmail);
       localStorage.setItem('userName',  userName);
+
+      // 前のユーザーのメモリキャッシュを完全リセット（別ユーザーでログインした際の混入防止）
+      allStaffList          = [];
+      myShiftsCache         = [];
+      window._cachedShifts       = [];
+      window._adminAllShifts     = [];
+      selectedSwapShiftId   = null;
+      selectedSwapStaffEmail = null;
+      allAdminSwaps         = [];
+      adminAllShifts        = [];
+      adminCurrentFilter    = 'all';
+      adminPendingAction    = null;
+      selectedWishDates     = new Set();
+      allNotices            = [];
 
       // 管理者判定: custom:role または cognito:groups で確認
       const groups   = payload['cognito:groups'] || [];
