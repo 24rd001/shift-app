@@ -144,7 +144,7 @@
     .pw-toggle {
       position: absolute;
       right: 12px;
-      top: 50%;
+      top: 65%;
       transform: translateY(-50%);
       background: none;
       border: none;
@@ -1724,7 +1724,7 @@
                  placeholder="••••••••"
                  autocomplete="current-password" required>
           <button type="button" class="pw-toggle" id="pwToggle" aria-label="パスワードを表示">
-            <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
               <circle cx="12" cy="12" r="3"/>
             </svg>
@@ -3865,32 +3865,35 @@
 
   async function decideSwap(swapId, approve, btn) {
     const label = approve ? '確定' : '拒否';
-    // swapIdが取れていない場合は処理しない
     if (!swapId || swapId === 'undefined' || swapId === 'null') {
       showToast('申請IDが取得できません。画面を再読み込みしてください。', 'error');
       return;
     }
     if (!confirm(`この交代申請を「${label}」しますか？`)) return;
     btn.disabled = true;
-    console.log('[decideSwap]', { swapId, approve, body: { approve } });
     try {
       const res = await fetch(`${API_BASE}/swap-requests/${swapId}/approve`, {
         method:  'PUT',
         headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
-        // バックエンドが approve/reject 両キーを期待する場合に備えて両方送る
+        // 拒否の場合: reject:true のみ送信（approve:false との混在でバックエンドが誤判定するのを防ぐ）
+        // 承認の場合: approve:true のみ送信
         body: JSON.stringify(approve
-          ? { approve: true,  reject: false }
-          : { approve: false, reject: true  }
+          ? { approve: true }
+          : { reject: true }
         ),
       });
-      console.log('[decideSwap] status:', res.status);
+      // レスポンスボディをログ出力（デバッグ用）
+      const resBody = await res.json().catch(() => ({}));
+      console.log('[decideSwap] status:', res.status, 'body:', JSON.stringify(resBody));
       if (res.status === 401) { doLogout(); return; }
       if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}));
-        console.error('[decideSwap] error body:', errBody);
-        throw new Error(errBody.error || errBody.message || `エラー (${res.status})`);
+        throw new Error(resBody.error || resBody.message || `エラー (${res.status})`);
       }
-      showToast(approve ? '✓ 交代を確定しました' : '申請を拒否しました', 'success');
+      // ローカルキャッシュを即時更新（再取得前に画面に反映）
+      const hit = allAdminSwaps.find(r => (r.swapId || r.id || r.requestId) === swapId);
+      if (hit) hit.status = approve ? 'approved' : 'rejected';
+
+      showToast(approve ? '✓ 交代を確定しました' : '✕ 申請を拒否しました', approve ? 'success' : 'error');
       loadAdminSwapList();
     } catch (err) {
       showToast(err.message, 'error');
