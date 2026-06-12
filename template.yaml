@@ -343,6 +343,32 @@ Resources:
             Path: /admin/wishes
             Method: GET
 
+  DeleteWishFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/shifts/deleteWish.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: deleteWish.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ShiftRequestsTable
+      Events:
+        DeleteWishApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /admin/wishes/{id}
+            Method: DELETE
+
   GetStaffFunction:
     Type: AWS::Serverless::Function
     Metadata:
