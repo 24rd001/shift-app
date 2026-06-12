@@ -1,4 +1,4 @@
-import { GetCommand, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
+import { GetCommand, TransactWriteCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { getAuthContext, isAdmin } from '../../middleware/auth';
 import { docClient, TABLES } from '../../utils/dynamodb';
@@ -6,7 +6,8 @@ import { badRequest, forbidden, internalError, notFound, ok, unauthorized } from
 
 interface SwapResponse {
   userId: string;
-  accept: boolean;
+  accept: boolean | null;
+  comment?: string | null;
   respondedAt: string;
 }
 
@@ -18,24 +19,69 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const swapId = event.pathParameters?.id;
   if (!swapId) return badRequest('swap ID is required');
 
+  // リクエストボディから approve / reject を判定
+  let body: { approve?: boolean; reject?: boolean } = {};
+  try {
+    body = event.body ? JSON.parse(event.body) : {};
+  } catch {
+    return badRequest('Invalid request body');
+  }
+
+  const isApproveAction = body.approve === true;
+  const isRejectAction = body.reject === true;
+
+  if (!isApproveAction && !isRejectAction) {
+    return badRequest('Request body must contain either { "approve": true } or { "reject": true }');
+  }
+
   try {
     const swap = await docClient.send(
       new GetCommand({ TableName: TABLES.SWAP_REQUESTS, Key: { swapId } }),
     );
 
     if (!swap.Item) return notFound('Swap request not found');
-    if (swap.Item['status'] !== 'pending') {
+    if (swap.Item['status'] !== 'pending' && swap.Item['status'] !== 'responded') {
       return badRequest(`Swap request is already ${swap.Item['status'] as string}`);
     }
 
-    const responses = (swap.Item['responses'] ?? []) as SwapResponse[];
-    const acceptedResponse = responses.find((r) => r.accept === true);
+    const { shiftId, requesterId } = swap.Item as { shiftId: string; requesterId: string };
 
-    if (!acceptedResponse) {
-      return badRequest('No staff member has accepted this swap yet');
+    // ── 拒否処理 ──────────────────────────────────────────
+    if (isRejectAction) {
+      await docClient.send(
+        new UpdateCommand({
+          TableName: TABLES.SWAP_REQUESTS,
+          Key: { swapId },
+          UpdateExpression: 'SET #s = :rejected, rejectedBy = :adminId, rejectedAt = :now',
+          ExpressionAttributeNames: { '#s': 'status' },
+          ExpressionAttributeValues: {
+            ':rejected': 'rejected',
+            ':adminId': auth.userId,
+            ':now': new Date().toISOString(),
+          },
+        }),
+      );
+
+      return ok({
+        message: 'Swap rejected successfully',
+        swapId,
+        shiftId,
+        requesterId,
+      });
     }
 
-    const { shiftId, requesterId } = swap.Item as { shiftId: string; requesterId: string };
+    // ── 承認処理 ──────────────────────────────────────────
+    const responses = (swap.Item['responses'] ?? []) as SwapResponse[];
+
+    // accept: true を優先、いなければ accept: null（相談）のスタッフを交代相手にする
+    const acceptedResponse =
+      responses.find((r) => r.accept === true) ??
+      responses.find((r) => r.accept === null);
+
+    if (!acceptedResponse) {
+      return badRequest('No staff member has responded to this swap yet');
+    }
+
     const newAssigneeId = acceptedResponse.userId;
 
     // DynamoDB トランザクション: 2つの更新を原子的に実行

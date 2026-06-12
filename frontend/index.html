@@ -4019,13 +4019,12 @@
 
   function renderAdminSwapList() {
     const el = document.getElementById('adminSwapList');
-    // ステータス表示ラベル
     const STATUS_LABEL = {
       pending:   '承認待ち',
-      responded: '承認待ち',  // respondedも管理者未確定なので「承認待ち」に統一
+      responded: '承認待ち',
       approved:  '承認済み',
       rejected:  '却下',
-    };
+  };
     const STATUS_COLOR = {
       pending:   'color:var(--yellow);background:var(--yellow-light)',
       responded: 'color:var(--yellow);background:var(--yellow-light)',
@@ -4033,25 +4032,20 @@
       rejected:  'color:var(--red);background:var(--red-light)',
     };
 
-    // フィルタリング
-    // 「承認待ち」= pending / responded（管理者がまだ確定していない）
-    // 「承認済み」= approved
-    // 「却下」    = rejected
-    // 「すべて」  = 全件
     let list = allAdminSwaps;
     if (adminSwapFilter === 'pending') {
       list = list.filter(r => r.status === 'pending' || r.status === 'responded');
-    } else if (adminSwapFilter === 'approved') {
+      } else if (adminSwapFilter === 'approved') {
       list = list.filter(r => r.status === 'approved');
-    } else if (adminSwapFilter === 'rejected') {
-      list = list.filter(r => r.status === 'rejected');
+      } else if (adminSwapFilter === 'rejected') {
+        list = list.filter(r => r.status === 'rejected');
     }
-    // 'all' はそのまま全件
 
     if (list.length === 0) {
       el.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:20px 0">申請はありません</p>';
       return;
     }
+
     const WEEKDAYS = ['日','月','火','水','木','金','土'];
     el.innerHTML = list.map(r => {
       const swapId    = r.swapId || r.id || r.requestId || r.swap_id || r.swapRequestId || '';
@@ -4061,10 +4055,8 @@
       const stLabel   = STATUS_LABEL[r.status] || r.status;
       const stStyle   = STATUS_COLOR[r.status] || '';
 
-      // 「代われる」回答者を取得
       const acceptedRes = (r.responses || []).filter(res => res.accept === true);
       const consultRes  = (r.responses || []).filter(res => res.accept === null && res.comment);
-      // 管理者がまだ確定/拒否していない = pending or responded
       const canDecide   = r.status === 'pending' || r.status === 'responded';
 
       // 名前解決ヘルパー
@@ -4074,7 +4066,7 @@
           emailOrId && (u.userId === emailOrId || u.sub === emailOrId || u.id === emailOrId || u.email === emailOrId)
         );
         return hit ? (hit.name || hit.displayName || hit.email || emailOrId || '—')
-                   : (emailOrId && !/^[0-9a-f-]{32,}$/i.test(emailOrId) ? emailOrId : '—');
+                 : (emailOrId && !/^[0-9a-f-]{32,}$/i.test(emailOrId) ? emailOrId : '—');
       }
       const resolveResName = res => {
         if (res.userName && !/^[0-9a-f-]{32,}$/i.test(res.userName)) return res.userName;
@@ -4088,6 +4080,14 @@
       const requesterLabel  = resolveName(r.requesterName, r.requesterEmail || r.requesterId);
       const targetLabel     = resolveName(r.targetName,    r.targetEmail    || r.targetId);
       const acceptedNames   = acceptedRes.map(resolveResName).filter(Boolean).join('、');
+
+      const hasResponded   = acceptedRes.length > 0 || consultRes.length > 0;
+      const decideLabel    = acceptedRes.length > 0
+        ? `✓ ${acceptedNames} が「代われる」と回答しました`
+        : `💬 相談コメントが届いています`;
+      const decideSubLabel = acceptedRes.length > 0
+        ? `${requesterLabel} → ${acceptedNames} への交代を確定しますか？`
+        : `内容を確認して承認または拒否してください`;
 
       const consultBlock = consultRes.length > 0 ? `
         <div style="margin-top:8px;padding:8px 10px;background:#FEF3C7;border-radius:8px;border:1px solid #FCD34D">
@@ -4109,13 +4109,14 @@
           <div style="font-size:12px;color:var(--muted);margin-bottom:4px">${dateLabel}　${r.startTime||''}〜${r.endTime||''}</div>
           ${r.reason ? `<div style="font-size:12px;color:var(--muted)">「${r.reason}」</div>` : ''}
           ${consultBlock}
-          ${canDecide && acceptedRes.length > 0 ? `
+          ${canDecide && hasResponded ? `
             <div style="margin-top:10px;padding:10px;background:var(--primary-light);border-radius:10px;border:1px solid var(--primary)">
               <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:4px">
-                ✓ ${acceptedNames} が「代われる」と回答しました
+                ${decideLabel}
               </div>
               <div style="font-size:11px;color:var(--text);margin-bottom:10px">
-                ${requesterLabel} → ${acceptedNames} への交代を確定しますか？
+                ${decideSubLabel}
+              </div>
               </div>
               <div style="display:flex;gap:8px">
                 <button class="act-btn approve" style="flex:2" onclick="decideSwap('${swapId}',true,this)">✓ 確定する</button>
@@ -4128,9 +4129,9 @@
           ${r.status === 'approved' ? `<div style="margin-top:8px;font-size:11px;color:#065F46;font-weight:700">✓ 交代が確定しました</div>` : ''}
           ${r.status === 'rejected' ? `<div style="margin-top:8px;font-size:11px;color:var(--red);font-weight:700">✕ 申請が拒否されました</div>` : ''}
         </div>`;
-    }).join('');
+      }).join('');
   }
-
+  
   async function decideSwap(swapId, approve, btn) {
     const label = approve ? '確定' : '拒否';
     if (!swapId || swapId === 'undefined' || swapId === 'null') {

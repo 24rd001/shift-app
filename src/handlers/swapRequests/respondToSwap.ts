@@ -5,7 +5,8 @@ import { docClient, TABLES } from '../../utils/dynamodb';
 import { badRequest, forbidden, internalError, notFound, ok, unauthorized } from '../../utils/response';
 
 interface RespondBody {
-  accept: boolean;
+  accept: boolean | null;
+  comment?: string;
 }
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -24,7 +25,15 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return badRequest('Invalid JSON');
   }
 
-  if (typeof body.accept !== 'boolean') return badRequest('accept (boolean) is required');
+  // accept は true / false / null のどれかであること
+  if (body.accept !== true && body.accept !== false && body.accept !== null) {
+    return badRequest('accept must be true, false, or null');
+  }
+
+  // 相談（accept: null）の場合はコメント必須
+  if (body.accept === null && !body.comment?.trim()) {
+    return badRequest('comment is required when accept is null');
+  }
 
   try {
     const swap = await docClient.send(
@@ -41,22 +50,37 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     const response = {
       userId: auth.userId,
-      accept: body.accept,
+      accept: body.accept,           // true / false / null
+      comment: body.comment ?? null, // 相談コメント（任意）
       respondedAt: new Date().toISOString(),
     };
 
-    // list_append でレスポンス配列に追加（上書きせず蓄積する）
+    // ステータスの決定
+    // true  → responded（管理者が承認/拒否できる状態）
+    // false → rejected（断った = 申請終了）
+    // null  → pending のまま（相談中、管理者がコメントを見て判断）
+    const newStatus =
+      body.accept === true  ? 'responded' :
+      body.accept === false ? 'rejected'  :
+      'pending'; // null = 相談、ステータス変えない
+
     await docClient.send(
       new UpdateCommand({
         TableName: TABLES.SWAP_REQUESTS,
         Key: { swapId },
-        UpdateExpression: 'SET #r = list_append(#r, :newResponse)',
-        ExpressionAttributeNames: { '#r': 'responses' },
-        ExpressionAttributeValues: { ':newResponse': [response] },
+        UpdateExpression: 'SET #r = list_append(#r, :newResponse), #s = :newStatus',
+        ExpressionAttributeNames: {
+          '#r': 'responses',
+          '#s': 'status',
+        },
+        ExpressionAttributeValues: {
+          ':newResponse': [response],
+          ':newStatus': newStatus,
+        },
       }),
     );
 
-    return ok({ message: 'Response recorded', response });
+    return ok({ message: 'Response recorded', response, status: newStatus });
   } catch (err) {
     console.error('[respondToSwap] error:', err);
     return internalError();
