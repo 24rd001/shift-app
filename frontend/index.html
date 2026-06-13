@@ -1565,6 +1565,67 @@
       font-size: 20px;
       padding: 2px 10px;
     }
+    .ss-empty {
+      font-size: 13px; color: var(--muted); text-align: center; padding: 18px 0;
+    }
+    /* ===== タイムライン型シフト表 ===== */
+    .week-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; margin-bottom: 12px;
+      background: var(--gray-light); border-radius: 10px; padding: 6px 8px;
+    }
+    .week-range { flex: 1; text-align: center; font-size: 13px; font-weight: 800; color: var(--text); }
+    .cal-icon-btn {
+      background: #fff; border: 1.5px solid var(--border); border-radius: 8px;
+      color: var(--primary); padding: 4px 8px; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center;
+    }
+    .cal-icon-btn:hover { border-color: var(--primary); background: var(--primary-light); }
+    .week-cal-pop {
+      border: 1px solid var(--border); border-radius: 10px; padding: 10px;
+      margin-bottom: 12px; background: #fff;
+    }
+    .week-cal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px; font-size: 14px; font-weight: 800; color: var(--text);
+    }
+    .day-block { margin-bottom: 14px; }
+    .day-block:last-child { margin-bottom: 0; }
+    .day-block-head {
+      background: #FEF3C7; border-radius: 8px; padding: 5px 10px; margin-bottom: 6px;
+      font-size: 14px; font-weight: 800; color: #92400E;
+      display: flex; align-items: baseline; gap: 6px;
+    }
+    .dbh-wd.sun { color: var(--red); }
+    .dbh-wd.sat { color: #2563EB; }
+    .tl-scroll {
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      border: 1px solid var(--border); border-radius: 8px;
+    }
+    .tl-inner { position: relative; }
+    .tl-axis { display: flex; border-bottom: 1px solid var(--border); background: var(--gray-light); }
+    .tl-hour {
+      width: 54px; flex-shrink: 0; box-sizing: border-box;
+      font-size: 11px; font-weight: 700; color: var(--muted);
+      padding: 4px 0 4px 5px; border-right: 1px solid var(--border);
+    }
+    .tl-rows {
+      position: relative; padding: 6px 0;
+      background-image: repeating-linear-gradient(to right, transparent, transparent 53px, var(--border) 53px, var(--border) 54px);
+    }
+    .tl-row { position: relative; height: 30px; }
+    .tl-bar {
+      position: absolute; top: 3px; height: 24px;
+      background: var(--green); color: #fff; border-radius: 5px;
+      display: flex; align-items: center; gap: 4px; padding: 0 8px;
+      font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,.12);
+    }
+    .tl-bar.mine { background: var(--primary); }
+    .tl-check { font-size: 11px; flex-shrink: 0; }
+    .tl-name { overflow: hidden; text-overflow: ellipsis; }
+    .tl-time { opacity: .85; font-weight: 600; margin-left: 2px; }
+    .tl-empty { font-size: 12px; color: var(--muted); text-align: center; padding: 14px 0; }
 
     /* ===== 交代返答ボタン ===== */
     .swap-reply-btn {
@@ -1994,35 +2055,24 @@
         <div id="pendingTasksList"></div>
       </div>
 
-      <!-- カレンダー -->
+      <!-- 本日のシフト -->
       <div class="section-card" style="margin-bottom:14px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <button onclick="shiftsPrevMonth()" class="mnav-btn">‹</button>
-          <span id="shiftsMonthLabel" style="font-size:15px;font-weight:800;color:var(--text)"></span>
-          <button onclick="shiftsNextMonth()" class="mnav-btn">›</button>
+          <div class="section-title" style="margin-bottom:0">本日のシフト</div>
+          <span id="todayShiftDate" style="font-size:11px;color:var(--muted);font-weight:700"></span>
         </div>
-        <div class="wish-calendar-grid">
-          <div class="cal-day-label sun">日</div>
-          <div class="cal-day-label">月</div>
-          <div class="cal-day-label">火</div>
-          <div class="cal-day-label">水</div>
-          <div class="cal-day-label">木</div>
-          <div class="cal-day-label">金</div>
-          <div class="cal-day-label sat">土</div>
+        <div id="todayShiftList">
+          <div class="center-state" style="padding:12px 0"><div class="big-spinner"></div></div>
         </div>
-        <div class="wish-calendar-grid" id="shiftsCalGrid"></div>
       </div>
 
+      <!-- 今後のシフト（自分の予定） -->
       <div class="month-bar">
         <div class="month-label" id="monthLabel">今後のシフト</div>
         <div class="month-badge" id="shiftCount">読込中</div>
       </div>
-        
       <div id="shiftsContainer">
-        <div class="center-state">
-          <div class="big-spinner"></div>
-          <p class="state-sub">シフトを読み込み中...</p>
-        </div>
+        <div class="center-state" style="padding:16px 0"><div class="big-spinner"></div></div>
       </div>
 
     </div>
@@ -2036,6 +2086,15 @@
           <line x1="3" y1="10" x2="21" y2="10"/>
         </svg>
         ホーム
+      </button>
+      <button class="nav-item" id="navConfirm" onclick="switchTab('shiftConfirm')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="7" y1="14" x2="9" y2="14"/><line x1="13" y1="14" x2="17" y2="14"/>
+        </svg>
+        シフト確認
       </button>
       <button class="nav-item" id="navWish" onclick="switchTab('wish')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2141,6 +2200,15 @@
         </svg>
         ホーム
       </button>
+      <button class="nav-item" id="navConfirmW" onclick="switchTab('shiftConfirm')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="7" y1="14" x2="9" y2="14"/><line x1="13" y1="14" x2="17" y2="14"/>
+        </svg>
+        シフト確認
+      </button>
       <button class="nav-item active" id="navWishW" onclick="switchTab('wish')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -2241,6 +2309,15 @@
         </svg>
         ホーム
       </button>
+      <button class="nav-item" id="navConfirmSw" onclick="switchTab('shiftConfirm')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="7" y1="14" x2="9" y2="14"/><line x1="13" y1="14" x2="17" y2="14"/>
+        </svg>
+        シフト確認
+      </button>
       <button class="nav-item" id="navWishSw" onclick="switchTab('wish')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -2320,6 +2397,15 @@
         </svg>
         ホーム
       </button>
+      <button class="nav-item" id="navConfirmTalk" onclick="switchTab('shiftConfirm')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="7" y1="14" x2="9" y2="14"/><line x1="13" y1="14" x2="17" y2="14"/>
+        </svg>
+        シフト確認
+      </button>
       <button class="nav-item" id="navWishTalk" onclick="switchTab('wish')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -2341,6 +2427,97 @@
       </button>
     </nav>
   </div><!-- /talkScreen -->
+
+  <!-- ==================== Shift Confirm Screen ==================== -->
+  <div class="screen" id="shiftConfirmScreen">
+    <header class="shifts-header">
+      <div class="header-brand">
+        <div class="header-icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </div>
+        <span class="header-title">シフト確認</span>
+      </div>
+    </header>
+
+    <div class="shifts-body">
+      <div class="section-card" style="margin-bottom:14px">
+        <div class="week-nav">
+          <button onclick="weekPrev()" class="mnav-btn">‹</button>
+          <span id="weekRangeLabel" class="week-range"></span>
+          <button onclick="weekNext()" class="mnav-btn">›</button>
+          <button onclick="toggleWeekCal()" class="cal-icon-btn" aria-label="カレンダーから選択" title="カレンダーから選択">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </button>
+        </div>
+        <div id="weekCalPop" class="week-cal-pop" style="display:none">
+          <div class="week-cal-head">
+            <button onclick="weekCalPrevMonth()" class="mnav-btn">‹</button>
+            <span id="weekCalLabel"></span>
+            <button onclick="weekCalNextMonth()" class="mnav-btn">›</button>
+          </div>
+          <div class="wish-calendar-grid">
+            <div class="cal-day-label sun">日</div>
+            <div class="cal-day-label">月</div>
+            <div class="cal-day-label">火</div>
+            <div class="cal-day-label">水</div>
+            <div class="cal-day-label">木</div>
+            <div class="cal-day-label">金</div>
+            <div class="cal-day-label sat">土</div>
+          </div>
+          <div class="wish-calendar-grid" id="weekCalGrid"></div>
+          <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:6px"><span style="color:var(--green)">●</span> 自分のシフトがある日　／　選んだ日から1週間を表示します</div>
+        </div>
+        <div id="weekView"></div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-item" id="navShiftsC" onclick="switchTab('shifts')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        ホーム
+      </button>
+      <button class="nav-item active" id="navConfirmC" onclick="switchTab('shiftConfirm')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="7" y1="14" x2="9" y2="14"/><line x1="13" y1="14" x2="17" y2="14"/>
+        </svg>
+        シフト確認
+      </button>
+      <button class="nav-item" id="navWishC" onclick="switchTab('wish')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        希望提出
+      </button>
+      <button class="nav-item" id="navSwapC" onclick="switchTab('swap')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+        交代申請
+      </button>
+      <button class="nav-item" id="navTalkC" onclick="switchTab('talk')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        トーク
+      </button>
+    </nav>
+  </div><!-- /shiftConfirmScreen -->
 
   <!-- ==================== Chat Room Screen ==================== -->
   <div class="chat-screen" id="chatRoomScreen">
@@ -2456,8 +2633,8 @@
         </div>
       </div>
 
-      <!-- フィルター -->
-      <div class="admin-filter-bar">
+      <!-- フィルター（ホームでは非表示。シフト一覧タブに集約） -->
+      <div class="admin-filter-bar" style="display:none">
         <button class="filter-chip active" onclick="adminFilter('all', this)">すべて</button>
         <button class="filter-chip" onclick="adminFilter('scheduled', this)">確定</button>
         <button class="filter-chip" onclick="adminFilter('pending', this)">申請中</button>
@@ -2465,16 +2642,19 @@
         <button class="filter-chip" onclick="adminFilter('cancelled', this)">キャンセル</button>
       </div>
 
-      <!-- 検索 -->
-      <div class="input-wrap" style="margin-bottom:14px">
+      <!-- 検索（ホームでは非表示。シフト一覧タブに集約） -->
+      <div class="input-wrap" style="margin-bottom:14px;display:none">
         <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
         <input class="form-input" type="search" id="adminSearch" placeholder="氏名・メールで検索…" oninput="renderAdminList()">
       </div>
 
-      <!-- リスト -->
-      <div id="adminShiftList">
+      <!-- 本日の全員シフト（タイムライン） -->
+      <div id="adminTodayGrid"></div>
+
+      <!-- リスト（ホームでは非表示。シフト一覧タブに集約） -->
+      <div id="adminShiftList" style="display:none">
         <div class="center-state">
           <div class="big-spinner"></div>
           <p class="state-sub">シフトを読み込み中...</p>
@@ -2686,6 +2866,44 @@
         </div>
       </div><!-- /adminSwapPanel -->
 
+      <!-- シフト確認（週）パネル（初期非表示） -->
+      <div id="adminWeekPanel" style="display:none">
+        <div class="section-card">
+          <div class="section-title" style="margin-bottom:10px">シフト確認</div>
+          <div class="week-nav">
+            <button onclick="adminWeekPrev()" class="mnav-btn">‹</button>
+            <span id="adminWeekRangeLabel" class="week-range"></span>
+            <button onclick="adminWeekNext()" class="mnav-btn">›</button>
+            <button onclick="adminToggleWeekCal()" class="cal-icon-btn" aria-label="カレンダーから選択" title="カレンダーから選択">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </button>
+          </div>
+          <div id="adminWeekCalPop" class="week-cal-pop" style="display:none">
+            <div class="week-cal-head">
+              <button onclick="adminWeekCalPrevMonth()" class="mnav-btn">‹</button>
+              <span id="adminWeekCalLabel"></span>
+              <button onclick="adminWeekCalNextMonth()" class="mnav-btn">›</button>
+            </div>
+            <div class="wish-calendar-grid">
+              <div class="cal-day-label sun">日</div>
+              <div class="cal-day-label">月</div>
+              <div class="cal-day-label">火</div>
+              <div class="cal-day-label">水</div>
+              <div class="cal-day-label">木</div>
+              <div class="cal-day-label">金</div>
+              <div class="cal-day-label sat">土</div>
+            </div>
+            <div class="wish-calendar-grid" id="adminWeekCalGrid"></div>
+            <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:6px">選んだ日から1週間を表示します</div>
+          </div>
+          <div id="adminWeekView"></div>
+        </div>
+      </div><!-- /adminWeekPanel -->
+
     </div><!-- /admin-body -->
 
     <nav class="bottom-nav">
@@ -2696,6 +2914,15 @@
           <line x1="3" y1="10" x2="21" y2="10"/>
         </svg>
         ホーム
+      </button>
+      <button class="nav-item" id="adminNavWeek" onclick="adminSwitchTab('adminWeek', this)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="7" y1="14" x2="9" y2="14"/><line x1="13" y1="14" x2="17" y2="14"/>
+        </svg>
+        シフト確認
       </button>
       <button class="nav-item" id="adminNavWishes" onclick="adminSwitchTab('adminWishes', this)">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -3370,10 +3597,6 @@
       ? `${userName}（${userEmail}）`
       : userEmail;
 
-    // 月ラベル
-    
-    document.getElementById('shiftCount').textContent = '読込中…';
-
     showScreen('shiftsScreen');
     // ボトムナビ アクティブ状態
     ['navShifts'].forEach(id => {
@@ -3381,105 +3604,374 @@
       if (el) el.classList.add('active');
     });
 
-    const container = document.getElementById('shiftsContainer');
+    // ローディング表示（本日のシフト）
+    const todayEl = document.getElementById('todayShiftList');
+    if (todayEl) todayEl.innerHTML =
+      '<div class="center-state" style="padding:12px 0"><div class="big-spinner"></div></div>';
 
-    // ローディング表示
-    container.innerHTML = `
-      <div class="center-state">
-        <div class="big-spinner"></div>
-        <p class="state-sub">シフトを読み込み中...</p>
-      </div>`;
-
+    fetchNotices();
     try {
-      fetchNotices();
-      const shifts = await fetchMyShifts();
+      storeShiftsCache = await fetchStoreShifts();
+    } catch (_) {
+      storeShiftsCache = [];
+    }
 
-      window._cachedShifts = shifts;   
-      renderShiftsCalendar(shifts);
+    // ホーム＝本日1日分の全体シフト表（週は「シフト確認」タブへ）
+    renderTodayStoreGrid();
+    ensureStaffList().then(() => renderTodayStoreGrid());
 
-      if (shifts.length === 0) {
-        document.getElementById('shiftCount').textContent = '0件';
-        container.innerHTML = `
-          <div class="center-state">
-            <div class="state-icon">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8"  y1="2" x2="8"  y2="6"/>
-                <line x1="3"  y1="10" x2="21" y2="10"/>
-              </svg>
-            </div>
-            <p class="state-title">シフトがありません</p>
-            <p class="state-sub">今月のシフトはまだ<br>登録されていません</p>
-          </div>`;
-        return;
-      }
-
-      // 日付昇順でソート
-      shifts.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
-
-      document.getElementById('shiftCount').textContent = `${shifts.length}件`;
-      container.innerHTML = shifts.map(shiftCardHTML).join('');
-
-    } catch (err) {
-      document.getElementById('shiftCount').textContent = 'エラー';
-      container.innerHTML = `
-        <div class="center-state">
-          <div class="state-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-          </div>
-          <p class="state-title">読み込みに失敗しました</p>
-          <p class="state-sub">${err.message}</p>
-          <button class="reload-btn" onclick="renderShiftsScreen()">再試行</button>
-        </div>`;
+    // 今後のシフト（自分の予定リスト）。カレンダーの印にも使うので保持
+    try {
+      const myShifts = await fetchMyShifts();
+      window._cachedShifts = myShifts;
+      renderUpcomingMyShifts(myShifts);
+    } catch (_) {
+      window._cachedShifts = [];
+      renderUpcomingMyShifts([]);
     }
   }
 
 
-  /* ===== シフト確認画面カレンダー ===== */
-  let shiftsCalYear  = new Date().getFullYear();
-  let shiftsCalMonth = new Date().getMonth();
+  /* ===== 店舗全員シフト（タイムライン表示） ===== */
+  const GRID_START_HOUR = 6;
+  const GRID_END_HOUR   = 24;
+  const GRID_COL_W      = 54;   // 1時間あたりの幅(px)
+  const STORE_SHIFTS_KEY = 'demoStoreShifts_v2';
+  let storeShiftsCache = [];
+  let weekStart = new Date(); weekStart.setHours(0, 0, 0, 0);
 
-  function shiftsPrevMonth() {
-    shiftsCalMonth--;
-    if (shiftsCalMonth < 0) { shiftsCalMonth = 11; shiftsCalYear--; }
-    renderShiftsCalendar(window._cachedShifts || []);
-  }
-  function shiftsNextMonth() {
-    shiftsCalMonth++;
-    if (shiftsCalMonth > 11) { shiftsCalMonth = 0; shiftsCalYear++; }
-    renderShiftsCalendar(window._cachedShifts || []);
+  const timeToMin = t => {
+    const [h, m] = String(t || '0:0').split(':').map(Number);
+    return (h || 0) * 60 + (m || 0);
+  };
+  const fmtDate = d =>
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+  /* シフトの表示名を解決：name → スタッフ一覧から解決 → メール頭 → 未設定 */
+  function shiftDisplayName(s) {
+    if (s.name) return s.name;
+    const r = resolveStaffName(s);
+    if (r.name) return r.name;
+    if (s.email)  return String(s.email).split('@')[0];
+    if (r.email)  return String(r.email).split('@')[0];
+    return '（名前未設定）';
   }
 
-  function renderShiftsCalendar(shifts) {
-    const shiftDates = new Set(shifts.map(s => s.date));
+  /* 名前解決用にスタッフ一覧を確保（未取得なら /staff を試行） */
+  async function ensureStaffList() {
+    if (Array.isArray(allStaffList) && allStaffList.length) return;
+    try {
+      const res = await fetch(`${API_BASE}/staff`, { headers: { Authorization: `Bearer ${idToken}` } });
+      if (!res.ok) return;
+      const d = await res.json();
+      const arr = Array.isArray(d.staff)   ? d.staff
+                : Array.isArray(d.users)   ? d.users
+                : Array.isArray(d.items)   ? d.items
+                : Array.isArray(d.members) ? d.members
+                : Array.isArray(d.data)    ? d.data
+                : Array.isArray(d)         ? d : [];
+      if (arr.length) allStaffList = arr;
+    } catch (_) { /* 取得失敗時は名前未設定のまま */ }
+  }
+
+  /* デモ用：店舗全員シフトを生成（店舗全体取得APIが未実装のため。実APIが来たら差し替え） */
+  function seedDemoStoreShifts() {
+    try { if (JSON.parse(localStorage.getItem(STORE_SHIFTS_KEY) || '[]').length) return; } catch {}
+    const base = [
+      { email: 'watakari@example.com', name: '渡嘉敷 登明' },
+      { email: 'miyazaki@example.com', name: '宮崎 清美' },
+      { email: 'yamada@example.com',   name: '山田 友紀' },
+      { email: 'kurihara@example.com', name: '栗原 幸喜' },
+      { email: 'masuda@example.com',   name: '増田 絢美' },
+      { email: 'asok@example.com',     name: 'ドゥンガナ アソク' },
+    ];
+    // ログイン中のユーザーが固定スタッフと重複しないようにする（重複すると自分のシフトが二重に入る）
+    const meEmail = userEmail || 'me@example.com';
+    const team = base.some(t => t.email === meEmail)
+      ? base
+      : [{ email: meEmail, name: userName || 'あなた' }, ...base];
+    const slots = [['06:00','09:00'],['09:00','13:00'],['13:00','17:00'],['17:00','22:00'],['08:00','12:00'],['12:00','18:00']];
+    const start = new Date(); start.setHours(0,0,0,0); start.setDate(start.getDate() - 14);
+    const out = []; let id = 1;
+    for (let i = 0; i < 70; i++) {
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      const dateStr = fmtDate(d);
+      // 各スタッフは週3日程度だけ出勤（決定的に散らす）→ カレンダーの印が自然に疎になる
+      team.forEach((c, si) => {
+        if (((i + si * 3) % 7) < 3) {
+          const s = slots[(i + si) % slots.length];
+          out.push({ shiftId:`demo-${id++}`, email:c.email, name:c.name, date:dateStr, startTime:s[0], endTime:s[1], status:'scheduled' });
+        }
+      });
+    }
+    localStorage.setItem(STORE_SHIFTS_KEY, JSON.stringify(out));
+  }
+
+  /* 店舗全員のシフトを取得（API試行→デモ用サンプル） */
+  async function fetchStoreShifts() {
+    try {
+      const res = await fetch(`${API_BASE}/shifts?scope=store`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const arr = Array.isArray(data.shifts) ? data.shifts : [];
+        if (arr.length) return arr;
+      }
+    } catch (_) { /* 未実装時はデモへ */ }
+    seedDemoStoreShifts();
+    try { return JSON.parse(localStorage.getItem(STORE_SHIFTS_KEY) || '[]'); }
+    catch { return []; }
+  }
+
+  /* 1日分のタイムライングリッド（横=時間軸、縦=スタッフ、緑バー=勤務帯） */
+  function dayGridHTML(dateStr, shifts, opts = {}) {
+    const WD = ['日','月','火','水','木','金','土'];
+    const d  = new Date(dateStr + 'T00:00:00');
+    const wdCls = d.getDay() === 0 ? 'sun' : d.getDay() === 6 ? 'sat' : '';
+    const day = (shifts || [])
+      .filter(s => s.date === dateStr)
+      .sort((a, b) => timeToMin(a.startTime) - timeToMin(b.startTime));
+
+    const hours = [];
+    for (let h = GRID_START_HOUR; h < GRID_END_HOUR; h++) hours.push(h);
+    const totalW = hours.length * GRID_COL_W;
+    const axis = hours.map(h => `<div class="tl-hour">${h}時</div>`).join('');
+
+    let rows;
+    if (!day.length) {
+      rows = `<div class="tl-empty">この日の出勤予定はありません</div>`;
+    } else {
+      rows = day.map(s => {
+        const st = timeToMin(s.startTime);
+        const en = Math.max(timeToMin(s.endTime), st + 30);
+        const left  = Math.max(0, (st / 60 - GRID_START_HOUR) * GRID_COL_W);
+        let   width = ((en - st) / 60) * GRID_COL_W;
+        width = Math.max(44, Math.min(width, totalW - left));
+        const mine = s.email && s.email === userEmail;
+        return `
+          <div class="tl-row">
+            <div class="tl-bar ${mine ? 'mine' : ''}" style="left:${left}px;width:${width}px">
+              <span class="tl-check">✓</span>
+              <span class="tl-name">${shiftDisplayName(s)}</span>
+              <span class="tl-time">${s.startTime}-${s.endTime}</span>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    const head = opts.showHead === false ? '' :
+      `<div class="day-block-head"><span class="dbh-date">${d.getMonth()+1}/${d.getDate()}</span><span class="dbh-wd ${wdCls}">(${WD[d.getDay()]})</span></div>`;
+
+    return `
+      <div class="day-block">
+        ${head}
+        <div class="tl-scroll">
+          <div class="tl-inner" style="width:${totalW}px">
+            <div class="tl-axis">${axis}</div>
+            <div class="tl-rows">${rows}</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  /* ホーム：本日1日分の店舗シフト表 */
+  function renderTodayStoreGrid() {
+    const el = document.getElementById('todayShiftList');
+    if (!el) return;
+    const today = fmtDate(new Date());
+    const dateEl = document.getElementById('todayShiftDate');
+    if (dateEl) dateEl.textContent =
+      new Date().toLocaleDateString('ja-JP', { month:'long', day:'numeric', weekday:'short' });
+    el.innerHTML = dayGridHTML(today, storeShiftsCache, { showHead: false });
+  }
+
+  /* ホーム：今後のシフト（自分の予定を日付順にリスト表示） */
+  function renderUpcomingMyShifts(shifts) {
+    const container = document.getElementById('shiftsContainer');
+    const countEl = document.getElementById('shiftCount');
+    if (!container) return;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const upcoming = (shifts || [])
+      .filter(s => (s.date || '') >= todayStr)
+      .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+    if (countEl) countEl.textContent = `${upcoming.length}件`;
+    container.innerHTML = upcoming.length
+      ? upcoming.map(shiftCardHTML).join('')
+      : '<div class="ss-empty">今後のシフトはありません</div>';
+  }
+
+  /* シフト確認：週単位ナビゲーション */
+  function weekPrev() { weekStart.setDate(weekStart.getDate() - 7); renderWeekView(); }
+  function weekNext() { weekStart.setDate(weekStart.getDate() + 7); renderWeekView(); }
+
+  function renderWeekView() {
+    const WD = ['日','月','火','水','木','金','土'];
+    const start = new Date(weekStart);
+    const end   = new Date(weekStart); end.setDate(start.getDate() + 6);
+    const lbl = document.getElementById('weekRangeLabel');
+    if (lbl) lbl.textContent =
+      `${start.getMonth()+1}/${start.getDate()}(${WD[start.getDay()]}) - ${end.getMonth()+1}/${end.getDate()}(${WD[end.getDay()]})`;
+    let html = '';
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      html += dayGridHTML(fmtDate(d), storeShiftsCache, { showHead: true });
+    }
+    const view = document.getElementById('weekView');
+    if (view) view.innerHTML = html;
+  }
+
+  /* シフト確認：カレンダーから週の起点日を選ぶ */
+  let weekCalYear  = new Date().getFullYear();
+  let weekCalMonth = new Date().getMonth();
+
+  function toggleWeekCal() {
+    const pop = document.getElementById('weekCalPop');
+    if (!pop) return;
+    const open = pop.style.display === 'none' || !pop.style.display;
+    pop.style.display = open ? 'block' : 'none';
+    if (open) {
+      weekCalYear  = weekStart.getFullYear();
+      weekCalMonth = weekStart.getMonth();
+      renderWeekCalPicker();
+    }
+  }
+  function weekCalPrevMonth() {
+    weekCalMonth--; if (weekCalMonth < 0) { weekCalMonth = 11; weekCalYear--; }
+    renderWeekCalPicker();
+  }
+  function weekCalNextMonth() {
+    weekCalMonth++; if (weekCalMonth > 11) { weekCalMonth = 0; weekCalYear++; }
+    renderWeekCalPicker();
+  }
+  function renderWeekCalPicker() {
     const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-    document.getElementById('shiftsMonthLabel').textContent =
-      `${shiftsCalYear}年 ${MONTHS[shiftsCalMonth]}`;
-
-    const today    = new Date();
-    today.setHours(0,0,0,0);
-    const firstDow = new Date(shiftsCalYear, shiftsCalMonth, 1).getDay();
-    const lastDay  = new Date(shiftsCalYear, shiftsCalMonth + 1, 0).getDate();
-
+    document.getElementById('weekCalLabel').textContent = `${weekCalYear}年 ${MONTHS[weekCalMonth]}`;
+    const firstDow = new Date(weekCalYear, weekCalMonth, 1).getDay();
+    const lastDay  = new Date(weekCalYear, weekCalMonth + 1, 0).getDate();
+    const today = new Date(); today.setHours(0,0,0,0);
+    const startStr = fmtDate(weekStart);
+    // 自分のシフトが入っている日（fetchMyShifts優先、無ければ店舗データから自分=メール一致を抽出）
+    const mySrc = (window._cachedShifts && window._cachedShifts.length)
+      ? window._cachedShifts
+      : storeShiftsCache.filter(s => s.email && s.email === userEmail);
+    const myDates = new Set(mySrc.map(s => s.date));
     let html = '';
     for (let i = 0; i < firstDow; i++) html += '<div class="cal-day empty"></div>';
-
     for (let d = 1; d <= lastDay; d++) {
-      const dt      = new Date(shiftsCalYear, shiftsCalMonth, d);
-      const dow     = dt.getDay();
-      const dateStr = `${shiftsCalYear}-${String(shiftsCalMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const dt  = new Date(weekCalYear, weekCalMonth, d);
+      const dow = dt.getDay();
+      const ds  = fmtDate(dt);
       const isToday  = dt.getTime() === today.getTime();
-      const hasShift = shiftDates.has(dateStr);
-      const colCls   = dow === 0 ? 'sun-col' : dow === 6 ? 'sat-col' : '';
-
-      html += `<div class="cal-day ${colCls} ${isToday ? 'today' : ''} ${hasShift ? 'has-shift' : ''}">${d}</div>`;
+      const isSel    = ds === startStr;
+      const hasShift = myDates.has(ds);
+      const col = dow === 0 ? 'sun-col' : dow === 6 ? 'sat-col' : '';
+      html += `<div class="cal-day ${col} ${isToday ? 'today' : ''} ${isSel ? 'selected' : ''} ${hasShift ? 'has-shift' : ''}" onclick="selectWeekFrom('${ds}')">${d}</div>`;
     }
-    document.getElementById('shiftsCalGrid').innerHTML = html;
+    document.getElementById('weekCalGrid').innerHTML = html;
+  }
+  function selectWeekFrom(dateStr) {
+    weekStart = new Date(dateStr + 'T00:00:00'); weekStart.setHours(0,0,0,0);
+    const pop = document.getElementById('weekCalPop');
+    if (pop) pop.style.display = 'none';
+    renderWeekView();
+  }
+
+  /* ===== 管理者：店舗全員シフトのタイムライン（本日＋週確認） ===== */
+  let adminWeekStart = new Date(); adminWeekStart.setHours(0, 0, 0, 0);
+  let adminWeekCalYear  = new Date().getFullYear();
+  let adminWeekCalMonth = new Date().getMonth();
+
+  /* 管理者のグリッド用データ：実データ(adminAllShifts) 優先、無ければデモ */
+  function adminGridShifts() {
+    if (adminAllShifts && adminAllShifts.length) return adminAllShifts;
+    if (!storeShiftsCache.length) {
+      seedDemoStoreShifts();
+      try { storeShiftsCache = JSON.parse(localStorage.getItem(STORE_SHIFTS_KEY) || '[]'); } catch {}
+    }
+    return storeShiftsCache;
+  }
+
+  /* 管理者ホーム：本日の全員シフト（既存リストの上に表示） */
+  function renderAdminTodayGrid() {
+    const el = document.getElementById('adminTodayGrid');
+    if (!el) return;
+    const today = fmtDate(new Date());
+    el.innerHTML = `
+      <div class="section-card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div class="section-title" style="margin-bottom:0">本日のシフト</div>
+          <span style="font-size:11px;color:var(--muted);font-weight:700">${new Date().toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'short'})}</span>
+        </div>
+        ${dayGridHTML(today, adminGridShifts(), { showHead: false })}
+      </div>`;
+  }
+
+  /* 管理者シフト確認：週ナビ */
+  function adminWeekPrev() { adminWeekStart.setDate(adminWeekStart.getDate() - 7); renderAdminWeekView(); }
+  function adminWeekNext() { adminWeekStart.setDate(adminWeekStart.getDate() + 7); renderAdminWeekView(); }
+  function renderAdminWeekView() {
+    const WD = ['日','月','火','水','木','金','土'];
+    const start = new Date(adminWeekStart);
+    const end   = new Date(adminWeekStart); end.setDate(start.getDate() + 6);
+    const lbl = document.getElementById('adminWeekRangeLabel');
+    if (lbl) lbl.textContent =
+      `${start.getMonth()+1}/${start.getDate()}(${WD[start.getDay()]}) - ${end.getMonth()+1}/${end.getDate()}(${WD[end.getDay()]})`;
+    const shifts = adminGridShifts();
+    let html = '';
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      html += dayGridHTML(fmtDate(d), shifts, { showHead: true });
+    }
+    const view = document.getElementById('adminWeekView');
+    if (view) view.innerHTML = html;
+  }
+
+  /* 管理者シフト確認：カレンダーから週の起点日を選ぶ */
+  function adminToggleWeekCal() {
+    const pop = document.getElementById('adminWeekCalPop');
+    if (!pop) return;
+    const open = pop.style.display === 'none' || !pop.style.display;
+    pop.style.display = open ? 'block' : 'none';
+    if (open) {
+      adminWeekCalYear  = adminWeekStart.getFullYear();
+      adminWeekCalMonth = adminWeekStart.getMonth();
+      renderAdminWeekCalPicker();
+    }
+  }
+  function adminWeekCalPrevMonth() {
+    adminWeekCalMonth--; if (adminWeekCalMonth < 0) { adminWeekCalMonth = 11; adminWeekCalYear--; }
+    renderAdminWeekCalPicker();
+  }
+  function adminWeekCalNextMonth() {
+    adminWeekCalMonth++; if (adminWeekCalMonth > 11) { adminWeekCalMonth = 0; adminWeekCalYear++; }
+    renderAdminWeekCalPicker();
+  }
+  function renderAdminWeekCalPicker() {
+    const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+    document.getElementById('adminWeekCalLabel').textContent = `${adminWeekCalYear}年 ${MONTHS[adminWeekCalMonth]}`;
+    const firstDow = new Date(adminWeekCalYear, adminWeekCalMonth, 1).getDay();
+    const lastDay  = new Date(adminWeekCalYear, adminWeekCalMonth + 1, 0).getDate();
+    const today = new Date(); today.setHours(0,0,0,0);
+    const startStr = fmtDate(adminWeekStart);
+    let html = '';
+    for (let i = 0; i < firstDow; i++) html += '<div class="cal-day empty"></div>';
+    for (let d = 1; d <= lastDay; d++) {
+      const dt  = new Date(adminWeekCalYear, adminWeekCalMonth, d);
+      const dow = dt.getDay();
+      const ds  = fmtDate(dt);
+      const isToday = dt.getTime() === today.getTime();
+      const isSel   = ds === startStr;
+      const col = dow === 0 ? 'sun-col' : dow === 6 ? 'sat-col' : '';
+      html += `<div class="cal-day ${col} ${isToday ? 'today' : ''} ${isSel ? 'selected' : ''}" onclick="adminSelectWeekFrom('${ds}')">${d}</div>`;
+    }
+    document.getElementById('adminWeekCalGrid').innerHTML = html;
+  }
+  function adminSelectWeekFrom(dateStr) {
+    adminWeekStart = new Date(dateStr + 'T00:00:00'); adminWeekStart.setHours(0,0,0,0);
+    const pop = document.getElementById('adminWeekCalPop');
+    if (pop) pop.style.display = 'none';
+    renderAdminWeekView();
   }
 
 
@@ -3757,6 +4249,10 @@
     } else if (tab === 'talk') {
       showScreen('talkScreen');
       renderTalkList();
+    } else if (tab === 'shiftConfirm') {
+      showScreen('shiftConfirmScreen');
+      weekStart = new Date(); weekStart.setHours(0, 0, 0, 0);
+      renderWeekView();
     } else if (tab === 'admin') {
       showScreen('adminScreen');
       renderAdminScreen();
@@ -3776,6 +4272,9 @@
     // 重要連絡はホームタブのみ表示
     const noticeCard = document.getElementById('adminNoticeCard');
     if (noticeCard) noticeCard.style.display = (tab === 'adminShifts') ? 'block' : 'none';
+    // 本日タイムラインはホームタブのみ表示
+    const todayGrid = document.getElementById('adminTodayGrid');
+    if (todayGrid) todayGrid.style.display = (tab === 'adminShifts') ? 'block' : 'none';
 
     // 各パネルを非表示にする
     document.getElementById('adminShiftList').style.display = 'none';
@@ -3783,15 +4282,26 @@
     document.getElementById('adminCreatePanel').style.display = 'none';
     document.getElementById('adminStaffPanel').style.display = 'none';
     document.getElementById('adminSwapPanel').style.display = 'none';
+    const adminWeekPanel = document.getElementById('adminWeekPanel');
+    if (adminWeekPanel) adminWeekPanel.style.display = 'none';
     
     document.querySelectorAll('#adminScreen .nav-item').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     
     if (tab === 'adminShifts') {
       statsRow.style.display = 'grid';
-      filterBar.style.display = 'flex';
-      searchInput.style.display = 'block';
-      document.getElementById('adminShiftList').style.display = 'block';
+      // 全スタッフのシフト一覧・検索・絞り込みは「シフト一覧」タブに集約（ホームでは非表示）
+      filterBar.style.display = 'none';
+      searchInput.style.display = 'none';
+      document.getElementById('adminShiftList').style.display = 'none';
+      renderAdminTodayGrid();
+    } else if (tab === 'adminWeek') {
+      statsRow.style.display = 'none';
+      filterBar.style.display = 'none';
+      searchInput.style.display = 'none';
+      if (adminWeekPanel) adminWeekPanel.style.display = 'block';
+      adminWeekStart = new Date(); adminWeekStart.setHours(0, 0, 0, 0);
+      renderAdminWeekView();
     } else if (tab === 'adminWishes') {
       statsRow.style.display = 'none';
       filterBar.style.display = 'none';
@@ -5441,6 +5951,7 @@
       adminAllShifts.sort((a,b) => (a.date||'').localeCompare(b.date||''));
       updateAdminStats();
       renderAdminList();
+      renderAdminTodayGrid();
     } catch (err) {
       listEl.innerHTML = `
         <div class="center-state">
@@ -5449,6 +5960,8 @@
           <p class="state-sub">${err.message}</p>
           <button class="reload-btn" onclick="renderAdminScreen()">再試行</button>
         </div>`;
+      // 一覧取得に失敗しても本日タイムラインはデモで表示
+      renderAdminTodayGrid();
     }
   }
 
