@@ -14,6 +14,7 @@ Globals:
         SHIFTS_TABLE: !Ref ShiftsTable
         SHIFT_REQUESTS_TABLE: !Ref ShiftRequestsTable
         SWAP_REQUESTS_TABLE: !Ref SwapRequestsTable
+        NOTICES_TABLE: !Ref NoticesTable
         USER_POOL_ID: !Ref CognitoUserPool
         USER_POOL_CLIENT_ID: !Ref CognitoUserPoolClient
   Api:
@@ -23,6 +24,18 @@ Globals:
       AllowOrigin: "'*'"
 
 Resources:
+
+  NoticesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-Notices"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: noticeId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: noticeId
+          KeyType: HASH
 
   # ========================================
   # Cognito
@@ -343,7 +356,8 @@ Resources:
             Path: /admin/wishes
             Method: GET
 
-  DeleteWishFunction:
+
+  CreateNoticeFunction:
     Type: AWS::Serverless::Function
     Metadata:
       BuildMethod: esbuild
@@ -351,23 +365,49 @@ Resources:
         Minify: false
         Target: es2020
         EntryPoints:
-          - src/handlers/shifts/deleteWish.ts
+          - src/handlers/notices/createNotice.ts
         External:
           - "@aws-sdk/client-dynamodb"
           - "@aws-sdk/lib-dynamodb"
     Properties:
       CodeUri: ./
-      Handler: deleteWish.handler
+      Handler: createNotice.handler
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref ShiftRequestsTable
+            TableName: !Ref NoticesTable
       Events:
-        DeleteWishApi:
+        CreateNoticeApi:
           Type: Api
           Properties:
             RestApiId: !Ref ShiftAppApi
-            Path: /admin/wishes/{id}
-            Method: DELETE
+            Path: /notices
+            Method: POST
+
+  ReactToNoticeFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2020
+        EntryPoints:
+          - src/handlers/notices/reactToNotice.ts
+        External:
+          - "@aws-sdk/client-dynamodb"
+          - "@aws-sdk/lib-dynamodb"
+    Properties:
+      CodeUri: ./
+      Handler: reactToNotice.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref NoticesTable
+      Events:
+        ReactToNoticeApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShiftAppApi
+            Path: /notices/{id}/reactions
+            Method: POST
 
   GetStaffFunction:
     Type: AWS::Serverless::Function
@@ -412,8 +452,8 @@ Resources:
       CodeUri: ./
       Handler: getNotices.handler
       Policies:
-        # 基本的なLambda実行権限のみ（DynamoDBは使わない）
-        - AWSLambdaBasicExecutionRole
+        - DynamoDBReadPolicy:
+            TableName: !Ref NoticesTable
       Events:
         GetNoticesApi:
           Type: Api

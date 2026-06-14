@@ -16,4 +16,8 @@ export const TABLES = {
   SHIFTS: process.env.SHIFTS_TABLE!,
   SHIFT_REQUESTS: process.env.SHIFT_REQUESTS_TABLE!,
   SWAP_REQUESTS: process.env.SWAP_REQUESTS_TABLE!,
+  NOTICES: process.env.NOTICES_TABLE!,
 } as const;
+
+// NOTE: NOTICES_TABLE を追加
+// 既存の TABLES を拡張する場合はこちらに追記
