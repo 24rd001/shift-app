@@ -24,11 +24,13 @@ import { badRequest, created, internalError } from '../../utils/response';
 const cognito = new CognitoIdentityProviderClient({});
 
 // フロントから受け取るデータの設計図
+// 注意: role は受け取らない。誰でも自分をadminにできてしまう権限昇格を防ぐため、
+// 登録時のロールは常にサーバー側で 'staff' に固定する。
+// 管理者への昇格は既存管理者専用の別API（changeRole）でのみ行う。
 interface RegisterBody {
   email: string;
   password: string;
   name: string;
-  role?: 'admin' | 'staff';  // 任意。デフォルトはstaff
 }
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -45,10 +47,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 
   // ③ 必須項目のチェック
-  const { email, password, name, role = 'staff' } = body;
+  const { email, password, name } = body;
   if (!email || !password || !name) {
     return badRequest('email, password, name are required');
   }
+
+  // ロールは常に staff 固定（bodyに role が含まれていても無視する）
+  // これにより登録APIからの権限昇格を防ぐ
+  const role = 'staff';
 
   try {
     // ④ Cognitoにユーザーを登録
