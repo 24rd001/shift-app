@@ -15,7 +15,13 @@
       "Bash(awk -F: '$1>5900')",
       "Bash(awk 'NR>=2991 && NR<=6123 { if \\($0 ~ /^  [^ ]/ && $0 !~ /^  \\(function|async function|const|let|class|\\\\/\\\\*|\\\\*|\\\\}\\)/ \\) print NR\": \"$0 }' frontend/index.html)",
       "Bash(grep -n \"^  /\\\\* ===\\\\|^  function \\\\|^  async function \\\\|^  let \\\\|^  const \" frontend/js/admin.js)",
-      "Bash(awk '{ if \\($0 ~ /^  [^ ]/ && $0 !~ /^  \\(function|async function|const|let|class|\\\\/\\\\*|\\\\*|\\\\}\\)/ \\) print NR\": \"$0 }' frontend/js/admin.js)"
+      "Bash(awk '{ if \\($0 ~ /^  [^ ]/ && $0 !~ /^  \\(function|async function|const|let|class|\\\\/\\\\*|\\\\*|\\\\}\\)/ \\) print NR\": \"$0 }' frontend/js/admin.js)",
+      "Bash(git branch *)",
+      "Bash(git fetch *)",
+      "Bash(git restore *)",
+      "Bash(grep -nE \"^<{7}|^={7}$|^>{7}\" frontend/index.html)",
+      "Bash(git ls-tree *)",
+      "Bash(echo \"結果コード: $?\")"
     ]
   }
 }
