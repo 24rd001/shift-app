@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(aws *)"
+      "Bash(aws *)",
+      "Bash(python -c \"import pypdf; print\\('pypdf ok'\\)\")",
+      "Bash(python -c \"import fitz; print\\('pymupdf ok'\\)\")",
+      "Bash(python -c \"import pdfplumber; print\\('pdfplumber ok'\\)\")",
+      "Bash(python -m pip install pypdf --quiet)",
+      "Bash(python -c \"import pypdf; print\\('pypdf', pypdf.__version__\\)\")",
+      "Bash(py --version)",
+      "Bash(node -e ' *)",
+      "Bash(gh pr *)"
     ]
   }
 }

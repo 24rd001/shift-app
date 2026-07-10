@@ -16,7 +16,6 @@
 - シフト交代申請（承認フロー付き）
 - 管理者によるシフト作成・確定
 - 重要連絡の配信と理解度リアクション（👍理解／△あとで確認／❓質問）＋管理者向け理解度ダッシュボード
-- グループ／個人トークと多言語自動翻訳（英語・中国語・ベトナム語）
 
 ## 使用技術
 | カテゴリ | 技術 |
@@ -51,27 +50,33 @@
 
 ## アプリ画面
 
+スクリーンショットは [`screenshots/`](screenshots/) フォルダに格納しています。
+
 ### スタッフ画面
 
-| ① ホーム（シフト確認） | ② シフト希望提出 |
+| ① ログイン | ② ホーム（本日のシフト＋今後の予定） |
 | :---: | :---: |
-| <img src="https://github.com/user-attachments/assets/cb87eacc-ad5f-438d-b4f6-3d49dff5893e" width="400" /> | <img src="https://github.com/user-attachments/assets/bba3b514-fdf0-42f9-a8b0-a72bf4bbd96a" width="400" /> |
+| <img src="screenshots/staff-01-login.png" width="320" /> | <img src="screenshots/staff-02-home.png" width="320" /> |
 
-| ③ シフト交代申請 | ④ トーク画面 |
+| ③ シフト希望提出 | ④ シフト交代申請 |
 | :---: | :---: |
-| <img src="https://github.com/user-attachments/assets/07b8d2db-f8d7-4c37-b414-00e0bdd7e572" width="400" /> | <img src="https://github.com/user-attachments/assets/96d7a051-e56b-48f6-9d13-79737476c3cd" width="400" /> |
+| <img src="screenshots/staff-03-wish.png" width="320" /> | <img src="screenshots/staff-04-swap.png" width="320" /> |
 
 ---
 
 ### 管理者画面
 
-| ⑤ 管理者ホーム（シフト一覧） | ⑥ 希望一覧（タップで確定） |
+| ⑤ ホーム（重要連絡＋理解度リアクション＋シフト） | ⑥ シフト確認（週表示） |
 | :---: | :---: |
-| <img src="https://github.com/user-attachments/assets/d93891af-c356-4293-8a1f-72e0a7079235" width="400" /> | <img src="https://github.com/user-attachments/assets/7dcd19bd-f778-44c9-84d2-00c37710988b" width="400" /> |
+| <img src="screenshots/admin-01-home.png" width="320" /> | <img src="screenshots/admin-02-week.png" width="320" /> |
 
-| ⑦ スタッフ管理 | ⑧ 交代申請管理 |
+| ⑦ 希望一覧（タップで確定） | ⑧ シフト一覧・作成 |
 | :---: | :---: |
-| <img src="https://github.com/user-attachments/assets/a06c3e6c-44f5-4b5e-9e2d-c7054155a26d" width="400" /> | <img src="https://github.com/user-attachments/assets/67b52543-cb2d-451e-905f-1fbb1660f202" width="400" /> |
+| <img src="screenshots/admin-03-wishes.png" width="320" /> | <img src="screenshots/admin-04-create.png" width="320" /> |
+
+| ⑨ スタッフ管理 | ⑩ 交代申請管理 |
+| :---: | :---: |
+| <img src="screenshots/admin-05-staff.png" width="320" /> | <img src="screenshots/admin-06-swap.png" width="320" /> |
 
 ---
 
@@ -165,12 +170,12 @@
 | シフト確認画面 | 週ナビ＋カレンダーから選んだ日の1週間を表示（自分の出勤日にマーカー） |
 | シフト希望提出画面 | カレンダーから複数日選択して提出 |
 | 交代申請画面 | 3択（代われる/無理/相談）で回答 |
-| トーク画面 | グループ／個人トーク。重要連絡の理解度リアクションと多言語翻訳 |
+| お知らせ・重要連絡 | 管理者からの重要連絡を確認し、理解度リアクション（👍／△／❓）で対応状況を返答 |
 
 #### 管理者向け
 | 画面 | 説明 |
 |------|------|
-| ホーム（シフト一覧） | 全スタッフのシフトをフィルタリング表示 |
+| ホーム（シフト一覧） | 全スタッフのシフトをタイムライン表示＋重要連絡の配信・理解度リアクション集計・各種件数サマリー |
 | シフト確認（週表示） | 週ナビ＋カレンダーから選んだ日の1週間を全スタッフ分まとめて確認 |
 | 希望一覧 | 月別で希望表示・タップでシフト確定 |
 | シフト一覧・作成 | カレンダーで絞り込み・手動作成 |
@@ -194,6 +199,5 @@
 - エンドポイントの実装状況の把握
 
 ### AIの活用について
-- Claude APIをフロントから直接呼び出し多言語翻訳機能を実装
 - コンソールエラーをそのまま貼り付けてデバッグを効率化
 - 自然言語での要望をコードに変換する開発スタイル

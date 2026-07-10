@@ -2998,6 +2998,10 @@
   const WEEKDAYS = ['日','月','火','水','木','金','土'];
   const STATUS_LABEL = { scheduled:'確定', cancelled:'キャンセル', swapped:'交換済み' };
 
+  /* ===== HTMLエスケープ（XSS対策）: ユーザー入力をinnerHTMLに入れる前に必ず通す ===== */
+  const escHtml = s => String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+
   /* ===== 状態 ===== */
   let idToken   = localStorage.getItem('idToken');
   let userEmail = localStorage.getItem('userEmail') || '';
@@ -3186,15 +3190,15 @@
       return `
         <div class="notice-item${unreacted ? ' notice-unreacted' : ''}" style="border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:10px">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-            <span class="notice-tag ${TAG_CLASS[n.tag] || 'tag-other'}">#${n.tag || 'その他'}</span>
+            <span class="notice-tag ${TAG_CLASS[n.tag] || 'tag-other'}">#${escHtml(n.tag || 'その他')}</span>
             ${n.pinned ? '<span style="font-size:10px;color:var(--muted)">📌</span>' : ''}
             ${unreacted
               ? '<span class="notice-todo-badge">⚠️ 要確認</span>'
               : '<span class="notice-done-badge">✓ 確認済み</span>'}
           </div>
-          <div class="notice-text">${n.body}</div>
+          <div class="notice-text">${escHtml(n.body)}</div>
           <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
-            <button class="translate-btn" onclick="translateNotice(${n.id},this,'${n.body.replace(/'/g,"\\'")}')">
+            <button class="translate-btn" onclick="translateNotice(${n.id},this)">
               🌐 翻訳
             </button>
           </div>
@@ -3353,8 +3357,8 @@
       <div class="pending-task-item">
         <div class="pending-task-icon">${t.icon}</div>
         <div class="pending-task-info">
-          <div class="pending-task-name">${t.name}</div>
-          <div class="pending-task-sub">${t.sub}</div>
+          <div class="pending-task-name">${escHtml(t.name)}</div>
+          <div class="pending-task-sub">${escHtml(t.sub)}</div>
         </div>
         <button class="pending-task-btn" onclick="pendingTaskActions[${i}]()">${t.label}</button>
       </div>`).join('');
@@ -3365,8 +3369,10 @@
   const LANG_CYCLE = ['英語','中国語','ベトナム語'];
   const langState  = {};
 
-  async function translateNotice(id, btn, text) {
+  async function translateNotice(id, btn) {
     const resultEl = document.getElementById(`translate-${id}`);
+    const note     = allNotices.find(n => String(n.id) === String(id));
+    const text     = note ? (note.body || '') : '';
     const idx      = (langState[id] || 0) % LANG_CYCLE.length;
     const lang     = LANG_CYCLE[idx];
     btn.textContent = `⏳ ${lang}に翻訳中...`;
@@ -3383,7 +3389,7 @@
       });
       const data = await res.json();
       const translated = data.content?.[0]?.text || '翻訳に失敗しました';
-      resultEl.innerHTML = `<div class="translate-result">🌐 ${lang}：${translated}</div>`;
+      resultEl.innerHTML = `<div class="translate-result">🌐 ${escHtml(lang)}：${escHtml(translated)}</div>`;
       langState[id] = idx + 1;
       btn.textContent = `🌐 ${LANG_CYCLE[langState[id] % LANG_CYCLE.length]}に翻訳`;
     } catch {
@@ -3456,11 +3462,11 @@
       const unread = getRoomUnread(id);
       const init   = name[0]?.toUpperCase() || '?';
       return `
-        <div class="talk-room-item" onclick="openChatRoom('${id}','${name}','dm')">
-          <div class="talk-room-avatar group-dm">${init}</div>
+        <div class="talk-room-item" data-room="${escHtml(id)}" data-name="${escHtml(name)}">
+          <div class="talk-room-avatar group-dm">${escHtml(init)}</div>
           <div class="talk-room-info">
-            <div class="talk-room-name">${name}</div>
-            <div class="talk-room-preview">${last ? last.senderName+': '+last.text : 'メッセージはありません'}</div>
+            <div class="talk-room-name">${escHtml(name)}</div>
+            <div class="talk-room-preview">${last ? escHtml(last.senderName+': '+last.text) : 'メッセージはありません'}</div>
           </div>
           <div class="talk-room-meta">
             <div class="talk-room-time">${last ? formatMsgTime(last.ts) : ''}</div>
@@ -3468,6 +3474,8 @@
           </div>
         </div>`;
     }).join('');
+    dmEl.querySelectorAll('.talk-room-item').forEach(item =>
+      item.addEventListener('click', () => openChatRoom(item.dataset.room, item.dataset.name, 'dm')));
     // 未読バッジをナビに反映
     const total = getTotalUnread();
     const navBadge = document.getElementById('talkUnreadBadgeNav');
@@ -3522,10 +3530,10 @@
       }
       html += `
         <div class="chat-bubble-wrap ${isMine ? 'mine' : ''}">
-          ${!isMine ? `<div class="chat-bubble-avatar">${init}</div>` : ''}
+          ${!isMine ? `<div class="chat-bubble-avatar">${escHtml(init)}</div>` : ''}
           <div class="chat-bubble-col ${isMine ? 'mine' : ''}">
-            ${!isMine ? `<div class="chat-bubble-sender">${m.senderName || m.sender}</div>` : ''}
-            <div class="chat-bubble ${isMine ? 'mine-bubble' : 'theirs'}">${m.text}</div>
+            ${!isMine ? `<div class="chat-bubble-sender">${escHtml(m.senderName || m.sender)}</div>` : ''}
+            <div class="chat-bubble ${isMine ? 'mine-bubble' : 'theirs'}">${escHtml(m.text)}</div>
             <div class="chat-bubble-time">${timeStr}</div>
           </div>
         </div>`;
@@ -3559,14 +3567,19 @@
     if (staffs.length === 0) {
       list.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:16px 0">スタッフが見つかりません</p>';
     } else {
-      list.innerHTML = staffs.map(s => `
-        <div class="talk-room-item" onclick="startDm('${s.email}','${s.name || s.email}')">
-          <div class="talk-room-avatar group-dm">${(s.name||s.email)[0].toUpperCase()}</div>
+      list.innerHTML = staffs.map(s => {
+        const name = s.name || s.email;
+        return `
+        <div class="talk-room-item" data-email="${escHtml(s.email)}" data-name="${escHtml(name)}">
+          <div class="talk-room-avatar group-dm">${escHtml(name[0].toUpperCase())}</div>
           <div class="talk-room-info">
-            <div class="talk-room-name">${s.name || s.email}</div>
-            <div class="talk-room-preview">${s.email}</div>
+            <div class="talk-room-name">${escHtml(name)}</div>
+            <div class="talk-room-preview">${escHtml(s.email)}</div>
           </div>
-        </div>`).join('');
+        </div>`;
+      }).join('');
+      list.querySelectorAll('.talk-room-item').forEach(item =>
+        item.addEventListener('click', () => startDm(item.dataset.email, item.dataset.name)));
     }
     modal.style.display = 'flex';
   }
@@ -4133,8 +4146,8 @@
         <div class="saved-acct-item" onclick="selectSavedAccount('${a.email}')">
           <div class="saved-acct-avatar">${initial}</div>
           <div class="saved-acct-info">
-            <div class="saved-acct-name">${a.name || a.email}</div>
-            ${a.name ? `<div class="saved-acct-email">${a.email}</div>` : ''}
+            <div class="saved-acct-name">${escHtml(a.name || a.email)}</div>
+            ${a.name ? `<div class="saved-acct-email">${escHtml(a.email)}</div>` : ''}
           </div>
           <button class="saved-acct-remove" onclick="removeSavedAccount('${a.email}', event)" aria-label="このアカウントを削除">✕</button>
         </div>`;
@@ -4380,12 +4393,12 @@
       return `
         <div class="swap-history-item" style="padding:12px 0" id="swapItem-${i}">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-            <div class="staff-avatar" style="width:34px;height:34px;font-size:13px">${initial}</div>
+            <div class="staff-avatar" style="width:34px;height:34px;font-size:13px">${escHtml(initial)}</div>
             <div>
-              <div class="swap-history-name">${name}</div>
+              <div class="swap-history-name">${escHtml(name)}</div>
               <div class="swap-history-reason">${dateLabel}　${r.startTime||''}〜${r.endTime||''}</div>
-              ${r.note   ? `<div class="swap-history-reason" style="margin-top:2px">「${r.note}」</div>`   : ''}
-              ${r.reason ? `<div class="swap-history-reason" style="margin-top:2px">「${r.reason}」</div>` : ''}
+              ${r.note   ? `<div class="swap-history-reason" style="margin-top:2px">「${escHtml(r.note)}」</div>`   : ''}
+              ${r.reason ? `<div class="swap-history-reason" style="margin-top:2px">「${escHtml(r.reason)}」</div>` : ''}
             </div>
           </div>
 
@@ -4604,7 +4617,7 @@
           <div style="font-size:11px;font-weight:700;color:#92400E;margin-bottom:4px">💬 相談コメント</div>
           ${consultRes.map(res => `
             <div style="font-size:11px;color:var(--text);padding:4px 0;border-bottom:1px solid #FDE68A">
-              <span style="font-weight:700">${resolveResName(res)}</span>：${res.comment || ''}
+              <span style="font-weight:700">${escHtml(resolveResName(res))}</span>：${escHtml(res.comment || '')}
             </div>`).join('')}
         </div>` : '';
 
@@ -4612,12 +4625,12 @@
         <div style="padding:14px 0;border-bottom:1px solid var(--border)">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
             <div style="font-size:13px;font-weight:700;color:var(--text)">
-              ${requesterLabel}<span style="color:var(--muted);font-weight:400"> → </span>${targetLabel}
+              ${escHtml(requesterLabel)}<span style="color:var(--muted);font-weight:400"> → </span>${escHtml(targetLabel)}
             </div>
             <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;${stStyle}">${stLabel}</span>
           </div>
           <div style="font-size:12px;color:var(--muted);margin-bottom:4px">${dateLabel}　${r.startTime||''}〜${r.endTime||''}</div>
-          ${r.reason ? `<div style="font-size:12px;color:var(--muted)">「${r.reason}」</div>` : ''}
+          ${r.reason ? `<div style="font-size:12px;color:var(--muted)">「${escHtml(r.reason)}」</div>` : ''}
           ${consultBlock}
           ${canDecide && hasResponded ? `
             <div style="margin-top:10px;padding:10px;background:var(--primary-light);border-radius:10px;border:1px solid var(--primary)">
@@ -4942,8 +4955,8 @@
       return `
       <div class="admin-notice-item">
         <div class="admin-notice-body">
-          <span class="notice-tag ${TAG_CLASS[n.tag] || 'tag-other'}">#${n.tag || 'その他'}</span>
-          <div class="notice-text" style="margin-top:5px">${n.body}</div>
+          <span class="notice-tag ${TAG_CLASS[n.tag] || 'tag-other'}">#${escHtml(n.tag || 'その他')}</span>
+          <div class="notice-text" style="margin-top:5px">${escHtml(n.body)}</div>
           ${n.pinned ? '<div class="notice-pin">📌 固定</div>' : ''}
           <div style="font-size:10px;color:var(--muted);margin-top:4px">${new Date(n.createdAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
           ${renderReactionSummary(n, s)}
@@ -4952,6 +4965,8 @@
         <button class="admin-notice-delete" onclick="deleteAdminNotice(${n.id})">削除</button>
       </div>`;
     }).join('');
+    el.querySelectorAll('.rd-follow-btn').forEach(btn =>
+      btn.addEventListener('click', () => followUp(btn.dataset.email, btn.dataset.name)));
   }
 
   function filterAdminNoticeList() { renderAdminNoticeList(); }
@@ -4983,7 +4998,6 @@
     if (reacted.length === 0 && noStaff.length === 0) {
       return '<div class="rd-empty">まだリアクションがありません</div>';
     }
-    const esc = str => String(str || '').replace(/'/g, "\\'");
     let html = '';
     if (reacted.length) {
       html += '<div class="rd-group-label">リアクション済み</div>';
@@ -4992,8 +5006,8 @@
         return `
           <div class="rd-row">
             <span class="rd-icon">${ICON[u.type] || '・'}</span>
-            <span class="rd-name">${u.name}</span>
-            ${followable ? `<button class="rd-follow-btn" onclick="followUp('${esc(u.email)}','${esc(u.name)}')">💬 フォロー</button>` : ''}
+            <span class="rd-name">${escHtml(u.name)}</span>
+            ${followable ? `<button class="rd-follow-btn" data-email="${escHtml(u.email)}" data-name="${escHtml(u.name)}">💬 フォロー</button>` : ''}
           </div>`;
       }).join('');
     }
@@ -5005,8 +5019,8 @@
         return `
           <div class="rd-row">
             <span class="rd-icon">—</span>
-            <span class="rd-name" style="color:var(--muted)">${nm}</span>
-            <button class="rd-follow-btn" onclick="followUp('${esc(em)}','${esc(nm)}')">💬 フォロー</button>
+            <span class="rd-name" style="color:var(--muted)">${escHtml(nm)}</span>
+            <button class="rd-follow-btn" data-email="${escHtml(em)}" data-name="${escHtml(nm)}">💬 フォロー</button>
           </div>`;
       }).join('');
     }
@@ -5085,10 +5099,10 @@
         : `<button class="role-act-btn promote" onclick="changeRole('${uid}','admin')">管理者にする</button>`;
       return `
         <div class="staff-card">
-          <div class="staff-card-avatar ${isAdmin ? 'admin-av' : ''}">${initial}</div>
+          <div class="staff-card-avatar ${isAdmin ? 'admin-av' : ''}">${escHtml(initial)}</div>
           <div class="staff-card-info">
-            <div class="staff-card-name">${u.name || '（名前未設定）'}</div>
-            <div class="staff-card-email">${u.email || ''}</div>
+            <div class="staff-card-name">${escHtml(u.name || '（名前未設定）')}</div>
+            <div class="staff-card-email">${escHtml(u.email || '')}</div>
           </div>
           <span class="role-badge ${isAdmin ? 'admin' : 'staff'}">${isAdmin ? '管理者' : 'スタッフ'}</span>
           <div class="staff-card-actions">${actionBtn}</div>
@@ -5323,8 +5337,8 @@
               ${initial}
             </div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:14px;font-weight:700;color:var(--text)">${w.name || '—'}</div>
-              <div style="font-size:11px;color:var(--muted)">${w.email || ''}</div>
+              <div style="font-size:14px;font-weight:700;color:var(--text)">${escHtml(w.name || '—')}</div>
+              <div style="font-size:11px;color:var(--muted)">${escHtml(w.email || '')}</div>
             </div>
             ${isSelected
               ? '<span style="font-size:16px;color:var(--primary);font-weight:800">✓</span>'
@@ -5335,7 +5349,7 @@
               ${dateLabel}
             </div>
             <div style="font-size:12px;color:var(--muted)">${timeStr}</div>
-            ${w.note ? `<div style="font-size:12px;color:var(--muted)">「${w.note}」</div>` : ''}
+            ${w.note ? `<div style="font-size:12px;color:var(--muted)">「${escHtml(w.note)}」</div>` : ''}
           </div>
         </div>`;
     }).join('');
@@ -5812,18 +5826,19 @@
         const initial = (s.name || s.email || '?')[0].toUpperCase();
         const isSel   = s.email === selectedSwapStaffEmail;
         return `
-          <div class="staff-item ${isSel ? 'selected' : ''}"
-               onclick="selectSwapStaff('${s.email}')">
-            <div class="staff-avatar">${initial}</div>
+          <div class="staff-item ${isSel ? 'selected' : ''}" data-email="${escHtml(s.email)}">
+            <div class="staff-avatar">${escHtml(initial)}</div>
             <div style="flex:1">
-              <div class="staff-name">${s.name || '—'}</div>
-              <div class="staff-email-label">${s.email || ''}</div>
+              <div class="staff-name">${escHtml(s.name || '—')}</div>
+              <div class="staff-email-label">${escHtml(s.email || '')}</div>
             </div>
             <div class="staff-check">
               ${isSel ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
             </div>
           </div>`;
       }).join('');
+      listEl.querySelectorAll('.staff-item').forEach(item =>
+        item.addEventListener('click', () => selectSwapStaff(item.dataset.email)));
     } catch (err) {
       listEl.innerHTML = `<p style="font-size:13px;color:var(--red);text-align:center;padding:16px 0">${err.message}</p>`;
     }
