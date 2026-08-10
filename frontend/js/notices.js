@@ -74,12 +74,6 @@
               : '<span class="notice-done-badge">✓ 確認済み</span>'}
           </div>
           <div class="notice-text">${escHtml(n.body)}</div>
-          <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
-            <button class="translate-btn" onclick="translateNotice(${n.id},this)">
-              🌐 翻訳
-            </button>
-          </div>
-          <div id="translate-${n.id}"></div>
           ${unreacted ? '<div class="reaction-hint">👇 内容を確認したら理解度を教えてください</div>' : ''}
           <div class="reaction-row">
             <button class="reaction-btn ${myReact==='ok'?'selected-ok':''}"
@@ -245,39 +239,19 @@
   }
 
 
-  /* ===== ⑥ 多言語翻訳（Claude API） ===== */
-  const LANG_CYCLE = ['英語','中国語','ベトナム語'];
-  const langState  = {};
-
-  async function translateNotice(id, btn) {
-    const resultEl = document.getElementById(`translate-${id}`);
-    const note     = allNotices.find(n => String(n.id) === String(id));
-    const text     = note ? (note.body || '') : '';
-    const idx      = (langState[id] || 0) % LANG_CYCLE.length;
-    const lang     = LANG_CYCLE[idx];
-    btn.textContent = `⏳ ${lang}に翻訳中...`;
-    btn.disabled    = true;
-    try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 400,
-          messages: [{ role: 'user', content: `次の日本語テキストを${lang}に翻訳してください。翻訳文のみを返してください。\n\n${text}` }],
-        }),
-      });
-      const data = await res.json();
-      const translated = data.content?.[0]?.text || '翻訳に失敗しました';
-      resultEl.innerHTML = `<div class="translate-result">🌐 ${escHtml(lang)}：${escHtml(translated)}</div>`;
-      langState[id] = idx + 1;
-      btn.textContent = `🌐 ${LANG_CYCLE[langState[id] % LANG_CYCLE.length]}に翻訳`;
-    } catch {
-      resultEl.innerHTML = `<div class="translate-result" style="color:var(--red)">翻訳に失敗しました</div>`;
-      btn.textContent = '🌐 翻訳';
-    }
-    btn.disabled = false;
-  }
+  /* ===== ⑥ 多言語翻訳（未実装 / TODO） =====
+   * ブラウザから api.anthropic.com を直接呼ぶ実装は削除した。理由:
+   *   - APIキーをフロントのJSに置くとDevToolsで誰でも閲覧でき、キーが公開されてしまう
+   *   - キー無しでは認証エラーになり、そもそも動作しない
+   *   - 動かない機能のためにCSPの connect-src に外部ドメインを許可することになり、
+   *     XSS発生時のデータ持ち出し経路（出口）を無駄に広げてしまう
+   *
+   * 実装する場合はバックエンド経由にする:
+   *   [ブラウザ] → [自社API Gateway/Lambda] → [api.anthropic.com]
+   *                      ↑ APIキーはサーバー側の環境変数で保持
+   *   フロントは fetch(`${API_BASE}/translate`) を呼ぶだけ。
+   *   通信先は自社APIのみになるため、CSPの変更は不要。
+   * 旧実装は Git 履歴から参照可能。 */
 
 
   /* ===== 管理者：重要連絡フォーム開閉 ===== */

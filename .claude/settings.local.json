@@ -21,7 +21,11 @@
       "Bash(git restore *)",
       "Bash(grep -nE \"^<{7}|^={7}$|^>{7}\" frontend/index.html)",
       "Bash(git ls-tree *)",
-      "Bash(echo \"結果コード: $?\")"
+      "Bash(echo \"結果コード: $?\")",
+      "Bash(node --check frontend/js/auth.js)",
+      "Bash(node --check frontend/js/notices.js)",
+      "Bash(cd \"C:/Users/hideto\" && echo \"=== Downloads の画像\\(最近30件\\) ===\" && ls -lt Downloads/*.png Downloads/*.jpg Downloads/*.jpeg 2>/dev/null | head -20; echo \"\"; echo \"=== Pictures / スクリーンショット ===\" && ls -lt \"Pictures/Screenshots\"/* 2>/dev/null | head -10; ls -lt \"Pictures/スクリーンショット\"/* 2>/dev/null | head -10; echo \"\"; echo \"=== Desktop の画像 ===\" && ls -lt Desktop/*.png Desktop/*.jpg 2>/dev/null | head -10)",
+      "Bash(unzip -l \"脆弱性診断_対応報告書_フロントエンド.docx\")"
     ]
   }
 }

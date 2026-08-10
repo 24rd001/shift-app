@@ -5,7 +5,7 @@
   <!-- CSP: XSS時の被害軽減（多層防御）。connect-srcで通信先を限定し、盗まれたトークンの外部送信を防ぐ。
        ※script/styleはインラインonclick・style属性を多用しているため'unsafe-inline'が必須。
        ※frame-ancestors等はmetaでは無効。本来はホスティング層(HTTPヘッダー)で付与するのが望ましい。 -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://cognito-idp.ap-northeast-1.amazonaws.com https://xcum14jnu2.execute-api.ap-northeast-1.amazonaws.com https://api.anthropic.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://cognito-idp.ap-northeast-1.amazonaws.com https://xcum14jnu2.execute-api.ap-northeast-1.amazonaws.com; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>シフト管理</title>
   <link rel="stylesheet" href="css/styles.css">

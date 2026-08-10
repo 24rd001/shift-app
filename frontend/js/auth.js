@@ -155,21 +155,29 @@
 
   /* ===== イベント: ログインフォーム ===== */
 
-  /* ===== 保存済みアカウント（端末に記憶・選択で自動入力） =====
-   * デモ用途のためlocalStorageに保存（base64は難読化のみで暗号化ではない）。
-   * 本番ではブラウザのパスワードマネージャーに任せる想定。 */
+  /* ===== 保存済みアカウント（端末にメールのみ記憶・選択で自動入力） =====
+   * パスワードは保存しない。localStorageはJSから読めるため、保存すると
+   * XSS時や共用端末で平文流出する（base64は暗号化ではない）。
+   * パスワードの記憶はブラウザのパスワードマネージャーに任せる
+   * （入力欄に autocomplete="current-password" を指定済み）。 */
   const ACCTS_KEY = 'savedAccounts';
-  const encPw = p => btoa(unescape(encodeURIComponent(p)));
-  const decPw = s => { try { return decodeURIComponent(escape(atob(s))); } catch { return ''; } };
 
   function getSavedAccounts() {
-    try { return JSON.parse(localStorage.getItem(ACCTS_KEY) || '[]'); }
-    catch { return []; }
+    try {
+      const list = JSON.parse(localStorage.getItem(ACCTS_KEY) || '[]');
+      // 旧バージョンが保存したパスワードを削除（セキュリティ移行処理）
+      if (list.some(a => a.pw !== undefined)) {
+        const cleaned = list.map(({ pw, ...rest }) => rest);
+        localStorage.setItem(ACCTS_KEY, JSON.stringify(cleaned));
+        return cleaned;
+      }
+      return list;
+    } catch { return []; }
   }
 
-  function saveAccount(email, password, name) {
+  function saveAccount(email, name) {
     const list = getSavedAccounts().filter(a => a.email !== email);
-    list.unshift({ email, pw: encPw(password), name: name || '', lastUsed: Date.now() });
+    list.unshift({ email, name: name || '', lastUsed: Date.now() });
     localStorage.setItem(ACCTS_KEY, JSON.stringify(list));
   }
 
@@ -184,8 +192,10 @@
     const acct = getSavedAccounts().find(a => a.email === email);
     if (!acct) return;
     document.getElementById('emailInput').value    = acct.email;
-    document.getElementById('passwordInput').value = decPw(acct.pw);
-    document.getElementById('loginBtn').focus();
+    // パスワードは保存していないので入力欄にフォーカスするだけ
+    // （ブラウザのパスワードマネージャーが補完する）
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('passwordInput').focus();
   }
 
   function renderSavedAccounts() {
@@ -238,8 +248,8 @@
       localStorage.setItem('userName',  userName);
       // 次回ログイン時にメールを事前入力するため保存（ログアウトしても残す）
       localStorage.setItem('savedEmail', email);
-      // アカウント一覧に記憶（次回は選択だけで自動入力）
-      saveAccount(email, password, userName);
+      // アカウント一覧に記憶（メールと表示名のみ。パスワードは保存しない）
+      saveAccount(email, userName);
 
       // 管理者判定: custom:role または cognito:groups で確認
       const groups   = payload['cognito:groups'] || [];
